@@ -3,9 +3,6 @@
 # Output directory
 output/
 
-# Network traces
-*.out
-
 # Latex generate files
 *.aux
 *.log
