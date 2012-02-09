@@ -1,5 +1,7 @@
+\begin{verbatim}
 No.     Time        Source                Destination           Protocol Length Info
-     12 12.018131   128.119.245.12        10.0.1.25             TCP      74     http > 43535 [SYN, ACK] Seq=0 Ack=1 Win=5792 Len=0 MSS=1460 SACK_PERM=1 TSval=1267473327 TSecr=256195 WS=128
+     12 12.018131   128.119.245.12        10.0.1.25             TCP      74     http > 43535 [SYN, ACK] Seq=0 Ack=1 Win=5792 Len=0
+        MSS=1460 SACK_PERM=1 TSval=1267473327 TSecr=256195 WS=128
 
 Frame 12: 74 bytes on wire (592 bits), 74 bytes captured (592 bits)
 Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: Azurewav_66:dd:8f (00:25:d3:66:dd:8f)
@@ -27,3 +29,4 @@ Transmission Control Protocol, Src Port: http (80), Dst Port: 43535 (43535), Seq
     Checksum: 0xf8ae [validation disabled]
     Options: (20 bytes)
     [SEQ/ACK analysis]
+\end{verbatim}
