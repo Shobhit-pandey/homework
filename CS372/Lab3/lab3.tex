@@ -1,0 +1,111 @@
+\title{Wireshark Lab 3}
+\author{
+    Trevor Bramwell \\
+    CS372 - Introduction to Computer Networks \\
+    Wireshark Lab 3: TCP
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\section{A first look at the capture trace}
+
+\subsection{}
+See 
+
+\subsection{}
+What is the IP address of gaia.cs.umass.edu? On what port number is it sending 
+and receiving TCP segments for this connection?
+
+10.0.1.25:43535
+
+\tiny
+\input{2_1.out}
+\normalsize
+
+\subsection{}
+What is the IP address and TCP port number used by your client computer 
+(source) to transfer the file to gaia.cs.umass.edu?
+
+128.119.245.12:80
+
+\section{TCP Basics}
+\subsection{4}
+\textbf{Question:}What is the sequence number of the TCP SYN segment that is used to initiate the
+TCP connection between the client computer and gaia.cs.umass.edu? What is it
+in the segment that identifies the segment as a SYN segment?
+
+\textbf{Answer:}The sequence number is 0. The flags are set to 0x02 [0000 0000 0010].
+
+\subsection{5}
+What is the sequence number of the SYNACK segment sent by gaia.cs.umass.edu
+to the client computer in reply to the SYN? What is the value of the
+ACKnowledgement field in the SYNACK segment? How did gaia.cs.umass.edu
+determine that value? What is it in the segment that identifies the segment \\
+as a SYNACK segment?
+
+The sequence number of the SYNACK segment is 0. The ACKnowledgement field is \\
+set to 1. gaia.cs.umass.edu determined that value from it recieving a packet.\\
+The flags 0x12 identify the segment as a SYNACK segment.
+
+\subsection{6}
+What is the sequence number of the TCP segment containing the HTTP POST
+command? Note that in order to find the POST command, you’ll need to dig into
+the packet content field at the bottom of the Wireshark window, looking for a
+segment with a “POST” within its DATA field.
+
+\subsection{7}
+Consider the TCP segment containing the HTTP POST as the first segment in the
+TCP connection. What are the sequence numbers of the first six segments in the
+TCP connection (including the segment containing the HTTP POST)? At what
+time was each segment sent? When was the ACK for each segment received?
+Given the difference between when each TCP segment was sent, and when its
+acknowledgement was received, what is the RTT value for each of the six
+segments? What is the EstimatedRTT value (see page 249 in text) after the
+receipt of each ACK? Assume that the value of the EstimatedRTT is equal to
+the measured RTT for the first segment, and then is computed using the
+EstimatedRTT equation on page 249 for all subsequent segments.
+Note: Wireshark has a nice feature that allows you to plot the RTT for
+each of the TCP segments sent. Select a TCP segment in the “listing of
+captured packets” window that is being sent from the client to the
+gaia.cs.umass.edu server. Then select: Statistics->TCP Stream Graph-
+>Round Trip Time Graph.
+
+\subsection{8}
+What is the length of each of the first six TCP segments?
+
+\subsection{9}
+What is the minimum amount of available buffer space advertised at the received
+for the entire trace? Does the lack of receiver buffer space ever throttle the
+sender?
+
+\subsection{10}
+Are there any retransmitted segments in the trace file? What did you check for (in
+the trace) in order to answer this question?
+
+\subsection{11}
+How much data does the receiver typically acknowledge in an ACK? Can you
+identify cases where the receiver is ACKing every other received segment (see
+Table 3.2 on page 257 in the text).
+
+\subsection{12}
+What is the throughput (bytes transferred per unit time) for the TCP connection?
+Explain how you calculated this value.
+
+\section{TCP congestion control in action}
+\subsection{13} 
+Use the Time-Sequence-Graph(Stevens) plotting tool to view the sequence
+number versus time plot of segments being sent from the client to the
+gaia.cs.umass.edu server. Can you identify where TCP’s slowstart phase begins
+and ends, and where congestion avoidance takes over? Comment on ways in
+which the measured data differs from the idealized behavior of TCP that we’ve
+studied in the text.
+
+\subsection{14}
+Answer each of two questions above for the trace that you have gathered when
+you transferred a file from your computer to gaia.cs.umass.edu
+
+\end{document}
