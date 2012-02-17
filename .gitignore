@@ -8,3 +8,6 @@ output/
 *.log
 *.out
 *.pdf
+*.swp
+*.mk
+.~lock*
