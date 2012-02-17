@@ -64,15 +64,15 @@
 \typeout{MLA Package - by Ryan Aycock}
 
 % New code thanks to Edward Z. Yang
-\ifpdf % We're generating a pdf
-    \usepackage[pdftex]{color,graphicx}
-    \pdfpagewidth=\paperwidth
-    \pdfpageheight=\paperheight
-    \usepackage{thumbpdf}
-    %\pdfcompresslevel=9
-\else
-    \usepackage[dvips]{graphicx}
-\fi
+%\ifpdf % We're generating a pdf
+%    \usepackage[pdftex]{color,graphicx}
+%    \pdfpagewidth=\paperwidth
+%    \pdfpageheight=\paperheight
+%    \usepackage{thumbpdf}
+%    %\pdfcompresslevel=9
+%\else
+%    \usepackage[dvips]{graphicx}
+%\fi
 
 % The old code
 % \ifx\pdfoutput\undefined % We're not running pdftex
@@ -145,15 +145,30 @@
 % \usepackage{makeidx}
 % \makeindex
 
+\usepackage{datetime}
 %
 %   Other new commands
 %
 \newcommand{\tab}{\hspace{0.5in}}
 
 %
+% MLA Date format
+%
+\newdateformat{mladate}{\THEDAY\ \monthname\ \THEYEAR}
+
+%
 %   MLA environment
 %
-\newenvironment{mla}[6]{\newcommand{\lastname}{#2} \fancyhead[RO]{\lastname\ \thepage} \raggedright #1\ #2 \\  #3 \\ #4 \\ #5 \\ \centering #6 \\ \frenchspacing\raggedright\setlength{\parindent}{.5in}}{\newpage}
+\newenvironment{mla}[6]{\newcommand{\lastname}{#2} 
+    \fancyhead[RO]{\lastname\ \thepage} 
+    \raggedright #1\ #2 \\
+    Professor #3 \\
+    #4 \\
+    \mladate#5 \\
+    \centering #6 \\
+    \frenchspacing\raggedright
+    \setlength{\parindent}{.5in}
+}{\newpage}
 
 %
 %   Block quote environment
@@ -173,3 +188,4 @@
 %
 \newcommand{\bibent}{\noindent \hangindent 40pt}
 \newenvironment{workscited}{\newpage {\centering Works Cited\\}}{\newpage}
+\newenvironment{workscitedinline}{\centering Works Cited\\}{\newpage}

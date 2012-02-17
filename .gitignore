@@ -6,4 +6,5 @@ output/
 # Latex generate files
 *.aux
 *.log
+*.out
 *.pdf
