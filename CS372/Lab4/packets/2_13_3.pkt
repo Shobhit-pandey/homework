@@ -1,0 +1,26 @@
+No.     Time        Source                Destination           Protocol Length Info
+    816 2.397469    140.211.167.30        128.119.245.12        UDP      554    Source port: 52724  Destination port: traceroute
+
+Frame 816: 554 bytes on wire (4432 bits), 554 bytes captured (4432 bits)
+Ethernet II, Src: Dell_b0:2f:34 (00:25:64:b0:2f:34), Dst: Cisco_ae:b0:50 (58:bc:27:ae:b0:50)
+Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.245.12 (128.119.245.12)
+    Version: 4
+    Header length: 20 bytes
+    Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
+    $\red{Total Length: 540}$
+    $\red{Identification: 0xf41f (62495)}$
+    $\red{Flags: 0x00}$
+    Fragment offset: 2960
+    Time to live: 1
+    Protocol: UDP (17)
+    $\red{Header checksum: 0x18ca [correct]}$
+    Source: 140.211.167.30 (140.211.167.30)
+    Destination: 128.119.245.12 (128.119.245.12)
+    [3 IPv4 Fragments (3480 bytes): #814(1480), #815(1480), #816(520)]
+        [Frame: 814, payload: 0-1479 (1480 bytes)]
+        [Frame: 815, payload: 1480-2959 (1480 bytes)]
+        [Frame: 816, payload: 2960-3479 (520 bytes)]
+        [Fragment count: 3]
+        [Reassembled IPv4 length: 3480]
+User Datagram Protocol, Src Port: 52724 (52724), Dst Port: traceroute (33434)
+Data (3472 bytes)

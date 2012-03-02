@@ -7,8 +7,19 @@
 
 \documentclass[12pt,letterpaper]{article}
 \usepackage[margin=1in]{geometry}
+%\usepackage{alltt}
+%\renewcommand{\ttdefault}{txtt}
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    basicstyle=\footnotesize,
+    escapechar=\$
+}
 \usepackage{chngcntr}
 \counterwithout{subsection}{section}
+
+\usepackage{color}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
 
 % Preamble
 \title{Wireshark Lab 4}
@@ -24,67 +35,127 @@
 
 \setcounter{section}{1}
 \section{A look at the capture trace}
+
+\label{1}
 \subsection{}
 \paragraph{Question} Select the first ICMP Echo Request message sent by your
 computer, and expand the Internet Protocol part of the packet in the packet
 details window. What is the IP address of your computer?
 \paragraph{Answer} 192.168.1.100
 
+\lstinputlisting{packets/2_1.pkt}
+
+\label{2}
 \subsection{}
 \paragraph{Question} Within the IP packet header, what is the value in the
 upper layer protocol field?
-\paragraph{Answer} UDP (17)
+\paragraph{Answer} ICMP (1)
 
+\label{3}
 \subsection{}
 \paragraph{Question} How many bytes are in the IP header? 
-\paragraph{Answer} 20
-\paragraph{Question} How many bytes are in the payload of the IP datagram?
-\paragraph{Answer} 38
-\paragraph{Question} Explain how you determined the number of payload bytes.
-\paragraph{Answer}
+How many bytes are in the payload of the IP datagram?
+Explain how you determined the number of payload byte.
+\paragraph{Answer} The IP header contains 20 bytes, the payload of the IP
+datagram contains 64 bytes.
+The payload bytes can be determined by selecting the payload
+header (Internet Control Message Protocol) and counting the number of bytes
+that are selected in the raw packet window.
 
 \subsection{}
 \paragraph{Question} Has this IP datagram been fragmented? Explain how you 
 determined whether or not the datagram has been fragmented.
-\paragraph{Answer}
+\paragraph{Answer} No. The fragment offset is set to 0.
+
+\label{5}
+\subsection{}
+\paragraph{Question} Which fields in the IP datagram \emph{always} change from
+one datagram to the next within this series of ICMP messages sent by your
+computer? 
+\paragraph{Answer} Identification, Header Checksum, Time to Live, Source and
+Destination Port.
+
+\subsection{}
+\paragraph{Question} Which fields stay constant? Which of the fields must stay constant? Which fields
+must change? Why?
+\paragraph{Answer} Source and Destination stay constant. These much stay
+constant while Time to Live changes because we are only interested in the route
+between our host and gaia.cs.umass.edu.
+
+\label{7}
+\subsection{}
+\paragraph{Question} Describe the pattern you see in the values in the
+Identification field of the IP datagram
+\paragraph{Answer} It increases by 1 every time.
+
+\subsection{}
+\paragraph{Question} What is the value in the Identification field and the TTL
+field?
+\paragraph{Answer} Identification: 0x0169 (361) and TTL: 64
+
+\lstinputlisting{packets/2_8.pkt}
+
+\label{9}
+\subsection{}
+\paragraph{Question} Do these values remain unchanged for all of the ICMP
+TTL-exceeded replies sent to your computer by the nearest (first hop) router?
+Why?
+\paragraph{Answer} The TTL does not change from 64, but each Identification
+number does.
+
+\section*{Fragmentation}
+\subsection{}
+\paragraph{Question}
+Find the first ICMP Echo Request message that was sent by your computer after
+you changed the \emph{Packet Size} in \emph{pingplotter} to be 2000. Has that message been
+fragmented across more than one IP datagram?
+\paragraph{Answer} Yes it has as indicated by the [2 IPv4 Fragments ...] item.
+
+\lstinputlisting{packets/2_10.pkt}
+
+\label{11}
+\subsection{}
+\paragraph{Question}
+Print out the first fragment of the fragmented IP datagram. What information in
+the IP header indicates that the datagram been fragmented? What information in
+the IP header indicates whether this is the first fragment versus a latter fragment?
+How long is this IP datagram?
+\paragraph{Answer} The flags have been set to 0x01 (More Fragments). This is
+the first fragment because the fragment offset is set to 0. This IP datagram
+is 1480 bytes
+
+\lstinputlisting{packets/2_10-11.pkt}
 
 \subsection{}
 \paragraph{Question}
-\paragraph{Answer}
+Print out the second fragment of the fragmented IP datagram. What information in
+the IP header indicates that this is not the first datagram fragment? Are the more
+fragments? How can you tell?
+\paragraph{Answer} This is not the first datagram fragment because the fragment
+offset is set to 1480. There are no more fragments because the flags are set to
+0x00. If there were more fragments the flags would be set to 0x01 as in the
+first fragment.
+
+\lstinputlisting{packets/2_12.pkt}
+
+\label{13}
+\subsection{}
+\paragraph{Question}
+What fields change in the IP header between the first and second fragment?
+\paragraph{Answer} Total Length, Flags, Identification, and Header Checksum.
 
 \subsection{}
 \paragraph{Question}
-\paragraph{Answer}
+How many fragments were created from the original datagram?
+\paragraph{Answer} 3
 
+\lstinputlisting{packets/2_13_1.pkt}
+\lstinputlisting{packets/2_13_2.pkt}
+\lstinputlisting{packets/2_13_3.pkt}
+
+\label{15}
 \subsection{}
 \paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\subsection{}
-\paragraph{Question}
-\paragraph{Answer}
-
-\tiny
-%\input{2_1.out}
-\normalsize
+What fields change in the IP header among the fragments?
+\paragraph{Answer} Total Length, Flags, Identification, and Header Checksum.
 \end{document}

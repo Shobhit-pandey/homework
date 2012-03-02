@@ -1,0 +1,25 @@
+No.     Time        Source                Destination           Protocol Length Info
+    756 1.987063    140.211.167.30        128.119.245.12        UDP      534    Source port: 50205  Destination port: traceroute
+
+Frame 756: 534 bytes on wire (4272 bits), 534 bytes captured (4272 bits)
+Ethernet II, Src: Dell_b0:2f:34 (00:25:64:b0:2f:34), Dst: Cisco_ae:b0:50 (58:bc:27:ae:b0:50)
+Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.245.12 (128.119.245.12)
+    Version: 4
+    Header length: 20 bytes
+    Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
+    Total Length: 520
+    Identification: 0xf3e8 (62440)
+    Flags: 0x00
+    Fragment offset: 1480
+    Time to live: 1
+    Protocol: UDP (17)
+    Header checksum: 0x19ce [correct]
+    Source: 140.211.167.30 (140.211.167.30)
+    Destination: 128.119.245.12 (128.119.245.12)
+    $\red{[2 IPv4 Fragments (1980 bytes): 755(1480), 756(500)]}$
+        [Frame: 755, payload: 0-1479 (1480 bytes)]
+        [Frame: 756, payload: 1480-1979 (500 bytes)]
+        [Fragment count: 2]
+        [Reassembled IPv4 length: 1980]
+User Datagram Protocol, Src Port: 50205 (50205), Dst Port: traceroute (33434)
+Data (1972 bytes)

@@ -1,0 +1,20 @@
+No.     Time        Source                Destination           Protocol Length Info
+    755 1.987056    140.211.167.30        128.119.245.12        IPv4     1514   Fragmented IP protocol (proto=UDP 0x11, off=0, ID=f3e8) [Reassembled in #756]
+
+Frame 755: 1514 bytes on wire (12112 bits), 1514 bytes captured (12112 bits)
+Ethernet II, Src: Dell_b0:2f:34 (00:25:64:b0:2f:34), Dst: Cisco_ae:b0:50 (58:bc:27:ae:b0:50)
+Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.245.12 (128.119.245.12)
+    Version: 4
+    Header length: 20 bytes
+    Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
+    Total Length: 1500
+    Identification: 0xf3e8 (62440)
+    $\red{Flags: 0x01 (More Fragments)}$
+    $\red{Fragment offset: 0}$
+    Time to live: 1
+    Protocol: UDP (17)
+    Header checksum: 0xf6b2 [correct]
+    Source: 140.211.167.30 (140.211.167.30)
+    Destination: 128.119.245.12 (128.119.245.12)
+    Reassembled IPv4 in frame: 756
+Data (1480 bytes)
