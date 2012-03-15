@@ -30,10 +30,37 @@
 \begin{document}
 \maketitle
 
+%----------------------------
 % Chapter 5 starts on page 464
+% 
+% 473 - Parity Checks
+% 475 - CRC
+% 482 - Slotted ALOHA
+%
+%
+%
+%
+%
 % Problems are on 536
+%----------------------------
 \paragraph{P9} Show that the maximum efficiency of pure ALOHA is $1/(2e)$.
 \emph{Note}: This problem is easy if you have completed the problem above!
+
+The probability that a node in pure ALOHA has a successful transmission is
+\[
+\lim_{N \to \infty} p(1-p)^{2(N-1)}
+\]
+
+To find the maximum efficiency of pure ALOHA and show that is $1/(2e)$ we take
+the dirivitive
+\[
+f(n) = Np(1-p)^{2(N-1)}
+\]
+
+\begin{align*}
+f'(n) &= N(1-p)^{2(N-1)}-Np2(N-1)(1-p)^{2(N-3)} \\
+&= N(1-p)^{2(N-3)}((1-p)-p2(N-1))
+\end{align*}
 
 \paragraph{P10} Consider two nodes, A and B, that use the slotted ALOHA 
 protocol to contend for a channel. Suppose node A has more data to transmit 
