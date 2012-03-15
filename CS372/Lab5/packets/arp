@@ -1,0 +1,2 @@
+Address                HWtype   HWaddress          Flags Mask Iface
+Base-Station-N.local   ether    00:16:cb:c1:5f:50  C          wlan0

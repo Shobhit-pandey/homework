@@ -1,0 +1,20 @@
+No.     Time        Source                Destination           Protocol Length Info
+     78 1.616849    AppleCom_c1:5f:50     BelkinIn_af:71:6b     0x0800   1514   IP
+
+Frame 78: 1514 bytes on wire (12112 bits), 1514 bytes captured (12112 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 $\b{(00:16:cb:c1:5f:50)}$, Dst: BelkinIn_af:71:6b $\b{(00:22:75:af:71:6b)}$
+    Destination: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Source: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+    Type: IP $\b{(0x0800)}$
+Data (1500 bytes)
+
+0000  45 20 05 dc cd 94 00 00 2e 06 38 d0 80 77 f5 0c   E ........8..w..
+0010  0a 00 01 14 00 50 8d 9d d3 88 9f dc bb 18 b3 6a   .....P.........j
+0020  80 10 00 36 26 a9 00 00 01 01 08 0a ff 99 94 a3   ...6&...........
+0030  00 28 85 5e 48 54 54 50 2f 31 2e 31 20 32 30 30   .(.^HTTP/1.1 200
+0040  20 $\b{4f}$ 4b 0d 0a 44 61 74 65 3a 20 54 68 75 2c 20    OK..Date: Thu, 
+0050  31 35 20 4d 61 72 20 32 30 31 32 20 30 34 3a 35   15 Mar 2012 04:5
+0060  34 3a 33 31 20 47 4d 54 0d 0a 53 65 72 76 65 72   4:31 GMT..Server
+                    -------                                  -------
+05c0  64 6d 65 6e 74 20 49 3c 2f 68 33 3e 3c 2f 73 74   dment I</h3></st
+05d0  72 6f 6e 67 3e 3c 2f 61 $\b{3e 0a 0a 3c}$               rong></a>..<

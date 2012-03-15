@@ -1,0 +1,40 @@
+No.     Time        Source                Destination           Protocol Length Info
+     76 1.300951    BelkinIn_af:71:6b     AppleCom_c1:5f:50     0x0800   483    IP
+
+Frame 76: 483 bytes on wire (3864 bits), 483 bytes captured (3864 bits)
+Ethernet II, Src: BelkinIn_af:71:6b $\b{(00:22:75:af:71:6b)}$, Dst: AppleCom_c1:5f:50 $\b{(00:16:cb:c1:5f:50)}$
+    Destination: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+    Source: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Type: IP $\b{(0x0800)}$
+Data (469 bytes)
+
+0000  45 00 01 d5 34 8e 40 00 40 06 83 fd 0a 00 01 14   E...4.@.@.......
+0010  80 77 f5 0c 8d 9d 00 50 bb 18 b1 c9 d3 88 9f dc   .w.....P........
+0020  80 18 01 c9 20 8b 00 00 01 01 08 0a 00 28 85 5e   .... ........(.^
+0030  ff 99 94 11 $\b{47}$ 45 54 20 2f 77 69 72 65 73 68 61   ....GET /wiresha
+0040  72 6b 2d 6c 61 62 73 2f 48 54 54 50 2d 65 74 68   rk-labs/HTTP-eth
+0050  65 72 65 61 6c 2d 6c 61 62 2d 66 69 6c 65 33 2e   ereal-lab-file3.
+0060  68 74 6d 6c 20 48 54 54 50 2f 31 2e 31 0d 0a 48   html HTTP/1.1..H
+0070  6f 73 74 3a 20 67 61 69 61 2e 63 73 2e 75 6d 61   ost: gaia.cs.uma
+0080  73 73 2e 65 64 75 0d 0a 43 6f 6e 6e 65 63 74 69   ss.edu..Connecti
+0090  6f 6e 3a 20 6b 65 65 70 2d 61 6c 69 76 65 0d 0a   on: keep-alive..
+00a0  55 73 65 72 2d 41 67 65 6e 74 3a 20 4d 6f 7a 69   User-Agent: Mozi
+00b0  6c 6c 61 2f 35 2e 30 20 28 58 31 31 3b 20 4c 69   lla/5.0 (X11; Li
+00c0  6e 75 78 20 78 38 36 5f 36 34 29 20 41 70 70 6c   nux x86_64) Appl
+00d0  65 57 65 62 4b 69 74 2f 35 33 35 2e 31 31 20 28   eWebKit/535.11 (
+00e0  4b 48 54 4d 4c 2c 20 6c 69 6b 65 20 47 65 63 6b   KHTML, like Geck
+00f0  6f 29 20 43 68 72 6f 6d 65 2f 31 37 2e 30 2e 39   o) Chrome/17.0.9
+0100  36 33 2e 37 39 20 53 61 66 61 72 69 2f 35 33 35   63.79 Safari/535
+0110  2e 31 31 0d 0a 41 63 63 65 70 74 3a 20 74 65 78   .11..Accept: tex
+0120  74 2f 68 74 6d 6c 2c 61 70 70 6c 69 63 61 74 69   t/html,applicati
+0130  6f 6e 2f 78 68 74 6d 6c 2b 78 6d 6c 2c 61 70 70   on/xhtml+xml,app
+0140  6c 69 63 61 74 69 6f 6e 2f 78 6d 6c 3b 71 3d 30   lication/xml;q=0
+0150  2e 39 2c 2a 2f 2a 3b 71 3d 30 2e 38 0d 0a 41 63   .9,*/*;q=0.8..Ac
+0160  63 65 70 74 2d 45 6e 63 6f 64 69 6e 67 3a 20 67   cept-Encoding: g
+0170  7a 69 70 2c 64 65 66 6c 61 74 65 2c 73 64 63 68   zip,deflate,sdch
+0180  0d 0a 41 63 63 65 70 74 2d 4c 61 6e 67 75 61 67   ..Accept-Languag
+0190  65 3a 20 65 6e 2d 55 53 2c 65 6e 3b 71 3d 30 2e   e: en-US,en;q=0.
+01a0  38 0d 0a 41 63 63 65 70 74 2d 43 68 61 72 73 65   8..Accept-Charse
+01b0  74 3a 20 49 53 4f 2d 38 38 35 39 2d 31 2c 75 74   t: ISO-8859-1,ut
+01c0  66 2d 38 3b 71 3d 30 2e 37 2c 2a 3b 71 3d 30 2e   f-8;q=0.7,*;q=0.
+01d0  33 $\b{0d 0a 0d 0a}$                                     3....

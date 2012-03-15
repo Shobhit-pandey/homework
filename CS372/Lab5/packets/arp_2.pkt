@@ -1,0 +1,23 @@
+No.     Time        Source                Destination           Protocol Length Info
+     18 14.992318   AppleCom_c1:5f:50     BelkinIn_af:71:6b     ARP      42     10.0.1.1 is at 00:16:cb:c1:5f:50
+
+Frame 18: 42 bytes on wire (336 bits), 42 bytes captured (336 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 $\b{(00:16:cb:c1:5f:50)}$, Dst: BelkinIn_af:71:6b $\b{(00:22:75:af:71:6b)}$
+    Destination: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Source: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+    Type: ARP (0x0806)
+Address Resolution Protocol (reply)
+    Hardware type: Ethernet (1)
+    Protocol type: IP (0x0800)
+    Hardware size: 6
+    Protocol size: 4
+    Opcode: reply (2)
+    [Is gratuitous: False]
+    Sender MAC address: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+    Sender IP address: 10.0.1.1 (10.0.1.1)
+    Target MAC address: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Target IP address: 10.0.1.20 (10.0.1.20)
+
+0000  00 22 75 af 71 6b 00 16 cb c1 5f 50 08 06 00 01   ."u.qk...._P....
+0010  08 00 06 04 $\b{00 02}$ 00 16 cb c1 5f 50 $\b{0a 00 01 01}$   .........._P....
+0020  00 22 75 af 71 6b 0a 00 01 14                     ."u.qk....

@@ -1,0 +1,216 @@
+%%%%%%%
+% Author; Trevor Bramwell
+% Date: Mar. 14th, 2012
+%   Lab 5 writeup for CS372
+% TODO: Find good way to include network traces
+%%%%%%
+
+\documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+%\usepackage{alltt}
+%\renewcommand{\ttdefault}{txtt}
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    basicstyle=\footnotesize,
+    escapechar=\$
+}
+\usepackage{chngcntr}
+\counterwithout{subsection}{section}
+
+\renewcommand{\b}[1]{\textbf{#1}}
+
+\newcommand{\q}{\textbf{Question} }
+\newcommand{\ans}{\textbf{Answer} }
+
+% Preamble
+\title{Wireshark Lab 5: Ethernet and ARP}
+\author{
+    Trevor Bramwell \\
+    CS372 - Introduction to Computer Networks \\
+    Professor Bechir Hamdaoui
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Capturing and analyzing Ethernet frames}
+
+\begin{enumerate}
+\item \q What is the 48-bit Ethernet address of your computer?
+
+\ans 00:22:75:af:71:6b
+
+\item \q What is the 48-bit destination address in the Ethernet frame?
+    Is this the Ethernet address of gaia.cs.umass.edu? (Hint: the answer
+    is \emph{no}). What device has this as its Ethernet address? [Note:
+    this is an important question, and one that students sometimes get wrong.
+    Re-read pages 468-469\ in the text and make sure you understand the answer
+    here.]
+
+\ans 00:16:cb:c1:5f:50. This is the Ethernet address of my external router.
+
+\item \q Give the hexadecimal value for the two-byte Frame type field. What do
+    the bits(s) whose value is 1 mean within the flag field?
+
+\ans 0x0800 means that this frame is of the IP Protocol type.
+
+\item \q How many bytes from the very start of the Ethernet frame does the
+    ASCII ``G'' in ``GET'' appear in the Ethernet frame?
+
+\ans 53 bytes from the start.
+
+\item \q What is the hexadecimal value of the CRC field in this Ethernet
+    frame?
+
+\ans 0x0d 0x0a 0x0d 0x0a
+
+\pagebreak
+\lstinputlisting{packets/get_billofrights.pkt}
+\pagebreak
+
+\item \q What is the value of the Ethernet source address? Is this the address
+    of your computer, or of gaia.cs.umass.edu (Hint: the answer is \emph{no}).
+    What device has this as its Ethernet address?
+
+\ans 00:16:cb:c1:5f:50. It is the address of neither. It the address of my
+    extenal router.
+
+\item \q What is the destination address in the Ethernet frame? Is this the
+    Ethernet address of your computer?
+
+\ans 00:22:75:af:71:6b. It is the Ethernet address of my wireless usb adapter,
+    so yes.
+
+\item \q Give the hexadecimal value for the two-byte Frame type field. What do
+    the bit(s) whose value is 1 mean within the flag field?
+
+\ans 0x0800. The bits signify that this is an IP Protocol frame.
+
+\item \q How many bytes from the very start of the Ethernet frame does the
+    ASCII ``O'' in ``OK'' (i.e., the HTTP response code) appear in the
+    Ethernet frame?
+
+\ans 66 bytes from the start.
+
+\item \q What is the hexadecimal value of the CRC field in this Ethernet frame
+    ?
+
+\ans 0x3e 0x0a 0x0d 0x3c
+
+\pagebreak
+\lstinputlisting{packets/http_ok.pkt}
+\pagebreak
+
+
+\section{The Address Resolution Protocol}
+\item \q Write down the contents of your computer's ARP cache. What is the
+    meaning of each column value?
+
+\lstinputlisting{packets/arp}
+
+\begin{description}
+    \item[Address] A named reference to the MAC address of the network router.
+    \item[HWtype] The type of hardware address.
+    \item[HWaddress] The actual hardware address.
+    \item[Flags] Flags attached to the address. C means Cached.
+    \item[Mask] What this address could be hidden as.
+    \item[Iface] The interface on which this address resides.
+\end{description}
+
+\item \q What are the hexadecimal values for the source and destination
+    addresses in the Ethernet frame containing the ARP request message?
+
+\ans Source: 00:22:75:af:71:6b. Destination: ff:ff:ff:ff:ff:ff.
+
+\item \q Give the hexadecimal value for the two-byte Ethernet Frame type
+    field. What do the bit(s) whose value is 1 mean within the flag field?
+
+\ans 0x0806. It specifics that this packet is using the ARP protocol.
+
+\item \q Download the ARP specification.
+    \begin{enumerate}
+        \item \q How many bytes from the very beginning of the Ethernet frame
+            does the ARP \emph{opcode} field begin?
+
+        \ans 21 Bytes after the beginning.
+
+        \item \q What is the value of the \emph{opcode} field within the ARP-
+            payload part of the Ethernet frame in which an ARP request is
+            made?
+
+        \ans 0x0001 (Request).
+
+        \item \q Does the ARP message contain the IP address of the sender?
+
+        \ans Yes. It is 10.0.1.20.
+
+        \item \q Where in the ARP request does the ``question'' appear -- the
+            Ethernet address of the machine whose corresponding IP address
+            is being queried?
+
+        \ans Starting at byte 33 and going till byte 39. It comes just after
+            the sender Ethernet address and IP address is listed.
+    \end{enumerate}
+
+\pagebreak
+\lstinputlisting{packets/arp_1.pkt}
+\pagebreak
+
+\item Now find the ARP reply that was sent in response to the ARP request.
+    \begin{enumerate}
+        \item \q How many bytes from the very beginning of the Ethernet frame
+            does the ARP \emph{opcode} field begin?
+
+        \ans 21 bytes after the beginning of the Ethernet frame.
+
+        \item \q What is the value of the \emph{opcode} field within the ARP-
+            payload part of the Ethernet frame in which an ARP request is
+            made?
+
+        \ans 0x0002 (Reply).
+
+        \item \q Where in the ARP message does the ``answer'' to the earlier
+            ARP request appear -- the IP address of the machine having the
+            Ethernet address of the machine whose corresponding IP address
+            is being queried?
+
+        \ans 7 bytes after the \emph{opcode}. The 6 bytes after the \emph{
+            opcode} is used for the Ethernet address of the queried machine.
+    \end{enumerate}
+
+\item \q What are the hexadecimal values for the source and destination
+    addresses in the Ethernet frame containing the ARP reply message?
+
+\ans Source: 00:16:cb:c1:5f:50. Destination: 00:22:75:af:71:6b.
+
+\item \q Why is there no ARP reply (sent in response to the ARP request in packet
+    6) in the packet trace?
+
+\ans There is no ARP reply sent because the Ethernet address in the request
+    does not match the local machines hardware address.
+\end{enumerate}
+
+\pagebreak
+\lstinputlisting{packets/arp_2.pkt}
+\pagebreak
+
+\section{Extra Credit}
+\begin{enumerate}
+    \item \q What would happen if, when you manually added an entry, you
+        entered the correct IP address, but the wrong Ethernet address
+        for that remote interface?
+    
+    \ans It disables that interface. All outbound requests go nowhere.
+
+    \item \q What is the default amount of time that an entry remains in your
+        ARP cache before being removed?
+
+    \ans 60 seconds. It can be found in \emph{/proc/sys/net/ipv4/neigh/wlan0/
+        gc\_stale\_time}.
+
+\end{enumerate}
+
+
+\end{document}

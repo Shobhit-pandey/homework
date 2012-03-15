@@ -1,0 +1,23 @@
+No.     Time        Source                Destination           Protocol Length Info
+     17 14.979987   BelkinIn_af:71:6b     Broadcast             ARP      42     Who has 10.0.1.1?  Tell 10.0.1.20
+
+Frame 17: 42 bytes on wire (336 bits), 42 bytes captured (336 bits)
+Ethernet II, Src: BelkinIn_af:71:6b $\b{(00:22:75:af:71:6b)}$, Dst: Broadcast $\b{(ff:ff:ff:ff:ff:ff)}$
+    Destination: Broadcast (ff:ff:ff:ff:ff:ff)
+    Source: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Type: ARP $\b{(0x0806)}$
+Address Resolution Protocol (request)
+    Hardware type: Ethernet (1)
+    Protocol type: IP (0x0800)
+    Hardware size: 6
+    Protocol size: 4
+    Opcode: request (1)
+    [Is gratuitous: False]
+    Sender MAC address: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+    Sender IP address: 10.0.1.20 $\b{(10.0.1.20)}$
+    Target MAC address: 00:00:00_00:00:00 $\b{(00:00:00:00:00:00)}$
+    Target IP address: 10.0.1.1 (10.0.1.1)
+
+0000  ff ff ff ff ff ff 00 22 75 af 71 6b 08 06 00 01   ......."u.qk....
+0010  08 00 06 04 $\b{00 01}$ 00 22 75 af 71 6b 0a 00 01 14   ......."u.qk....
+0020  $\b{00 00 00 00 00 00}$ 0a 00 01 01                     ..........
