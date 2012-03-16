@@ -12,136 +12,176 @@
 {Delf}{WR222 -- MWF 1600}{\today}{The History of The Oregon
     State Open Source Lab}
 
-% Linux/Open Source Movement
+%\section*{Hook}
 On August 25th, 1991, Linus Torvalds changed the world with one email. 
-(http://groups.google.com/group/comp.os.minix/msg/b813d52cbc5a044b). Linus had
-began working on a free operating system which would later be known as
-GNU/Linux, commonly referred to today as just Linux. Back in the 1990's there
-were really no free operating systems available, with the exception of UNIX,
-which was freely distribution to universities and government agencies. Linux 
-was the first free, and open source alternative operating system. It was based 
+\begin{quotation}
+Hello everybody out there using minix - 
+I'm doing a (free) operating system (just a hobby, won't be big and 
+professional like gnu) for 386(486) AT clones.  This has been brewing 
+since april, and is starting to get ready.  I'd like any feedback on 
+things people like/dislike in minix, as my OS resembles it somewhat 
+(same physical layout of the file-system (due to practical reasons) 
+among other things). (Torvalds) 
+\end{quotation}
+As those at \emph{Linux Weekly News} know, Linus had
+began working on a free operating system which would be known today as
+GNU/Linux. It served as a catalyst for the open source movement. Without
+GNU/Linux, or the open source movement, we wouldn't have some of the most 
+widely used and know software projects in the world: Mozilla Firefox, Gentoo, 
+the Apache Web Server, Debian, and Drupal.
+
+%\section*{Introduction/Thesis}
+Where do all these globally known open source project reside today? 
+Corvallis, OR.
+Wait. It's not Cupertino, CA, home of Apple; Redmond, WA, home of Microsoft;
+or Mountain View, CA, home of Google? Nope! All of them, with the exception of
+Firefox, reside in Corvallis, OR, home of the Oregon State Open Source Lab 
+(OSUOSL).
+The OSUOSL hosts the largest collection of high impact open source software in 
+the world. Though a lot of people don't know this because they do not directly
+interact with the OSUOSL to download Drupal or the Apache Web Server.
+The Open Source Lab did not evolve overnight night, but through a series of 
+interrelated events. %\label{thesis}
+Founded in
+late 2003, the Oregon State Open Source Lab came about due to the hosting 
+needs of the
+Gentoo community, a financial disaster in the Oregon State Information Services
+department, a large increase of available network bandwidth, and a domain name 
+for the worst education.
+
+%\section*{Open Source Movement}
+For those who are unaware of what the open source movement here is a brief
+overview of it's inception.
+Steven Weber explains in his book how Richard Stallman started the open source
+movement. ``He founded the Free Software Foundation as a non-profit 
+organization to support the work. The goal was the produce an entirely free
+operating system that anyone could download, use, modify, and distribute freely
+.''
+Back in the 1990's there were no free operating systems available.
+GNU/Linux 
+was the first free and open source operating system. It was based 
 on MINIX, which was created by Professor Andrew Tanenbaum of Vrije 
 Universitait, Amsterdam as a teaching tool to understand how the UNIX 
-operating system worked. At the same time Linus was creating Linux, the GNU
-Project was developing a free operating system of their own. Richard Stallman
-was the leader of the project and also created the first open source license:
-the GNU General Public License. Both the GNU and Linux worked in cohesion to
-being the open source movement. Without either Richard Stallman ideas of free
-softare, or Linus' work on the Linux operating system, open source software
-would not be where it is today.  This movement is not something of the past. 
-It is alive and well today.
+operating system worked. At the same time Linus was creating GNU/Linux, the GNU
+Project, out of the Free Software Foundation, had the same goal in mind: to 
+developing a free and open source 
+operating system. Richard Stallman released the
+GNU Project's source code under the GNU General Public License, the first open 
+source license. Now with a full operating system and public license which
+helped frame their ideals, the open source movement was well underway. 
 
-Where do all the leaders in open source technology reside? Corvallis, Oregon. 
-Wait. It's not Cupertino, CA home of Apple, Redmond, WA home of Microsoft,
-or Mountain View, CA home of Google, but Corvallis, OR: home of the Open Source
-Lab. The Oregon State Open Source Lab hosts the largest collection of high
-impact open source software in the world. Most people don't know this wonderful
-fact though because the primary thing the Open Source Lab does is hosting. It
-is not actually home to any large open source community, so it make sense why
-it is largely unheard of outside of the open source world. Yet the history of
-the Open Source Lab is shrouded in a thick web of events. None of which singly
-brought about it's creation. The Open Source lab was founded after Curt
-Pederson became Chief Information Officer of Oregon State University.
+%\section*{Gentoo Hosting}
+One of the projects that came out of the open source movement was the Gentoo 
+linux distribution.
+Unlike other GNU/Linux distributions, Gentoo is special because of it's
+involvement in the creation of the Oregon State Open Source Lab.
+``It's not an overstatement to say that Gentoo was integral to the Open Source
+Lab’s foundation. The Linux-based operating system was one of the OSUOSL's 
+first
+projects – it even preceded the existence of the lab – and was instrumental in
+building the buzz that put open source at OSU on the map'' (Reciprocity and
+Gentoo). As Gentoo began to grow it needed more hosting. The Gentoo community
+reached out to Oregon State and a partnership was formed that laid a
+foundation for the mission of the OSUOSL. But before it was hosted by the
+OSUOSL it was originally hosted by Oregon State's Information Services 
+department (IS), which after a series of events underwent some 
+economic strees.
 
-% Finances
-```OSU's information services group had a bit of a financial disaster 8 years
-ago; our former CIO went a little crazy writing checks, etc. After the dust
-settled, we were left with a huge debt, and increasing user base and the need
-to provide a lot more with a lot less. We had no choice but to turn to open
-source.''' [Scott Kveton] (Andrews).
+%\section*{Oregon State Budget}
+Scott Kventon, one of the founders of the OSUOSL, explained this stress to a
+member of the KernelTrap project in a blog post in 2005. ```OSU's information
+services group had a bit of a financial disaster 8 years
+ago [1997]; our former CIO went a little crazy writing checks, etc. After the 
+dust settled, we were left with a huge debt, and increasing user base and the 
+need to provide a lot more with a lot less. We had no choice but to turn to 
+open source''' (Andrews).
 When Curt Pederson came to Oregon State University as the new Chief Information
-Officer he had no idea that the Information Services deparment was \$6,000,000
-in debt. He set up a six year plan that would cut \$1,000,000 every year. Once
-Information Services had more money, Pederson choose to reinvest it in
-increasing the network bandwidth available to the university.
+Officer he had no idea that the IS deparment was \$6,000,000
+in debt. He set up a six year plan that would cut \$1,000,000 every year. A
+large part of this plan involved leveraging open source software over
+proprietary software which costs a large amount due to licensing fees.
+Once Information Services was back in the black, and with the the goal of
+enabling open source to grow at Oregon State, Pederson reinvested
+some of the money into increasing the network bandwidth available to the 
+university (Pederson).
 
-% Dark Fiber
-```Our CIO (Curt Pederson) chose to fund a fiber build-out to I-5 and the Open
+%\section*{Dark Fiber}
+With the extra money available from the cuts, Pederson funded the laying
+of unused, also know as 'dark', fiber optic cable to Interstate 5.
+Having been around at the time, Scott Kventon told Kernel Trap: ```Our CIO 
+(Curt Pederson) chose to fund a fiber build-out to I-5 and the Open
 Source Lab. The strategic funds are seed money to get the OSL off the ground
-and we're well on our way to cost recovery.''' [Scott Kveton] (Andrews).
+and we're well on our way to cost recovery''' (Andrews).
 The laying of this dark fiber was key to the OSL success. TDS Telecom saw that
 The Open Source Lab was putting out a lot of bandwidth, and wanted to partner
-with them to save money. As a partnership
-between TDS Telecom and Oregon State University, 21 miles of fiber optic cable
+with them to save money. With funding from TDS Telecom and Oregon State 
+University, 21 miles of fiber optic cable
 were laid between OSU and Interstate 5. This construction cost the university
-\$500,000, but provided them with 2gbs of bandwidth from TDS at no charge; that
-amount of bandwidth is worth \$300,000 a year. TDS also provided the Open
-Source Lab with three mirror sites for download.
+\$500,000, but provided them with 2 Gibibytes of bandwidth from TDS at no 
+charge; that amount of bandwidth is worth \$300,000 a year. 
+TDS also provided the OSUOSL with three mirror hosting sites for downloads.
 
+%\section*{Worst Domain Name}
+Not too long after this extra bandwidth was available, the former Oregon State
+University President Paul Risser saw a sign on the highway advertising Oregon
+State's website at `www.orst.edu'. He didn't want Oregon State to be know as
+the University with the `worst' education website (Pederson).
+Read that domain name again: `ww-worst-edu'. To fix that problem Risser hired
+Scott Kventon to change the domain name. When Kventon came to Oregon State,
+Pederson had just requesitioned a server room in the Kerr Administration
+building from holding Banner, Oregon State's administrative website, to be used
+as the home of the Oregon State Open Source Lab.
 
-\pagebreak
-{\centering Notes\\}
-\begin{description}
-    \item[Thesis]
-        Several events led to the creation of The Oregon State Open Source Lab 
-("OSL"). Fifteen miles of dark-fiber were laid out to I-5 to help load balance
-web traffic to the university, and the previous CIO cause the university's IS
-department to be in debt, leading to the university moving towards open source
-technologies.
-    \item[Stakes]
-        There is not definite understanding of how the open source lab was
-created. Quotes from several different old employees conflict on this topic.
-    \item[Publication]
-        This essay is being written for Linux World News (lwn.net).
-    \item[Alternative Cause/Effect]
-        www.orst.edu domain seen by Ed Ray. Didn't want to have 'worst' domain.
-This lead to a focus on web presence.
-    \item[Speakers]
-        Joe Brockmeier, a writer for linux.com, wrote an overview of the OSL
-that includes information regarding it's history.
-        Jeremy Andrews, a writer for Kerneltrap.org, blogged about Kernel
-Trap's relocation to the OSL.
-\end{description}
-\pagebreak
-                        
-\noindent\textbf{Question}: What caused the OSL to be created?
-\begin{itemize}
-    \item Open Source Movement \\
-        The open source movement starting with linux and progressed from there.
-        It is hard to talk about open source in general without metioning the
-        movement.
+%\section*{Conclusion}
+It would be wrong to say that a single event was responsible for the creation
+of the Oregon State Open Source Lab. Gentoo's need for hosting, the financial
+mishaps of the Oregon State University Information Services department, the
+laying of fiber to Interstate 5, and a domain name for the `worst' education,
+all contributed to the creation of the OSUOSL. As supporters of the open source
+community at large, the lab has helped to filled a gap in the needs of open
+source projects all over the world. 
+Without Richard Stallman creation of the Free Software Foundation and GPL,
+or Linus' work on the GNU/Linux operating system, open source software
+and the open source movement would exist today.  
+But without the Oregon State Open Source Lab, that open source software 
+would not continue to be free to download, use, or modify.
 
-    \item Dark fiber \\
-        ```Our CIO (Curt Pederson) chose to fund a fiber build-out to I-5 and the Open
-        Source Lab. The strategic funds are seed money to get the OSL off the ground
-        and we're well on our way to cost recovery.''' [Scott Kveton] (Andrews).
-
-    \item Forced into open source due to budget \\
-        ```OSU's information services group had a bit of a financial disaster 8 years
-        ago; our former CIO went a little crazy writing checks, etc. After the dust
-        settled, we were left with a huge debt, and increasing user base and the need
-        to provide a lot more with a lot less. We had no choice but to turn to open
-        source.''' [Scott Kveton] (Andrews).
-
-    \item Worst domain name \\
-        "Oregon State University president saw a sign with "www.orst.edu," and didn't
-        want to have the "worst" edu domain. (Read it again.) That led OSU's president
-        to get in touch with the folks running the Web site. Having drawn the attention
-        of the university leadership to the Web presence, OSU paid more attention to
-        hosting and eventually got into the business of hosting for open source
-        projects." (Brockmeier).
-
-    \item Gentoo hosting \\
-        \tab One of the primary causes for the OSL's creation was Oregon State University's
-        hosting of a Gentoo server. Gentoo is a linux distribution. ```Web services
-        donated an old Dell server, and from there Gentoo just grew and grew,' says
-        Lance Albertson'' (http://osuosl.org/about/stories/gentoo).
-\end{itemize}
-
+%\pagebreak
+%\input{notes.tex}
+%\pagebreak 
 \pagebreak
 {\centering Rhetorical Analysis\\}
 
 \begin{workscited}
 \bibent
-Joe Brockmeier. ``A Look At Oregon State University's Open Source Lab''.
-    \emph{Linux.com}. August 19, 2011
+Andrews, Jeremy. ``Kernel Trap: New Home At The Open Source Lab''.
+    \emph{Kerneltrap.org}. 6 May 2005. Web. 10 Mar. 2012.
+% http://kerneltrap.org/node/5083
+
+\bibent
+Brockmeier, Joe. ``A Look At Oregon State University's Open Source Lab''.
+    \emph{Linux.com}. 19 Aug. 2011. Web. 10 Mar. 2012.
 % https://www.linux.com/news/enterprise/biz-enterprise/486133-
 %   a-look-at-oregon-state-universitys-open-source-lab
 
 \bibent
-Jeremy Andrews. ``Kernel Trap: New Home At The Open Source Lab''.
-    \emph{Kerneltrap.org}. May 6, 2005.
-% http://kerneltrap.org/node/5083
+Pederson, Curt. Personal Interview. 9 Mar. 2012
+
+\bibent
+``Reciprocity and Gentoo.'' \emph{osusol.org}. Open Source Lab, n.d., Web.
+    16 Mar. 2012.
+
+\bibent
+Torvalds, Linus. ``What would you like to see most in minix?''. \emph{Usenet}.
+    25 Aug. 1991. Web 12 Mar. 2012
+
+\bibent
+Weber, Steven. \emph{The Success of Open Source}. Harvard University Press, 
+    2004. 
+Cambridge, Massachusetts.
+London, England.
 \end{workscited}
+
 \end{mla}
+
 \end{document}
