@@ -1,4 +1,29 @@
 Homework
 =====
+This is a collection of my homework at 
+[Oregon State University](http://oregonstate.edu) written in LaTeX.
 
-This is a collection of my homework written in LaTeX.
+Terms
+----
+* Spring 2012
+    * [CS372]- Introduction to Computer Networks
+    * [CS391] - Social and Ethical Issues in Computer Science
+* Winter 2012
+    * WR222 - English Composition 2
+
+Structure
+----
+Each class is listed as it's own directory. Each directory will generally have
+a **templates/** sub-directory to hold assignment templates for that class.
+
+### Example
+* Coursecode[0-9]{3}
+    * templates
+    * files -- syllibus, calendar, etc...
+    * (assignment title | ((assignment | lab)[0-9]+))
+
+[CS372](http://web.engr.oregonstate.edu/~hamdaoui/teaching/372Spring12/index.htm) 
+[CS391](http://beaversource.oregonstate.edu/social/pg/groups/39318/cs391-spring-2012/)
+
+`author: Trevor Bramwell`  
+`date: Mon Apr  9 20:05:00 PDT 2012`
