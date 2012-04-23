@@ -1,0 +1,51 @@
+%%%%%%%
+% Author; Trevor Bramwell
+% Date: Mon Apr 23 01:03:43 PDT 2012
+%   Lab 2 writeup for CS372
+%%%%%%
+
+\documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    basicstyle=\footnotesize,
+    escapechar=\$
+}
+\usepackage{chngcntr}
+%\counterwithout{subsection}{section}
+
+% Custom Commands
+\renewcommand{\b}[1]{\textbf{#1}}
+\newcommand{\q}{\textbf{Question} }
+\newcommand{\ans}{\textbf{Answer} }
+
+% Preamble
+\title{Wireshark Lab 2: }
+\author{
+    Trevor Bramwell \\
+    CS372 - Introduction to Computer Networks \\
+    Professor Bechir Hamdaoui
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+\item \q
+\ans 
+\begin{itemize}
+    \item DNS
+    \item HTTP
+    \item TCP
+\end{itemize}
+
+\pagebreak
+\lstinputlisting{packets/get.pkt}
+\pagebreak
+\lstinputlisting{packets/ok.pkt}
+
+\end{enumerate}
+\end{document}
