@@ -1,0 +1,20 @@
+No.     Time        Source                Destination           Protocol Length Info
+    155 1.720115    128.119.240.90        10.0.1.21             HTTP     1382   HTTP/1.1 200 OK  (JPEG JFIF image)
+
+Frame 155: 1382 bytes on wire (11056 bits), 1382 bytes captured (11056 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.240.90 (128.119.240.90), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 60965 (60965), Seq: 99913, Ack: 590, Len: 1316
+[70 Reassembled TCP Segments (101228 bytes): #37(1448), #39(1448), #41(1448), #43(1448), #45(1448), #47(1448), #49(1448), #51(1448), #53(1448), #55(1448), #57(1448), #59(1448), #61(1448), #63(1448), #66(1448), #68(1448), #70(1448), #72(1448]
+Hypertext Transfer Protocol
+    HTTP/1.1 200 OK\r\n
+    Date: Tue, 24 Apr 2012 03:38:41 GMT\r\n
+    Server: Apache/2.2.15 (CentOS)\r\n
+    Last-Modified: Tue, 15 Sep 2009 18:23:27 GMT\r\n
+    ETag: "78004-18a68-473a1e0e6e5c0"\r\n
+    Accept-Ranges: bytes\r\n
+    Content-Length: 100968\r\n
+    Connection: close\r\n
+    Content-Type: image/jpeg\r\n
+    \r\n
+JPEG File Interchange Format

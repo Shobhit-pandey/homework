@@ -1,0 +1,15 @@
+No.     Time        Source                Destination           Protocol Length Info
+     25 4.505268    128.119.245.12        10.0.1.21             HTTP     247    HTTP/1.1 304 Not Modified 
+
+Frame 25: 247 bytes on wire (1976 bits), 247 bytes captured (1976 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.245.12 (128.119.245.12), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 38102 (38102), Seq: 1183, Ack: 1912, Len: 181
+Hypertext Transfer Protocol
+    HTTP/1.1 304 Not Modified\r\n
+    Date: Tue, 24 Apr 2012 03:32:33 GMT\r\n
+    Server: Apache/2.2.3 (CentOS)\r\n
+    Connection: Keep-Alive\r\n
+    Keep-Alive: timeout=10, max=98\r\n
+    ETag: "d6c96-173-65df9080"\r\n
+    \r\n

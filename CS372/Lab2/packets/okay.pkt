@@ -1,0 +1,20 @@
+No.     Time        Source                Destination           Protocol Length Info
+      8 1.219879    128.119.245.12        10.0.1.21             HTTP     494    HTTP/1.1 200 OK  (text/html)
+
+Frame 8: 494 bytes on wire (3952 bits), 494 bytes captured (3952 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.245.12 (128.119.245.12), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 38089 (38089), Seq: 1, Ack: 693, Len: 428
+Hypertext Transfer Protocol
+    HTTP/1.1 200 OK\r\n
+    Date: Tue, 24 Apr 2012 03:26:27 GMT\r\n
+    Server: Apache/2.2.3 (CentOS)\r\n
+    Last-Modified: Tue, 24 Apr 2012 03:26:01 GMT\r\n
+    ETag: "8734d-80-505b2440"\r\n
+    Accept-Ranges: bytes\r\n
+    Content-Length: 128\r\n
+    Keep-Alive: timeout=10, max=100\r\n
+    Connection: Keep-Alive\r\n
+    Content-Type: text/html; charset=UTF-8\r\n
+    \r\n
+Line-based text data: text/html

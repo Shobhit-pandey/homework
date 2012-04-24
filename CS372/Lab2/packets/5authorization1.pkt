@@ -1,0 +1,18 @@
+No.     Time        Source                Destination           Protocol Length Info
+     12 0.376650    128.119.245.12        10.0.1.21             HTTP     839    HTTP/1.1 401 Authorization Required  (text/html)
+
+Frame 12: 839 bytes on wire (6712 bits), 839 bytes captured (6712 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.245.12 (128.119.245.12), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 38145 (38145), Seq: 1, Ack: 708, Len: 773
+Hypertext Transfer Protocol
+    HTTP/1.1 401 Authorization Required\r\n
+    Date: Tue, 24 Apr 2012 03:47:24 GMT\r\n
+    Server: Apache/2.2.3 (CentOS)\r\n
+    WWW-Authenticate: Basic realm="wireshark-students only"\r\n
+    Content-Length: 486\r\n
+    Keep-Alive: timeout=10, max=100\r\n
+    Connection: Keep-Alive\r\n
+    Content-Type: text/html; charset=iso-8859-1\r\n
+    \r\n
+Line-based text data: text/html

@@ -1,0 +1,17 @@
+No.     Time        Source                Destination           Protocol Length Info
+     18 6.415661    128.119.245.12        10.0.1.21             HTTP     620    HTTP/1.1 404 Not Found  (text/html)
+
+Frame 18: 620 bytes on wire (4960 bits), 620 bytes captured (4960 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.245.12 (128.119.245.12), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 38145 (38145), Seq: 774, Ack: 1474, Len: 554
+Hypertext Transfer Protocol
+    HTTP/1.1 404 Not Found\r\n
+    Date: Tue, 24 Apr 2012 03:47:30 GMT\r\n
+    Server: Apache/2.2.3 (CentOS)\r\n
+    Content-Length: 338\r\n
+    Keep-Alive: timeout=10, max=99\r\n
+    Connection: Keep-Alive\r\n
+    Content-Type: text/html; charset=iso-8859-1\r\n
+    \r\n
+Line-based text data: text/html

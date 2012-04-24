@@ -1,0 +1,20 @@
+No.     Time        Source                Destination           Protocol Length Info
+     27 0.858039    165.193.140.14        10.0.1.21             HTTP     1022   HTTP/1.1 200 OK  (GIF89a)
+
+Frame 27: 1022 bytes on wire (8176 bits), 1022 bytes captured (8176 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 165.193.140.14 (165.193.140.14), Dst: 10.0.1.21 (10.0.1.21)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 40928 (40928), Seq: 1587, Ack: 459, Len: 956
+[3 Reassembled TCP Segments (2542 bytes): #23(218), #25(1368), #27(956)]
+Hypertext Transfer Protocol
+    HTTP/1.1 200 OK\r\n
+    Date: Tue, 24 Apr 2012 03:38:41 GMT\r\n
+    Server: Apache\r\n
+    Vary: Host\r\n
+    Last-Modified: Sat, 09 Jul 2011 13:17:52 GMT\r\n
+    Accept-Ranges: bytes\r\n
+    Content-Length: 2324\r\n
+    Connection: close\r\n
+    Content-Type: image/gif\r\n
+    \r\n
+Compuserve GIF, Version: GIF89a
