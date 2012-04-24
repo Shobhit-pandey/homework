@@ -16,13 +16,17 @@
 \usepackage{chngcntr}
 %\counterwithout{subsection}{section}
 
+\usepackage{enumitem}
+
+\renewcommand{\labelenumii}{\arabic{enumii})}
+
 % Custom Commands
 \renewcommand{\b}[1]{\textbf{#1}}
 \newcommand{\q}{\textbf{Question} }
 \newcommand{\ans}{\textbf{Answer} }
 
 % Preamble
-\title{Wireshark Lab 2: }
+\title{Wireshark Lab 2: HTTP}
 \author{
     Trevor Bramwell \\
     CS372 - Introduction to Computer Networks \\
@@ -33,19 +37,160 @@
 \begin{document}
 \maketitle
 
+\section{The Basic HTTP GET/response interation}
 \begin{enumerate}
-\item \q
-\ans 
-\begin{itemize}
-    \item DNS
-    \item HTTP
-    \item TCP
-\end{itemize}
+\item \q Is your browser running HTTP version 1.0 or 1.1?  What version of HTTP
+    is the server running? 
+
+\ans My browser is running HTTP 1.1, and the server is running HTTP 1.1.
+
+\item \q What languages (if any) does your browser indicate that it can accept
+    to the server? 
+
+\ans US English and English.
+
+\item \q What is the IP address of your computer?  Of the gaia.cs.umass.edu
+    server? 
+
+\ans My computer's IP address is \textbf{10.0.1.21}, and the
+    \emph{gaia.cs.umass.edu} IP address is \textbf{128.119.245.12}.
+
+\item \q What is the status code returned from the server to your browser?  
+
+\ans 200
+
+\item \q When was the HTML file that you are retrieving last modified at the
+    server? 
+
+\ans Tue, 24 Apr 2012 03:26:01 GMT
+
+\item \q How many bytes of content are being returned to your browser? 
+
+\ans 128 Bytes
+
+\item \q By inspecting the raw data in the packet content window, do you see
+    any headers within the data that are not displayed in the packet-listing
+    window? If so, name one.
+
+\ans No, I do not. Every header is accounted for in the raw data.
+\end{enumerate}
+
 
 \pagebreak
-\lstinputlisting{packets/get.pkt}
+\lstinputlisting{packets/get.pkt}\pagebreak
+\lstinputlisting{packets/okay.pkt}\pagebreak
+
+
+% Random indent here for some reason...
+\section{The HTTP CONDITIONAL GET/response interaction}
+\begin{enumerate}[resume]
+\item \q Inspect the contents of the first HTTP GET request from your browser
+    to the server.  Do you see an ``IF-MODIFIED-SINCE'' line in the HTTP GET? 
+
+\ans Yes. It contains the current time.
+
+\item \q Inspect the contents of the server response. Did the server explicitly
+    return the contents of the file? How can you tell? 
+
+\ans Yes. The file is explicitly displayed below the packet.
+
+\item \q Now inspect the contents of the second HTTP GET request from your
+    browser to the server.  Do you see an ``IF-MODIFIED-SINCE:'' line in the
+    HTTP GET? If so, what information follows the ``IF-MODIFIED-SINCE:''
+    header? 
+
+\ans Yes. The same date and time listed from the previous ``IF-MODIFIED-SINCE''
+    header is listed.
+
+\item \q What is the HTTP status code and phrase returned from the server in
+    response to this second HTTP GET?  Did the server explicitly return the
+    contents of the file? Explain.
+
+\ans The returned response is \textbf{304 Not Modified}. The server did not
+    return the contents of the file because the file had not changed since it
+    was last accessed.
+\end{enumerate}
+
+
 \pagebreak
-\lstinputlisting{packets/ok.pkt}
+\lstinputlisting{packets/get2.pkt}\pagebreak
+\lstinputlisting{packets/okay2.pkt}\pagebreak
+\lstinputlisting{packets/get3.pkt}\pagebreak
+\lstinputlisting{packets/notmodified.pkt}\pagebreak
+
+
+\section{Retrieving Long Documents}
+\begin{enumerate}[resume]
+
+\item \q How many HTTP GET request messages were sent by your browser? 
+
+\ans One HTTP GET request was sent by my browser.
+
+\item \q How many data-containing TCP segments were needed to carry the single
+    HTTP response? 
+
+\ans 4 TCP segments were needed to carry the response.
+
+\item \q What is the status code and phrase associated with the response to the
+    HTTP GET request? 
+
+\ans 200 OK
+
+\item \q Are there any HTTP status lines in the transmitted data associated
+    with a TCPinduced ``Continuation''? 
+
+\ans There are no HTTP status lines in the data associated with 
+    ``Continuation''
+\end{enumerate}
+
+
+\pagebreak
+\lstinputlisting{packets/longokay.pkt}\pagebreak
+
+
+\section{HTML Documents with Embeded Objects}
+\begin{enumerate}[resume]
+\item \q How many HTTP GET request messages were sent by your browser?  To
+    which Internet addresses were these GET requests sent? 
+
+\ans 3 seperate GET requests were sent by my browser:
+    \begin{enumerate}
+        \item http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file4.html
+        \item http://manic.cs.umass.edu/~kurose/cover\_5th\_ed.jpg
+        \item http://www.pearsonhighered.com/assets/hip/us/hip\_us\_pearson\\highered/images/pearson\_logo.gif
+    \end{enumerate}
+
+\item \q Can you tell whether your browser downloaded the two images serially,
+    or whether they were downloaded from the two web sites in parallel?
+    Explain.
+
+\ans The two images were downloaded serially. There is a 23 millisecond
+    difference between the GET requests.
 
 \end{enumerate}
+
+
+\pagebreak
+\lstinputlisting{packets/4get2.pkt}\pagebreak
+\lstinputlisting{packets/4get3.pkt}\pagebreak
+
+
+\section{HTTP Authentication}
+\begin{enumerate}[resume]
+\item \q What is the server’s response (status code and phrase) in response to
+    the initial HTTP GET message from your browser? 
+
+\ans 401 Authorization Required
+
+\item \q When your browser’s sends the HTTP GET message for the second time,
+    what new field is included in the HTTP GET message? 
+
+\ans The Authorization field. It's value is: \\
+    Basic d2lyZXNoYXJrLXN0dWRlbnRzOm5ldHdvcms=
+\end{enumerate}
+
+\pagebreak
+\lstinputlisting{packets/5authorization1.pkt}\pagebreak 
+\lstinputlisting{packets/5get2.pkt}\pagebreak
+
 \end{document}
