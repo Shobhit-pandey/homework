@@ -1,20 +1,19 @@
 No.     Time        Source                Destination           Protocol Length Info
-     34 0.982627    10.0.1.21             128.119.240.90        HTTP     655    GET /~kurose/cover_5th_ed.jpg HTTP/1.1 
+     34 $\b{0.982627}$   10.0.1.21             128.119.240.90        HTTP     655    GET /~kurose/cover_5th_ed.jpg HTTP/1.1 
 
 Frame 34: 655 bytes on wire (5240 bits), 655 bytes captured (5240 bits)
 Ethernet II, Src: BelkinIn_af:71:6b (00:22:75:af:71:6b), Dst: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
 Internet Protocol Version 4, Src: 10.0.1.21 (10.0.1.21), Dst: 128.119.240.90 (128.119.240.90)
 Transmission Control Protocol, Src Port: 60965 (60965), Dst Port: http (80), Seq: 1, Ack: 1, Len: 589
 Hypertext Transfer Protocol
-    GET /~kurose/cover_5th_ed.jpg HTTP/1.1\r\n
-    Host: manic.cs.umass.edu\r\n
-    Connection: keep-alive\r\n
-    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19\r\n
-    Accept: */*\r\n
-    Referer: http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file4.html\r\n
-    Accept-Encoding: gzip,deflate,sdch\r\n
-    Accept-Language: en-US,en;q=0.8\r\n
-    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3\r\n
-    Cookie: __utma=198765611.63021047.1334475645.1334475645.1334475645.1; __utmz=198765611.1334475645.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=umass%20amherst\r\n
-    \r\n
+    GET /~kurose/cover_5th_ed.jpg HTTP/1.1
+    Host: manic.cs.umass.edu
+    Connection: keep-alive
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19
+    Accept: */*
+    Referer: http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file4.html
+    Accept-Encoding: gzip,deflate,sdch
+    Accept-Language: en-US,en;q=0.8
+    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+    Cookie: __utma=198765611.63021047.1334475645.1334475645.1334475645.1; __utmz=198765611.1334475645.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=umass%20amherst
     [Full request URI: http://manic.cs.umass.edu/~kurose/cover_5th_ed.jpg]

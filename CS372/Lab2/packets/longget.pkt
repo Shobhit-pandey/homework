@@ -6,15 +6,14 @@ Ethernet II, Src: BelkinIn_af:71:6b (00:22:75:af:71:6b), Dst: AppleCom_c1:5f:50 
 Internet Protocol Version 4, Src: 10.0.1.21 (10.0.1.21), Dst: 128.119.245.12 (128.119.245.12)
 Transmission Control Protocol, Src Port: 38107 (38107), Dst Port: http (80), Seq: 1, Ack: 1, Len: 692
 Hypertext Transfer Protocol
-    GET /wireshark-labs/HTTP-wireshark-file3.html HTTP/1.1\r\n
-    Host: gaia.cs.umass.edu\r\n
-    Connection: keep-alive\r\n
-    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19\r\n
-    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n
-    Referer: http://web.engr.oregonstate.edu/~hamdaoui/teaching/372Spring12/labs/WiresharkLab-HTTP-Ch2.pdf\r\n
-    Accept-Encoding: gzip,deflate,sdch\r\n
-    Accept-Language: en-US,en;q=0.8\r\n
-    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3\r\n
-    Cookie: __utma=198765611.63021047.1334475645.1334475645.1334475645.1; __utmz=198765611.1334475645.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=umass%20amherst\r\n
-    \r\n
+    GET /wireshark-labs/HTTP-wireshark-file3.html HTTP/1.1
+    Host: gaia.cs.umass.edu
+    Connection: keep-alive
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+    Referer: http://web.engr.oregonstate.edu/~hamdaoui/teaching/372Spring12/labs/WiresharkLab-HTTP-Ch2.pdf
+    Accept-Encoding: gzip,deflate,sdch
+    Accept-Language: en-US,en;q=0.8
+    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+    Cookie: __utma=198765611.63021047.1334475645.1334475645.1334475645.1; __utmz=198765611.1334475645.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=umass%20amherst
     [Full request URI: http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file3.html]

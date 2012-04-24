@@ -7,14 +7,13 @@ Internet Protocol Version 4, Src: 128.119.240.90 (128.119.240.90), Dst: 10.0.1.2
 Transmission Control Protocol, Src Port: http (80), Dst Port: 60965 (60965), Seq: 99913, Ack: 590, Len: 1316
 [70 Reassembled TCP Segments (101228 bytes): #37(1448), #39(1448), #41(1448), #43(1448), #45(1448), #47(1448), #49(1448), #51(1448), #53(1448), #55(1448), #57(1448), #59(1448), #61(1448), #63(1448), #66(1448), #68(1448), #70(1448), #72(1448]
 Hypertext Transfer Protocol
-    HTTP/1.1 200 OK\r\n
-    Date: Tue, 24 Apr 2012 03:38:41 GMT\r\n
-    Server: Apache/2.2.15 (CentOS)\r\n
-    Last-Modified: Tue, 15 Sep 2009 18:23:27 GMT\r\n
-    ETag: "78004-18a68-473a1e0e6e5c0"\r\n
-    Accept-Ranges: bytes\r\n
-    Content-Length: 100968\r\n
-    Connection: close\r\n
-    Content-Type: image/jpeg\r\n
-    \r\n
+    HTTP/1.1 200 OK
+    Date: Tue, 24 Apr 2012 03:38:41 GMT
+    Server: Apache/2.2.15 (CentOS)
+    Last-Modified: Tue, 15 Sep 2009 18:23:27 GMT
+    ETag: "78004-18a68-473a1e0e6e5c0"
+    Accept-Ranges: bytes
+    Content-Length: 100968
+    Connection: close
+    Content-Type: image/jpeg
 JPEG File Interchange Format

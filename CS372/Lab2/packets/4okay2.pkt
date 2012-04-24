@@ -7,14 +7,13 @@ Internet Protocol Version 4, Src: 165.193.140.14 (165.193.140.14), Dst: 10.0.1.2
 Transmission Control Protocol, Src Port: http (80), Dst Port: 40928 (40928), Seq: 1587, Ack: 459, Len: 956
 [3 Reassembled TCP Segments (2542 bytes): #23(218), #25(1368), #27(956)]
 Hypertext Transfer Protocol
-    HTTP/1.1 200 OK\r\n
-    Date: Tue, 24 Apr 2012 03:38:41 GMT\r\n
-    Server: Apache\r\n
-    Vary: Host\r\n
-    Last-Modified: Sat, 09 Jul 2011 13:17:52 GMT\r\n
-    Accept-Ranges: bytes\r\n
-    Content-Length: 2324\r\n
-    Connection: close\r\n
-    Content-Type: image/gif\r\n
-    \r\n
+    HTTP/1.1 200 OK
+    Date: Tue, 24 Apr 2012 03:38:41 GMT
+    Server: Apache
+    Vary: Host
+    Last-Modified: Sat, 09 Jul 2011 13:17:52 GMT
+    Accept-Ranges: bytes
+    Content-Length: 2324
+    Connection: close
+    Content-Type: image/gif
 Compuserve GIF, Version: GIF89a

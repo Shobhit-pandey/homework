@@ -1,19 +1,18 @@
 No.     Time        Source                Destination           Protocol Length Info
-     21 0.758114    10.0.1.21             165.193.140.14        HTTP     524    GET /assets/hip/us/hip_us_pearsonhighered/images/pearson_logo.gif HTTP/1.1 
+     21 $\b{0.758114}$    10.0.1.21             165.193.140.14        HTTP     524    GET /assets/hip/us/hip_us_pearsonhighered/images/pearson_logo.gif HTTP/1.1 
 
 Frame 21: 524 bytes on wire (4192 bits), 524 bytes captured (4192 bits)
 Ethernet II, Src: BelkinIn_af:71:6b (00:22:75:af:71:6b), Dst: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
 Internet Protocol Version 4, Src: 10.0.1.21 (10.0.1.21), Dst: 165.193.140.14 (165.193.140.14)
 Transmission Control Protocol, Src Port: 40928 (40928), Dst Port: http (80), Seq: 1, Ack: 1, Len: 458
 Hypertext Transfer Protocol
-    GET /assets/hip/us/hip_us_pearsonhighered/images/pearson_logo.gif HTTP/1.1\r\n
-    Host: www.pearsonhighered.com\r\n
-    Connection: keep-alive\r\n
-    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19\r\n
-    Accept: */*\r\n
-    Referer: http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file4.html\r\n
-    Accept-Encoding: gzip,deflate,sdch\r\n
-    Accept-Language: en-US,en;q=0.8\r\n
-    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3\r\n
-    \r\n
+    GET /assets/hip/us/hip_us_pearsonhighered/images/pearson_logo.gif HTTP/1.1
+    Host: www.pearsonhighered.com
+    Connection: keep-alive
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19
+    Accept: */*
+    Referer: http://gaia.cs.umass.edu/wireshark-labs/HTTP-wireshark-file4.html
+    Accept-Encoding: gzip,deflate,sdch
+    Accept-Language: en-US,en;q=0.8
+    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
     [Full request URI: http://www.pearsonhighered.com/assets/hip/us/hip_us_pearsonhighered/images/pearson_logo.gif]
