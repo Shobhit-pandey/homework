@@ -1,146 +1,132 @@
 %%%%%%%
 % Author; Trevor Bramwell
-% Date: Feb. 9th, 2012
+% Date: Sat May  5 16:35:13 PDT 2012
 %   Lab 3 writeup for CS372
-%
-% TODO: Create new styles for 'Question' and 'Answer'
-%       and abstract a template from this file for future
-%       labs.
-% TODO: Find good way to include network traces
-% TODO: Remove large margins around side. Reduce to maybe 1in?
 %%%%%%
+
 \documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    basicstyle=\footnotesize,
+    escapechar=\$
+}
+\usepackage{chngcntr}
+
+\usepackage{enumitem}
+
+\renewcommand{\labelenumii}{\arabic{enumii})}
+
+% Custom Commands
+\renewcommand{\b}[1]{\textbf{#1}}
+\newcommand{\q}{\textbf{Question} }
+\newcommand{\ans}{\textbf{Answer} }
+
 % Preamble
-% Answer/Question Style
-%  Abstract method to take input, and place input into
-%  'Question' area
-% \newcommand{\question}{\textbf{Question}\\\tab}
-% \newcommand{\question}[1]{\textbf{#1}\\\tab}
-% \newcommand --- ALIAS answer -> question
-\begin{document}
-\title{Wireshark Lab 3}
+\title{Wireshark Lab: TCP}
 \author{
     Trevor Bramwell \\
     CS372 - Introduction to Computer Networks \\
-    Wireshark Lab 3: TCP
+    Professor Bechir Hamdaoui
 }
 \date{\today}
 
-
+\begin{document}
 \maketitle
 
 \setcounter{section}{1}
-\section{A first look at the capture trace}
+\section{A first look at the captured trace}
+\begin{enumerate}
+\item \q What is the IP address and TCP port number used by the client computer
+(source) that is transferring the file to gaia.cs.umass.edu? 
 
-\subsection{}
-See 2.3
+\item \q What is the IP address of gaia.cs.umass.edu? On what port number is it
+sending and receiving TCP segments for this connection?
 
-\subsection{}
-\textbf{Question}\\
-What is the IP address of gaia.cs.umass.edu? On what port number is it sending 
-and receiving TCP segments for this connection?\\\\
-\noindent\textbf{Answer}\\
-The IP address of gaia.cs.umass.edu is \emph{128.119.245.12}. It is sending 
-and recieveing on port \emph{80}.
+\item \q What is the IP address and TCP port number used by your client computer
+(source) to transfer the file to gaia.cs.umass.edu?  
+\end{enumerate}
 
-\tiny
-\input{2_1.out}
-\normalsize
-
-\subsection{}
-\label{section3}
-\textbf{Question}\\
-What is the IP address and TCP port number used by your client computer 
-(source) to transfer the file to gaia.cs.umass.edu?\\\\
-\noindent\textbf{Answer}\\
-The IP address of my client computer is \emph{10.0.1.25} The TCP port is \emph{43535}
+\pagebreak
+%\lstinputlisting{packets/title.pkt}\pagebreak
+%\lstinputlisting{packets/title2.pkt}\pagebreak
 
 \section{TCP Basics}
-\setcounter{subsection}{3}
-\subsection{}
-\textbf{Question}\\
-What is the sequence number of the TCP SYN segment that is used to initiate the
-TCP connection between the client computer and gaia.cs.umass.edu? What is it
-in the segment that identifies the segment as a SYN segment?\\\\
-\noindent\textbf{Answer}\\
-The sequence number is 0. The flags are set to 0x02 [0000 0000 0010].
+% Resume allows the numbering to continue from where it left off.
+\begin{enumerate}[resume]
+\item \q What is the sequence number of the TCP SYN segment that is used to
+initiate the TCP connection between the client computer and gaia.cs.umass.edu?
+What is it in the segment that identifies the segment as a SYN segment?  
 
-\tiny
-\input{3_4.out}
-\normalsize
+\ans
+\begin{enumerate}
+    \item 123
+    \item 123
+\end{enumerate}
 
-\subsection{}
-\textbf{Question}\\
-What is the sequence number of the SYNACK segment sent by gaia.cs.umass.edu
-to the client computer in reply to the SYN? What is the value of the
-ACKnowledgement field in the SYNACK segment? How did gaia.cs.umass.edu
-determine that value? What is it in the segment that identifies the segment \\
-as a SYNACK segment?\\\\
-\noindent\textbf{Answer}\\
-The sequence number of the SYNACK segment is 0. The ACKnowledgement field is \\
-set to 1. gaia.cs.umass.edu determined that value from it recieving a packet.\\
-The flags 0x12 identify the segment as a SYNACK segment.
+\item \q What is the sequence number of the SYNACK segment sent by
+gaia.cs.umass.edu to the client computer in reply to the SYN?  What is the
+value of the ACKnowledgement field in the SYNACK segment?  How did
+gaia.cs.umass.edu determine that value? What is it in the segment that
+identifies the segment as a SYNACK segment? 
 
-\tiny
-\input{3_5.out}
-\normalsize
+\ans
+\begin{enumerate}
+    \item 123
+    \item 123
+    \item 123
+    \item 123
+\end{enumerate}
 
-\subsection{}
-What is the sequence number of the TCP segment containing the HTTP POST
-command? Note that in order to find the POST command, you’ll need to dig into
-the packet content field at the bottom of the Wireshark window, looking for a
-segment with a “POST” within its DATA field.
+\item \q What is the sequence number of the TCP segment containing the HTTP
+POST command?
 
-\subsection{}
-Consider the TCP segment containing the HTTP POST as the first segment in the
-TCP connection. What are the sequence numbers of the first six segments in the
-TCP connection (including the segment containing the HTTP POST)? At what
-time was each segment sent? When was the ACK for each segment received?
+\item \q Consider the TCP segment containing the HTTP POST as the first segment
+in the TCP connection. What are the sequence numbers of the first six segments
+in the TCP connection (including the segment containing the HTTP POST)?  At
+what time was each segment sent?  When was the ACK for each segment received?
 Given the difference between when each TCP segment was sent, and when its
 acknowledgement was received, what is the RTT value for each of the six
-segments? What is the EstimatedRTT value (see page 249 in text) after the
-receipt of each ACK? Assume that the value of the EstimatedRTT is equal to
-the measured RTT for the first segment, and then is computed using the
-EstimatedRTT equation on page 249 for all subsequent segments.
-Note: Wireshark has a nice feature that allows you to plot the RTT for
-each of the TCP segments sent. Select a TCP segment in the “listing of
-captured packets” window that is being sent from the client to the
-gaia.cs.umass.edu server. Then select: Statistics->TCP Stream Graph-
->Round Trip Time Graph.
+segments?  What is the EstimatedRTT value (see page 249 in text) after the
+receipt of each ACK?  Assume that the value of the EstimatedRTT is equal to the
+measured RTT for the first segment, and then is computed using the EstimatedRTT
+equation on page 249 for all subsequent segments.  Note: Wireshark has a nice
+feature that allows you to plot the RTT for each of the TCP segments sent.
+Select a TCP segment in the “listing of captured packets” window that is being
+sent from the client to the gaia.cs.umass.edu server.  Then select:
+Statistics->TCP Stream Graph- >Round Trip Time Graph.  
 
-\subsection{}
-What is the length of each of the first six TCP segments?
+\item \q What is the length of each of the first six TCP segments?
 
-\subsection{}
-What is the minimum amount of available buffer space advertised at the received
-for the entire trace? Does the lack of receiver buffer space ever throttle the
-sender?
+\item \q What is the minimum amount of available buffer space advertised at the
+received for the entire trace?  Does the lack of receiver buffer space ever
+throttle the sender?  
 
-\subsection{}
-Are there any retransmitted segments in the trace file? What did you check for (in
-the trace) in order to answer this question?
+\item \q Are there any retransmitted segments in the trace file? What did you
+check for (in the trace) in order to answer this question?  
 
-\subsection{}
-How much data does the receiver typically acknowledge in an ACK? Can you
-identify cases where the receiver is ACKing every other received segment (see
-Table 3.2 on page 257 in the text).
+\item \q How much data does the receiver typically acknowledge in an ACK?  Can
+you identify cases where the receiver is ACKing every other received segment
+(see Table 3.2 on page 257 in the text).  
 
-\subsection{}
-What is the throughput (bytes transferred per unit time) for the TCP connection?
-Explain how you calculated this value.
+\item \q What is the throughput (bytes transferred per unit time) for the TCP
+connection?  Explain how you calculated this value.  
+\end{enumerate}
+
 
 \section{TCP congestion control in action}
-\setcounter{subsection}{12}
-\subsection{} 
-Use the Time-Sequence-Graph(Stevens) plotting tool to view the sequence
-number versus time plot of segments being sent from the client to the
-gaia.cs.umass.edu server. Can you identify where TCP’s slowstart phase begins
-and ends, and where congestion avoidance takes over? Comment on ways in
-which the measured data differs from the idealized behavior of TCP that we’ve
-studied in the text.
+\begin{enumerate}[resume]
+\item \q Use the Time-Sequence-Graph(Stevens) plotting tool to view the
+sequence number versus time plot of segments being sent from the client to the
+gaia.cs.umass.edu server.  Can you identify where TCP’s slowstart phase begins
+and ends, and where congestion avoidance takes over?  Comment on ways in which
+the measured data differs from the idealized behavior of TCP that we’ve studied
+in the text. 
 
-\subsection{}
-Answer each of two questions above for the trace that you have gathered when
-you transferred a file from your computer to gaia.cs.umass.edu
+\item \q Answer each of two questions above for the trace that you have
+gathered when you transferred a file from your computer to gaia.cs.umass.edu 
 
+\end{enumerate}
 \end{document}
