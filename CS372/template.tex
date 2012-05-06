@@ -1,0 +1,55 @@
+%%%%%%%
+% Author; Trevor Bramwell
+% Date: `:r!date`
+%   Lab # writeup for CS372
+%%%%%%
+
+\documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage{listings}
+\lstset{
+    breaklines=true,
+    basicstyle=\footnotesize,
+    escapechar=\$
+}
+\usepackage{chngcntr}
+
+\usepackage{enumitem}
+
+\renewcommand{\labelenumii}{\arabic{enumii})}
+
+% Custom Commands
+\renewcommand{\b}[1]{\textbf{#1}}
+\newcommand{\q}{\textbf{Question} }
+\newcommand{\ans}{\textbf{Answer} }
+
+% Preamble
+\title{WIRESHARK LAB HEADER}
+\author{
+    Trevor Bramwell \\
+    CS372 - Introduction to Computer Networks \\
+    Professor Bechir Hamdaoui
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{SECTION TITLE}
+\begin{enumerate}
+\item \q Question....
+
+\ans Answer...
+\end{enumerate}
+
+\pagebreak
+\lstinputlisting{packets/title.pkt}\pagebreak
+\lstinputlisting{packets/title2.pkt}\pagebreak
+
+\section{NEXT SECTION TITLE}
+% Resume allows the numbering to continue from where it left off.
+\begin{enumerate}[resume]
+\end{enumerate}
+
+\end{document}
