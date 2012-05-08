@@ -1,0 +1,17 @@
+No.     Time        Source                Destination           Protocol Length Info
+      3 0.020274    10.0.1.23             128.119.245.12        TCP      74     45679 > http [SYN] Seq=0 Win=14600 Len=0 MSS=1460 SACK_PERM=1 TSval=3515862 TSecr=0 WS=32
+
+Frame 3: 74 bytes on wire (592 bits), 74 bytes captured (592 bits)
+Ethernet II, Src: BelkinIn_af:71:6b (00:22:75:af:71:6b), Dst: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+Internet Protocol Version 4, Src: 10.0.1.23 (10.0.1.23), Dst: 128.119.245.12 (128.119.245.12)
+Transmission Control Protocol, Src Port: 45679 (45679), Dst Port: http (80), Seq: 0, Len: 0
+    Source port: 45679 (45679)
+    Destination port: http (80)
+    [Stream index: 1]
+    $\b{Sequence number: 0    (relative sequence number)}$
+    Header length: 40 bytes
+    $\b{Flags: 0x02 (SYN)}$
+    Window size value: 14600
+    [Calculated window size: 14600]
+    Checksum: 0x80c9 [validation disabled]
+    Options: (20 bytes)

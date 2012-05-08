@@ -42,29 +42,34 @@
 \item \q What is the IP address and TCP port number used by the client computer
 (source) that is transferring the file to gaia.cs.umass.edu? 
 
+\ans 10.0.1.23 port 45679
+
 \item \q What is the IP address of gaia.cs.umass.edu? On what port number is it
 sending and receiving TCP segments for this connection?
 
-\item \q What is the IP address and TCP port number used by your client computer
-(source) to transfer the file to gaia.cs.umass.edu?  
+\ans 128.119.245.12 port 80
+
 \end{enumerate}
 
-\pagebreak
-%\lstinputlisting{packets/title.pkt}\pagebreak
-%\lstinputlisting{packets/title2.pkt}\pagebreak
+\lstinputlisting{packets/2_1.pkt}
 
+\pagebreak
 \section{TCP Basics}
 % Resume allows the numbering to continue from where it left off.
 \begin{enumerate}[resume]
 \item \q What is the sequence number of the TCP SYN segment that is used to
 initiate the TCP connection between the client computer and gaia.cs.umass.edu?
+
 What is it in the segment that identifies the segment as a SYN segment?  
 
 \ans
 \begin{enumerate}
-    \item 123
-    \item 123
+    \item 0
+    \item The `Sequence number' field of the TCP Protocol, and the set `Syn'
+        flag.
 \end{enumerate}
+
+\lstinputlisting{packets/3_4.pkt}
 
 \item \q What is the sequence number of the SYNACK segment sent by
 gaia.cs.umass.edu to the client computer in reply to the SYN?  What is the
@@ -74,14 +79,20 @@ identifies the segment as a SYNACK segment?
 
 \ans
 \begin{enumerate}
-    \item 123
-    \item 123
-    \item 123
-    \item 123
+    \item 0
+    \item 1
+    \item It is the first ACK back.
+    \item The Flags field is set to 0x12 (SYN, ACK)
 \end{enumerate}
+
+\lstinputlisting{packets/3_5.pkt}
 
 \item \q What is the sequence number of the TCP segment containing the HTTP
 POST command?
+
+\ans 1
+
+\lstinputlisting{packets/3_6.pkt}
 
 \item \q Consider the TCP segment containing the HTTP POST as the first segment
 in the TCP connection. What are the sequence numbers of the first six segments
@@ -98,7 +109,19 @@ Select a TCP segment in the “listing of captured packets” window that is bei
 sent from the client to the gaia.cs.umass.edu server.  Then select:
 Statistics->TCP Stream Graph- >Round Trip Time Graph.  
 
+\ans
+\begin{enumerate}
+    \item 1, 823, 2271, 3719, 5167, 6615
+    \item 16:57:14.048263, 16:57:14.048296, 16:57:14.048309, 16:57:14.048320,
+        16:57:14.048371, 16:57:14.048415
+    \item 16:57:14.470306, 16:57:14.470451, 16:57:14.470921, 16:57:14.471671,
+        16:57:14.880228, 16:57:14.880971
+    \item 
+\end{enumerate}
+
 \item \q What is the length of each of the first six TCP segments?
+
+\ans Each of them are 1448 bytes 
 
 \item \q What is the minimum amount of available buffer space advertised at the
 received for the entire trace?  Does the lack of receiver buffer space ever
@@ -125,8 +148,6 @@ and ends, and where congestion avoidance takes over?  Comment on ways in which
 the measured data differs from the idealized behavior of TCP that we’ve studied
 in the text. 
 
-\item \q Answer each of two questions above for the trace that you have
-gathered when you transferred a file from your computer to gaia.cs.umass.edu 
-
 \end{enumerate}
+
 \end{document}

@@ -1,0 +1,22 @@
+No.     Time        Source                Destination           Protocol Length Info
+      6 0.145260    10.0.1.23             128.119.245.12        TCP      888    45679 > http [PSH, ACK] Seq=1 Ack=1 Win=14624 Len=822 TSval=3515887 TSecr=173883771
+
+Frame 6: 888 bytes on wire (7104 bits), 888 bytes captured (7104 bits)
+Ethernet II, Src: BelkinIn_af:71:6b (00:22:75:af:71:6b), Dst: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50)
+Internet Protocol Version 4, Src: 10.0.1.23 (10.0.1.23), Dst: 128.119.245.12 (128.119.245.12)
+Transmission Control Protocol, Src Port: 45679 (45679), Dst Port: http (80), Seq: 1, Ack: 1, Len: 822
+    Source port: 45679 (45679)
+    Destination port: http (80)
+    [Stream index: 1]
+    $\b{Sequence number: 1    (relative sequence number)}$
+    [Next sequence number: 823    (relative sequence number)]
+    Acknowledgement number: 1    (relative ack number)
+    Header length: 32 bytes
+    Flags: 0x18 (PSH, ACK)
+    Window size value: 457
+    [Calculated window size: 14624]
+    [Window size scaling factor: 32]
+    Checksum: 0xb0a9 [validation disabled]
+    Options: (12 bytes)
+    [SEQ/ACK analysis]
+Data (822 bytes)

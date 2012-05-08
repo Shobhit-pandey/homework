@@ -1,0 +1,19 @@
+No.     Time        Source                Destination           Protocol Length Info
+      4 0.119016    128.119.245.12        10.0.1.23             TCP      74     http > 45679 [SYN, ACK] Seq=0 Ack=1 Win=5792 Len=0 MSS=1460 SACK_PERM=1 TSval=173883771 TSecr=3515862 WS=128
+
+Frame 4: 74 bytes on wire (592 bits), 74 bytes captured (592 bits)
+Ethernet II, Src: AppleCom_c1:5f:50 (00:16:cb:c1:5f:50), Dst: BelkinIn_af:71:6b (00:22:75:af:71:6b)
+Internet Protocol Version 4, Src: 128.119.245.12 (128.119.245.12), Dst: 10.0.1.23 (10.0.1.23)
+Transmission Control Protocol, Src Port: http (80), Dst Port: 45679 (45679), Seq: 0, Ack: 1, Len: 0
+    Source port: http (80)
+    Destination port: 45679 (45679)
+    [Stream index: 1]
+    $\b{Sequence number: 0    (relative sequence number)}$
+    $\b{Acknowledgement number: 1    (relative ack number)}$
+    Header length: 40 bytes
+    $\b{Flags: 0x12 (SYN, ACK)}$
+    Window size value: 5792
+    [Calculated window size: 5792]
+    Checksum: 0x4e45 [validation disabled]
+    Options: (20 bytes)
+    [SEQ/ACK analysis]
