@@ -1,6 +1,5 @@
 \documentclass[12pt,letterpaper]{article}
 
-\linespread{1}
 
 \title{Open Source Licensing}
 \author{
@@ -11,37 +10,81 @@
 \date{\today}
 
 \usepackage{hyperref}
+\usepackage{fullpage}
+\linespread{1}
+
+\renewcommand{\abstractname}{Overview}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This paper explains the expression ``Free as in Freedom, not as in
-beer.'' Defines What open source is and is not in terms of intellectual 
-property. The rights Open Source developers can retain and can not
-retain when release their code under open source license. A description
-and definition of key terms of the most common OSI License. What it
-means for a license to be GPL compliant.
+This paper explains attemps to provide an introduction to open source
+licensing, the different freedom licenses can provide, and list some key
+terms and their definitions that open source licenses might contain.  It
+also will explain the expression ``Free as in Freedom, not as in
+beer.'', define what open source as it relates to intellectual property,
+examine what rights Open Source developers can and cannot retain when
+release code, and define what it means for a license to be GPL
+compliant.
 \end{abstract}
+
 
 \section{Free as in Freedom, Not as in Beer}
 When people hear 'free' they generally think of something that costs
-nothing: ``It's free!'' they might even exclaim to their friends. But
+nothing. ``It's free,'' they might exclaim to their friends. But
 when refering to free software, people are not talking about the `free'
 others may think they are. This free is the `free' in `freedom' not
-the `free' in `free beer'.
+the `free' in `free beer'. It is a question of liberty, not payment.
 
-This free in free software means the user has been granted freedom.
-Freedom to edit, modify, redistribute, copy, run, and study the source
-code of any program that is free software. It does not mean it has to be
-freely given away. People have every right to charge for the laybor they
-have invested in creating this software and marketing it to others.
+Users of free software are given several freedoms. They have the freedom
+to edit, modify, redistribute, copy, run, and study the source code of
+the software. Athough free software is
+generally given away for free, the free software definition does not
+require the software creator to sell their product, or give it away for
+free. Rather it gives the creator the freedom to choose wheather or not
+they want to charge for their product. This freedom labeled as the
+second freedom in 'The Free Software Definition'[1].
 
-\section{Free Software vs. Open Software}
+These are a summary of the four freedoms granted by the definition:
+    \begin{enumerate}
+    % Start counter at 0 because that is how the freedoms are numbered
+    \setcounter{enumi}{-1}
+        \item Freedom to run the program.
+        \item Freedom to study and modify the source code.
+        \item Freedom to redistribute copies.
+        \item Freedom to distribute your modified copies.
+    \end{enumerate}
+
+The most important freedom of these four is the freedom to distribute
+your modified copies. It is this freedom
+
+It should be noted that all of these freedoms are 'freedoms' they are
+not 'restictions'. Individual creators have the right to choose not to
+distribute their modified copies. Although the extent of this freedom is
+generally decided by the license the creator has released his or her
+code under.
+
+\subsection{Free Software vs. Open Source}
 
 
+\section{Intellectual Property as it relates to Open Source}
+The free and open source movement all began with a printer.
 
-\pagebreak
+
+\section{Retainable and Non-Retainable Developer Rights for OSI Licenses}
+
+
+\section{Key Terms}
+\subsection{Copyleft}
+The key difference between Copyright and Copyleft lies in who is given
+the rights. Under Copyright the rights extend to authors, whereas under
+Copyleft the rights extend to every user, since every user is seen as a
+potential author.
+
+
+\section{GPL Compliance}
+
 \include{biblioagraphy}
 
 \end{document}
