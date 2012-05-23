@@ -9,9 +9,18 @@
 }
 \date{\today}
 
+\usepackage{url}
 \usepackage{hyperref}
+
+\hypersetup{
+    colorlinks,
+    citecolor=blue,
+    urlcolor=black,
+}
+
 \usepackage{fullpage}
 \linespread{1}
+
 
 \renewcommand{\abstractname}{Overview}
 
@@ -44,7 +53,7 @@ generally given away for free, the free software definition does not
 require the software creator to sell their product, or give it away for
 free. Rather it gives the creator the freedom to choose wheather or not
 they want to charge for their product. This freedom labeled as the
-second freedom in 'The Free Software Definition'[1].
+second freedom in 'The Free Software Definition'.
 
 These are a summary of the four freedoms granted by the definition:
     \begin{enumerate}
@@ -81,21 +90,45 @@ Stallman's argument for using the term Free Software is based on the assumption
 that when people say `Free Software' they will also explain that the `Free'
 refers to Freedom, yet when people say `Open Source' they will take no
 provisions to explain it's meaning, and people will take it on face value.  
-
-\section*{Intellectual Property as it relates to Open Source}
-Although aimed at sharing and sharing alike for the greater good, Open
-source software is still intellectual property
+\cite{website:gnu-open-source}
 
 
 \section*{Retainable and Non-Retainable Developer Rights for OSI Licenses}
 
 
 \section*{Key Terms}
+Because wading through the plethora of open source licenses can be
+confusing and feel like reading a foreign language, I have attempted to
+clarify a few of the key terms used in open source license, and
+discussions about them.
+
 \subsection*{Copyleft}
-The key difference between Copyright and Copyleft lies in who is given
-the rights. Under Copyright the rights extend to authors, whereas under
-Copyleft the rights extend to every user, since every user is seen as a
-potential author.
+A copyleft license allows modification and derivitive
+works as long at the new work is also realeased under the original
+license. The most well known copyleft license is the GPL. 
+
+\subsection*{Permissive}
+A permissive license, also commonly referred to as a non-copyleft
+license, does not provide any restrictions on how the licensed work can
+be combined or redistibuted with other licensed work. Therefore the
+licensed work can easily be combined with other free software, open
+source software, or even proprietary software. An example of a
+permissive license is the MIT License, and a good example of a well
+known project that uses the MIT License is Ruby on Rails.
+
+\subsection*{Attribution}
+Attribution means that redistributed works and modifications must
+attribute, or acknowledge, the creation of the original work to the
+original author, and any new authors should be attributed as well if a
+derivitive work is created.
+
+\subsection*{Non-Commercial}
+A somewhat lesser known term in the licensing of open source software is
+the 'non-commercial' clause. These clauses generally state that the
+created work can not be used in or for any commercial purposes.
+Generally the author means to imply that you can not make any financial
+gains off of the software, but you are free to modify it and
+redistribute it.
 
 
 \section*{GPL Compliance}
@@ -103,6 +136,12 @@ GPL Compliance means that the code being released under a given license, yet bui
 
 One of the important factors open source projects look at when choosing a license is whether or not the license it GPL Compliant. License compliance is an interesting 
 
-\include{biblioagraphy}
 
+\pagebreak
+
+\nocite{*}
+
+\bibliographystyle{plain}
+\bibliography{biblio}
 \end{document}
+
