@@ -3,7 +3,7 @@
 # Output directory
 output/
 
-# Latex generate files
+# Latex generated files
 *.aux
 *.log
 *.out
@@ -11,3 +11,7 @@ output/
 *.swp
 *.mk
 .~lock*
+
+# Bibtex generated files
+*.bbl
+*.blg
