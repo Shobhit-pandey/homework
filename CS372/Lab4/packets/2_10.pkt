@@ -16,7 +16,7 @@ Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.
     Header checksum: 0x19ce [correct]
     Source: 140.211.167.30 (140.211.167.30)
     Destination: 128.119.245.12 (128.119.245.12)
-    $\red{[2 IPv4 Fragments (1980 bytes): 755(1480), 756(500)]}$
+    $\b{[2 IPv4 Fragments (1980 bytes): 755(1480), 756(500)]}$
         [Frame: 755, payload: 0-1479 (1480 bytes)]
         [Frame: 756, payload: 1480-1979 (500 bytes)]
         [Fragment count: 2]

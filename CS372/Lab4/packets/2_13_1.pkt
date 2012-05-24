@@ -7,13 +7,13 @@ Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.
     Version: 4
     Header length: 20 bytes
     Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
-    $\red{Total Length: 1500}$
-    $\red{Identification: 0xf41f (62495)}$
-    $\red{Flags: 0x01 (More Fragments)}$
+    $\b{Total Length: 1500}$
+    $\b{Identification: 0xf41f (62495)}$
+    $\b{Flags: 0x01 (More Fragments)}$
     Fragment offset: 0
     Time to live: 1
     Protocol: UDP (17)
-    $\red{Header checksum: 0xf67b [correct]}$
+    $\b{Header checksum: 0xf67b [correct]}$
     Source: 140.211.167.30 (140.211.167.30)
     Destination: 128.119.245.12 (128.119.245.12)
     Reassembled IPv4 in frame: 816

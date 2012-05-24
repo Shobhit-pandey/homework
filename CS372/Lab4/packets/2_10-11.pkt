@@ -9,8 +9,8 @@ Internet Protocol Version 4, Src: 140.211.167.30 (140.211.167.30), Dst: 128.119.
     Differentiated Services Field: 0x00 (DSCP 0x00: Default; ECN: 0x00: Not-ECT (Not ECN-Capable Transport))
     Total Length: 1500
     Identification: 0xf3e8 (62440)
-    $\red{Flags: 0x01 (More Fragments)}$
-    $\red{Fragment offset: 0}$
+    $\b{Flags: 0x01 (More Fragments)}$
+    $\b{Fragment offset: 0}$
     Time to live: 1
     Protocol: UDP (17)
     Header checksum: 0xf6b2 [correct]
