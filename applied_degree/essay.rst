@@ -6,9 +6,21 @@ Essay
 Introduction
 ------------
 
-A degree in FOSS Development would provide me with the skills to
-communicate well with other cultures, resolve disputes quickly, and
-manage a small group of developers effectively.
+I love telling people that the reason I came to Oregon State Univerity
+was to create open source software. As soon as I was enrolled, I did
+everything in my power to get a job at Oregon State University's Open
+Source Lab. This led me to become a core contributor to the Ganeti Web
+Manager project at the OSUOSL.
+
+Knowing that Oregon State had such a strong interest in open source
+software made me excited to be a student here, but  when I learned that
+the university's interest in open source wasn't as strong as I realized,
+I was dismayed; Oregon State University doesn't have an open source degree.
+
+That is why I have created this plan for a Bachelor of Science in
+Free/Open Source Software Development. A degree which will provide me
+with the skills to communicate well with other cultures, quickly resolve
+disputes, and effectively manage a small group of developers.
 
 ----
 Body
