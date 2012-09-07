@@ -15,28 +15,24 @@ Manager project at the OSUOSL.
 Knowing that Oregon State had such a strong interest in open source
 software made me excited to be a student here, but  when I learned that
 the university's interest in open source wasn't as strong as I realized,
-I was dismayed; Oregon State University doesn't have an open source degree.
+I was dismayed; Oregon State University doesn't have an open source
+degree.
 
 That is why I have created this plan for a Bachelor of Science in
 Free/Open Source Software Development. A degree which will provide me
 with the skills to communicate well with other cultures, quickly resolve
-disputes, and effectively manage a small group of developers.
+disputes, and solve problems with a small group of developers.
 
-----
-Body
-----
+During my first summer at the OSUOSL, there was a Google Code-In student
+from Poland helping out on Ganeti Web Manager. Communicating back and
+forth was challenging with the student because of the language barrier.
+I'm sure our
+communication would have been much easier or I would have had the
+skills to help smooth it out. Either way it would enable me to
+communicate well with other cultures.
 
-- communicate well with other cultures
 
-Open Source development is done over the internet between people of
-varying cultural backgrounds. The first summer working on GWM the OSL
-participated in Google Code-In. One of our main contributers from the
-program was pbnan from Poland. It was not easy communicating back and
-forth about what we expected from the issues and what he had done. If I
-had a background in communication, we could have better explained our
-expectation to someone from another culture.
-
-- resolve disputes effectively
+- COMM 440 theories of conflict and conflict management
 
 Open source project generally contain conflicts and differing opinions
 of implementation or importance of a feature. grnet did not agree with
@@ -46,28 +42,15 @@ forking from GWM at 0.5. If I had better communication skills I could
 have worked as an intermediary between grnet and the developers on the
 issue. 
 
+- COMM 322 small-group problem solving 
 - manage small group of developers
 
-A very common trend in open source software is that the development is
-done by a small group of dedicated volunteers. In order for that group
-to work well together though, they need a leader who is able to resolve
-internal disputes and keep things on track.
+Recently at the OSUOSL I transfered over to being a dev-op because I
+felt I didn't know enough about systems to 
 
-----------
-Conclusion
-----------
 
 All of these skills are not taught in the current Computer Science
 curriculum. 
-
-----------
-
-Communication takes up a large portion of the open source development 
-process.
-
-Though communication is key to other disciplines as well, open source 
-development is unique in that most of the communication is
-conducted online across cultural boundries.
 
 This is why I feel an Applied Computer Science degree in Open Source 
 Development should be focused on acquiring a depth of communication 
