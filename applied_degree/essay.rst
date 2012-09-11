@@ -23,6 +23,7 @@ Free/Open Source Software Development. A degree which will provide me
 with the skills to communicate well with other cultures, quickly resolve
 disputes, and solve problems with a small group of developers.
 
+- Rephrase second half
 During my first summer at the OSUOSL, there was a Google Code-In student
 from Poland helping out on Ganeti Web Manager. Communicating back and
 forth was challenging with the student because of the language barrier.
@@ -31,19 +32,15 @@ communication would have been much easier or I would have had the
 skills to help smooth it out. Either way it would enable me to
 communicate well with other cultures.
 
-
-- COMM 440 theories of conflict and conflict management
-
-Open source project generally contain conflicts and differing opinions
-of implementation or importance of a feature. grnet did not agree with
-the choice of caching objects, and wanted the feature to be optional. We
-disagreed. There was no compromise. grnet 'took their ball and left'
-forking from GWM at 0.5. If I had better communication skills I could
-have worked as an intermediary between grnet and the developers on the
-issue. 
+Around version 0.5 of Ganeti Web Manager, GRNET (The Greek Research and
+Technology Network) withdrew their contributions and began working on
+their own version of Ganeti Web Manager. This was due to a conflict
+between our team and theirs over a feature implementation. They left
+because a compromise wasn't reached. If I had taken a class like COMM
+440, I'm sure I would have been much more helpful in finding a
+compromise that both our teams could have agreed upon.
 
 - COMM 322 small-group problem solving 
-- manage small group of developers
 
 Recently at the OSUOSL I transfered over to being a dev-op because I
 felt I didn't know enough about systems to 
