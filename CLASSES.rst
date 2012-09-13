@@ -9,14 +9,13 @@ Applied CS Degree
 Similar to the `Communications Minor`_
 
  * 32 Credits Total
- * 12 Minimum upper division credits (with prereqs from applied program)
+ * 12 Minimum upper division credits with prereqs from applied program
  * 2 CS Electives that support Applied CS Program Goals
 
 Computer Science
 ----------------
  #. CS 419 - Special Topics in Open Source Development
- #. CS 480 - Translators (4)
-     Prereq: (CS311 & CS321)
+ #. CS 480 - Translators 4 CS311 & CS321
 
 Communications
 --------------
