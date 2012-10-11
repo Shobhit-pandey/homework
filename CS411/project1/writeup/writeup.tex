@@ -1,0 +1,105 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=8.5in, textwidth=6in}
+
+%random comment
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+
+\def\name{Trevor Bramwell}
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfpagemode = UseNone
+}
+
+\title{CS411: Individual Writeup - Group 13}
+\date{}
+\author{\name}
+
+\begin{document}
+\maketitle
+
+\subsection*{What do you think the main point of this assignment is?}
+
+The main point of this assignment was several fold.
+
+    \begin{enumerate}
+        \item For us to learn how to compile the linux kernel.
+        \item For us to understand how the linux scheduler works.
+        \item For us to work as a team to create a Round Robin and FIFO
+            process scheduler.
+        \item And for us to learn to work as a group.
+    \end{enumerate}
+
+\subsection*{How did you personally approach the problem? Design
+decisions, algorithm, etc.}
+
+I began by reading. I re-read most of Chapter 4 of Linux Kernel
+Development to make sure I really understood the concepts, and then dove
+into the code. Starting in \emph{sched\_rt.c}, once I discovered the
+\textbf{SCHED\_RR} and \textbf{SCHED\_FIFO} constants, I grepped around
+for them in all the kernel files. This lead me to the
+\emph{include/linux/sched.h} and
+\emph{kernel/sched.c} files, which contained the \emph{struct
+sched\_class} needed to implement scheduling classes.
+
+I let my group know that I felt we were somewhat off track by not
+implementing two new scheduling classes based on the
+\emph{struct sched\_class}, but they were both confident that we were
+only supposed to \emph{replace} what had been taken out.
+
+So, I set my differences aside, and went with their decision.
+
+\subsection*{How did you ensure your solution was correct? Testing
+details, for instance.}
+
+After our group realized we had to compile the kernel \emph{on} the
+Squidly, it worked quite well. We knew that during the bootup
+phase of the kernel, it uses Round Robin and FIFO scheduling for
+processes. Thus, we determined that if it booted, and we could login,
+our solution was correct and working as intended.
+
+\subsection*{What did you learn?}
+
+\begin{enumerate}
+    \item Compiling is hard.
+
+    \item Depending upon how things turn out for this assignment, I
+probably need to stick up more for my beliefs.
+
+If my group isn't going the direction I feel the teacher intended for
+them to go, I should probably double check with the teacher.
+
+    \item Get things working as soon as possible
+
+One of the reason I think we might have gotten off track is due to the
+long amount of time it took to get the Squidly up and running with a new
+compiled kernel.
+
+\end{enumerate}
+
+
+\end{document}
