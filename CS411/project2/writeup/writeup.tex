@@ -47,6 +47,17 @@
 
 \section{Introduction}
 
+The Linux Kernel I/O Scheduling algorithms developed along this path:
+Linus Elevator -> Deadline -> Anticipitory
+
+Then jumped to CFQ.
+
+There is also the Noop Scheduler which is used for devices that have
+random access.
+
+I/O Scheduling algorithms are briefly touched on in Modern Operating
+Systems (3e) on pages 379 - 382.
+
 \section{First Steps}
 
 All IO Schedulers are kernel modules. The default is chosen either at
@@ -56,5 +67,8 @@ compile time (with CONFIG\_DEFAULT\_IOSCHED), or during boot with the
 Though told to start off with using the FIFO IO Scheduler as a template,
 no FIFO Scheduler exists in the LInux Kernel. Thus, we began by using
 the noop scheduler (noop-iosched.c) as a template.
+
+\section{Algorithm}
+
 
 \end{document}

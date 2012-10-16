@@ -1,0 +1,48 @@
+======================
+Kernel Data Structures
+======================
+
+- Linked Lists
+    Four Kinds:
+    - Singly or Doubly linked
+    - Linear or Circularly
+
+    Traditional:
+    struct node {
+        int x;
+        int y;
+        struct node *next:
+        sturct node *prev;
+    }
+
+    Kernel:
+    struct node_foo {
+        int x;
+        int y;
+        struct list_head *item;
+    }
+    
+    This works because structs are packed datastructures. So the address
+      of a struct is the address of the first element.
+
+- Binary Trees
+    - Binary Search Tree (BST)
+    - Red-Black Tree (RBtree)
+      <rbtree.c>
+
+- Queues
+  kfifos
+
+- Maps
+  - Associative Array
+  - Maps keys to values
+  - _not_ a hash table
+  Mapping a UID to a pointer (almost always a function pointer)
+  They're called 'idr's (No one knows why!)
+
+- Trie
+    re-Trie-val Tree: Used by routers for LPM (logest prefix match)
+    Slow to add, super fast to retrieve.
+    n-ary trees (ex. words, 26 children, one for each letter)
+
+- Bitmap
