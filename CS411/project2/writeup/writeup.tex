@@ -37,38 +37,105 @@
 
 \title{CS411: Individual Writeup - Group 13\\
     Project 2: SSTF IO Scheduler}
-\date{}
 \author{\name}
 
 \begin{document}
 \maketitle
 
-\tableofcontents
+%What do you think the main point of this assignment is?
+\section*{Introduction}
 
-\section{Introduction}
+The main point of this assignment was to gain an understanding of the
+linux I/O Scheduler interface, and to teach us about scheduling
+algorithms.
 
-The Linux Kernel I/O Scheduling algorithms developed along this path:
-Linus Elevator -> Deadline -> Anticipitory
+Throughout this assignment I have learned that the Linux Kernel 
+has four different I/O Scheduling algorithms. They are:
+\begin{enumerate}
+    \item Noop
+    \item Deadline
+    \item Anticipitory
+    \item CFQ
+\end{enumerate}
 
-Then jumped to CFQ.
+Note that the 'Linus Elevator' is no longer in the kernel. Though Robert Love's
+book implies it is, he merely uses it as an example of a simple elevator
+algorithm for I/O scheduling.
 
-There is also the Noop Scheduler which is used for devices that have
-random access.
+The I/O scheduling algorithm my group implemented is the Shortest Seek
+Time First (SSTF) algorithm. This algorithm works to make the heads of a
+hard disk seek as little as possible. It accomplishes this by organizing
+I/O requests based on their sector positions, and adding requests
+closest to the disk head to the dispatch queue first.
 
-I/O Scheduling algorithms are briefly touched on in Modern Operating
-Systems (3e) on pages 379 - 382.
+Though SSTF increaces the overall throughput of the I/O, it comes at the
+cost of possible process starvation. If a large enough number of I/O
+operations continues to take place in one area of the disk, requests in
+areas far away from there might never get dispatched, and thus starve.
 
-\section{First Steps}
+%How did you personally approach the problem? Design decisions,
+%algorithm, etc.
+\section*{First Steps}
 
-All IO Schedulers are kernel modules. The default is chosen either at
-compile time (with CONFIG\_DEFAULT\_IOSCHED), or during boot with the
+The default I/O scheduler is chosen either at compile time (using the
+configuration option \emph{CONFIG\_DEFAULT\_IOSCHED}), or during boot with the
 \emph{elevator=} option.
 
-Though told to start off with using the FIFO IO Scheduler as a template,
-no FIFO Scheduler exists in the LInux Kernel. Thus, we began by using
-the noop scheduler (noop-iosched.c) as a template.
+So our first step as a group was to get the I/O scheduler recognized and
+configured as the default. To start off, we copied
+\emph{block/noop-iosched.c} to \emph{block/sstf-ioched.c} and changed
+the function names and module parameters. Now that we had a scheduler in
+placed called SSTF, we added lines to \emph{block/Kconfig.iosched} and
+\emph{block/Makefile} in order to enable it when running \emph{make
+config}.
 
-\section{Algorithm}
+Our group figured most of this out by using a previous CS411 class
+assignemnt description written by Rob Hess.
+
+\section*{Design Decisions}
+
+When we got around to implementing the actual SSTF algorithm, me and
+Matt bounced ideas off of each other. My plan was to use a circularly
+linked list and keep a reference to the last request dispatched from it.
+Like someone holding their finger in a rolodex. New requests are
+inserted in sorted order. Meaning the list should always be in order.
+When a request is to be dispatched, my algorithm would check the
+request on either side of the previous request, and find the one with the
+smallest difference in sector. This request would then be dispatched and
+the reference to the last dispatch request would be updated.
+
+But, due to the complexity involved in my solution, our group decided it
+would be better to keep it simple and use Matt's solution. His solution
+was to add all requests to the end of the list. 
+
+%\include{sstf\_add\_request()}
+
+When a request is to be
+dispatched, the last request is compared to all the requests in the list
+until the smallest difference in sectors is found. That request is then
+put on the dispatch queue.
+
+%\include{sstf\_dispatch()}
+
+\section*{Proof}
+
+After trying a couple different methods, we decided our \emph{printk()}
+statements were resonable proof, since they list the order in which
+requests are added and dispatched along with their sector numbers. We
+found some requests that got added, took longer to get dispatched then
+some other. This was because they accessed sectors far enough away from
+the current requests being handled.
+
+One other solution we attempted was to write a program that had three
+reader processes and one writer process. But due to disk caching we
+weren't able to get it to work properly.
+
+\section*{Learning}
+
+As a whole, this assignment went much better than before. I feel our
+group worked together much better than last time, and actually put in a
+great effort to complete the assignment. Both Matt and Brian worked hard
+to complete this assignment on time.
 
 
 \end{document}
