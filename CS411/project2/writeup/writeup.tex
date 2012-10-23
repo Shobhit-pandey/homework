@@ -18,23 +18,31 @@
 \usepackage{geometry}
 \geometry{textheight=8.5in, textwidth=6in}
 
-%random comment
-
 \newcommand{\cred}[1]{{\color{red}#1}}
 \newcommand{\cblue}[1]{{\color{blue}#1}}
 
 \usepackage{hyperref}
+\usepackage{geometry}
 
-\def\name{Trevor Bramwell}
+\def\name{Group 13: Brian Cox, Matthew Okazaki, Trevor Bramwell}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+\parindent = 0.0 in
+\parskip = 0.1 in
 
 %% The following metadata will show up in the PDF properties
 \hypersetup{
   colorlinks = true,
   urlcolor = black,
   pdfauthor = {\name},
+  pdfkeywords = {cs411 ``operating systems'' SSTF},
+  pdftitle = {CS 411 Project 2:Shortest Seek Time First I/O Scheduler} 
+  pdfsubject = {CS 411 Project 2},
   pdfpagemode = UseNone
 }
 
+\def\name{Trevor Bramwell}
 \title{CS411: Individual Writeup - Group 13\\
     Project 2: SSTF IO Scheduler}
 \author{\name}
@@ -108,14 +116,14 @@ But, due to the complexity involved in my solution, our group decided it
 would be better to keep it simple and use Matt's solution. His solution
 was to add all requests to the end of the list. 
 
-%\include{sstf\_add\_request()}
+\input{__sstf_add_request.c.tex}
 
 When a request is to be
 dispatched, the last request is compared to all the requests in the list
 until the smallest difference in sectors is found. That request is then
 put on the dispatch queue.
 
-%\include{sstf\_dispatch()}
+\input{__sstf_dispatch.c.tex}
 
 \section*{Proof}
 
