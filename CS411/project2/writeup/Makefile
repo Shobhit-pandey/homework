@@ -6,7 +6,7 @@ SRC2=sstf_dispatch.c
 default: pdf
 
 clean:
-	rm ${TARGET}.{aux,dvi,log,out,ps,toc}
+	rm ${TARGET}.{aux,dvi,log,out,ps}
 
 both: pdf html
 

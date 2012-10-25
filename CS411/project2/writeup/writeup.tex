@@ -54,7 +54,7 @@
 \section*{Introduction}
 
 The main point of this assignment was to gain an understanding of the
-linux I/O Scheduler interface, and to teach us about scheduling
+Linux I/O Scheduler interface, and to teach us about scheduling
 algorithms.
 
 Throughout this assignment I have learned that the Linux Kernel 
@@ -76,7 +76,7 @@ hard disk seek as little as possible. It accomplishes this by organizing
 I/O requests based on their sector positions, and adding requests
 closest to the disk head to the dispatch queue first.
 
-Though SSTF increaces the overall throughput of the I/O, it comes at the
+Though SSTF increases the overall throughput of the I/O, it comes at the
 cost of possible process starvation. If a large enough number of I/O
 operations continues to take place in one area of the disk, requests in
 areas far away from there might never get dispatched, and thus starve.
@@ -105,7 +105,7 @@ assignemnt description written by Rob Hess.
 When we got around to implementing the actual SSTF algorithm, me and
 Matt bounced ideas off of each other. My plan was to use a circularly
 linked list and keep a reference to the last request dispatched from it.
-Like someone holding their finger in a rolodex. New requests are
+Like someone holding their finger in a Rolodex. New requests are
 inserted in sorted order. Meaning the list should always be in order.
 When a request is to be dispatched, my algorithm would check the
 request on either side of the previous request, and find the one with the
@@ -128,7 +128,7 @@ put on the dispatch queue.
 \section*{Proof}
 
 After trying a couple different methods, we decided our \emph{printk()}
-statements were resonable proof, since they list the order in which
+statements were reasonable proof, since they list the order in which
 requests are added and dispatched along with their sector numbers. We
 found some requests that got added, took longer to get dispatched then
 some other. This was because they accessed sectors far enough away from
