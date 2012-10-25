@@ -25,7 +25,9 @@ Communications
 
  #. `COMM 318`_ - Advanced Interpersonal Communication (3) - Prereq: `COMM 218`_
 
- #. `COMM 321`_ - Small-Group Problem Solving (3) - Prereq: `COMM 218`_
+ #. `COMM 321`_ - Introduction to Communication Theory (3)
+
+ #. `COMM 322`_ - Small-Group Problem Solving (3) - Prereq: `COMM 218`_
  
  #. `COMM 326`_ - Intercultural Communication (3)
  
@@ -47,6 +49,7 @@ Communications
 .. _COMM 280: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=280
 .. _COMM 318: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=318
 .. _COMM 321: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=321
+.. _COMM 322: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=322
 .. _COMM 326: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=326
 .. _COMM 432: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=432
 .. _COMM 440: http://catalog.oregonstate.edu/CourseDetail.aspx?subjectcode=COMM&coursenumber=440

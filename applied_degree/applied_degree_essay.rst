@@ -27,6 +27,8 @@ Classes
 
 * Advanced Interpersonal Communication
 
+* Introduction to Communication Theory
+
 * Small-Group Problem Solving
 
 * Interculturual Communication
