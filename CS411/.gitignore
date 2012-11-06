@@ -1,2 +1,5 @@
-*.pdf
 cs411-group13*
+*/linux/*
+*/kernel/*
+*.tar.*
+!*.pdf

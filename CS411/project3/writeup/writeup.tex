@@ -1,0 +1,117 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=8.5in, textwidth=6in}
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+
+\def\name{Group 13: Brian Cox, Matthew Okazaki, Trevor Bramwell}
+
+%pull in the necessary preamble matter for pygments output
+%\input{pygments.tex}
+\parindent = 0.0 in
+\parskip = 0.1 in
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs411 ``operating systems'' Ram Disk Driver},
+  pdftitle = {CS 411 Project 3:Encrypted Ram Disk Driver} 
+  pdfsubject = {CS 411 Project 3},
+  pdfpagemode = UseNone
+}
+
+\def\name{Trevor Bramwell}
+\title{CS411: Individual Writeup - Group 13\\
+    Project 3: Encrypted Ram Disk Driver}
+\author{\name}
+
+\begin{document}
+\maketitle
+
+%What do you think the main point of this assignment is?
+\section*{Introduction}
+
+The main point of this assignment was to gain an understanding of
+Linux device drivers, and to understand how to work with the Linux
+Crypto API.
+
+This was achieved by having our group write a Encrypted RAM Disk 
+Driver. This driver works by presenting the user with a disk that is
+stored completely in RAM and is encrypted when written to and
+decrypted when read from.
+
+%How did you personally approach the problem?
+%Design decisions, algorithm, etc.
+\section*{Approach}
+
+My approach to the problem was to first review the assignment. Second, I
+for some external resources. This lead me to find the final project for
+a previous CS411 class which contained a wealth of more information. I
+informed my group of the discovery, and we followed the new instructions
+to read \emph{Linux Device Drivers 3rd Edition} (LDD3).
+
+\section*{Design}
+
+When designing the RAM disk driver, I basically followed all the
+information in LDD3. Knowing that sitting down and writing out all the
+source code from the book would be tedious, I opted to find a copy of
+the \emph{sbull.c} file already written. This lead me to find a
+simple driver which had been updated for the 3.0 kernel.
+
+Very little had to be done in terms of design, since most of the
+architecture was handled by the \emph{sbull.c} driver from the book.
+
+% How did you ensure your solution was correct?
+% Testing details, for instance.
+\section*{Testing}
+
+To test the new RAM disk driver I formated the new device
+\emph{/dev/sbd0} that
+was created when the sbd kernel module was loaded. Then I created a new
+partition on the device, and also created an ext2 file system. I then
+created a new file, wrote out some text, closed the file, and then
+'cat'ed it to stdout. 
+
+Seeing as the printk statements in the driver, along with the data I
+wrote to the file was outputting correctly. I deduced that the
+implementation was correct and working accordingly.
+
+\section*{Learning}
+
+From this assignment I learned a decent bit about how cryptography is
+handled in the Kernel. Mainly that there are several different methods
+of using a single algorithm, such as AES. The kernel allows you to use
+any of the block modes: CBC, ECB, CTS, CTR, XTS, PCBC, and LRW. On top
+of that you have your choice of algorithm from: AES, Blowfish, DES,
+Anubis, Twofish, ARC4, or CAST; just to name a few.
+
+Originally when I tried using the AES algorithm, the module would not
+load. I found that this was because the AES module had to be loaded in
+as well, and the Kernel was not configured to even build it!
+
+Overall I learned a great deal from this assignment about writing a
+Linux Kernel driver, encryption, and loading and compiling modules.
+
+\end{document}
