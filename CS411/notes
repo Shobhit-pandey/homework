@@ -46,3 +46,41 @@ Kernel Data Structures
     n-ary trees (ex. words, 26 children, one for each letter)
 
 - Bitmap
+
+
+Filesystems
+===========
+
+Programs
+(VFS)
+Filesystems
+Storage
+
+open -> vfs_open -> specific filesystem open
+
+Ideally we want concurrent access to data, therefore we can't share in
+memory because it's protected. (Pages are protected)
+
+* NTFS
+* HFS+
+* EXT
+* xfs
+* jfs
+* ufs
+* fat
+* reiserfs
+
+* zfs
+* btrfs
+
+A file is a logical unit of information.
+An abstraction of on disk blocks
+
+Files can be viewed as
+* A hierarchy
+* A collection of bytes
+* ....
+
+Files are just a sequence (lseek) of bytes
+Files have attributes (stat)
+
