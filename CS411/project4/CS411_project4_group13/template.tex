@@ -1,0 +1,128 @@
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage{graphicx}                                        
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=8.5in, textwidth=6in}
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+
+\def\name{Group 13: Brian Cox, Matthew Okazaki, Trevor Bramwell}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+\parindent = 0.0 in
+\parskip = 0.1 in
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs411 ``operating systems'' Slob},
+  pdftitle = {CS 411 Project 4: Replacing Slab with Best-fit Slob} 
+  pdfsubject = {CS 411 Project 4},
+  pdfpagemode = UseNone
+}
+\begin{document}
+
+\title{CS411 Project 4}
+
+
+\date{Trevor Bramwell, Brian Cox, Matthew Okazaki }
+\maketitle
+\begin{abstract}
+This document describes the design, implementation, testing, and obstacles
+faced in implementing best-fit slob for the Linux Kernel. These challenges
+were faced by Group 13 of the Fall 2012 CS411 class with the assistance
+of Squidly 13. This group consists of Brian Cox, Matthew Okazaki,
+Trevor Bramwell, and Squidly. 
+\end{abstract}
+
+\section*{Design }
+
+At the beginning of this project we already understood several things
+about the project and about the kernel:
+\begin{itemize}
+\item The slob was located in the mm directory 
+\item The slab, located in the same directory as the slob, was the current
+memory management system 
+\item The slob currently implemented first-fit and we wanted best-fit 
+\item We needed a way to show that the best-fit slob used more memory, was
+less efficient, than first-fit slob.
+\end{itemize}
+Using the same general concept that everything is referenced in the
+kconfig, we used the config menu to disable the slab and enable the
+slob. this had minor tediousness to it, but we understood what to
+do. Reading through Tannenbaum we found descriptions of best-fit,
+worst-fit, last-fit, and first-fit. Comparing first-fit to any of
+the others showed there was only a minor difference between them,
+all versions of memory management, except first-fit, must iterate
+through all the pages. With implementing best-fit, we need to change
+the slob so it didn\textquoteright{}t allocate as soon as it found
+a page it fit in, and we needed to find free space as close to the
+object\textquoteright{}s size as possible. Lastly, we had to set up
+a pair of system calls and a program. The system calls would tell
+us how much space was being used and how much was free, while the
+program would take the information from the system calls and find
+the percentage of free space and used space. 
+
+
+\section*{Implementation }
+
+We implemented the project by changing the slob\_alloc function in
+the slob.c file. The function would already loop through the link
+list in order to find the first page that could fit and allocate the
+memory. We modified this in order to loop through all the pages in
+the linked list and find the page that would best fit the unit. We
+also added system calls within the project in order to retrieve information
+about the memory allocation. Because of this, we ended up modifying
+several other files and creating two system call functions in slob.c.
+The other files that were modified were the unistd.h, the syscall.h,
+and the syscall\_table\_32.s. These files were necessary in order
+to correctly implement the system call. 
+
+
+\section*{Testing }
+
+Our testing consisted of making sure the kernel ran and using the
+system calls and program we made to check the memory. Implementing
+two system calls, sys\_get\_slob\_amt\_free and sys\_get\_slob\_amt\_claimed,
+these two system calls would return the amount of free space and the
+amount of total space. The program would make the call to the two
+system calls and process the different values to display the percentage
+free, percentage used, and total volume. 
+
+
+\section*{Difficulties }
+
+while working on the project we were uncertain if we needed to find
+the best fitting page or the best fitting block. After a short burst
+of research we found that only worrying about the page would suffice.
+Following that, the changes to the kernel would not boot. Thanks to
+the large number of hours Trevor put into it, he managed to isolate
+the problem and the kernel was up and running. Lastly the syscalls
+used for getting the memory information gave extra issues.
+
+\section*{Code}
+%input the pygmentized output of report_code.c, using a (hopefully) unique name
+%this file only exists at compile time. Feel free to change that.
+\input{__report_code.c.tex}
+\end{document}
