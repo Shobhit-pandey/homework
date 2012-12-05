@@ -1,0 +1,166 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=8.5in, textwidth=6in}
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+
+\def\name{Group 13: Brian Cox, Matthew Okazaki, Trevor Bramwell}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+\parindent = 0.0 in
+\parskip = 0.1 in
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs411 ``operating systems'' USB Rocket Launcher Driver},
+  pdftitle = {CS 411 Project 5: USB Rocket Launcher Driver} 
+  pdfsubject = {CS 411 Project 5},
+  pdfpagemode = UseNone
+}
+
+\def\name{Trevor Bramwell}
+\title{CS411: Individual Writeup - Group 13\\
+    Project 5: USB Rocket Launcher}
+\author{\name}
+
+\begin{document}
+\maketitle
+
+%What do you think the main point of this assignment is?
+\section*{Introduction}
+
+The main point of this assignment was to learn how to write a USB device
+driver for the Linux kernel, understand how the USB protocol works at a
+low level, and write a userspace program that interacts with a driver.
+
+Our group achieved this primarily by using a preexisting driver and
+controller program we found online written by Nick Glynn. Nick had
+previously completed a project similar to this one. 
+
+%How did you personally approach the problem?
+%Design decisions, algorithm, etc.
+\section*{Approach}
+
+I approached this assignment with high hopes that completing it would be
+very simple. Before I started I was already aware of the \emph{Linux
+Device Drivers, 3rd Edition} (LDD3) book by Greg Kroah-Hartman, et al. which
+outlines how to write device drivers for the Linux kernel. Upon actually
+reading through the USB device driver chapter of LDD3 I realized that
+it would not be as great of an asset as I originally though. 
+
+LDD3 is currently completely outdated. Though the general overview on
+USB was somewhat informative, the rest of the chapter read primarily as
+a reference guide to USB structs in the Linux kernel. Thus, I needed to
+look else where -- le Internet -- for more information.
+
+\section*{Design}
+
+Since Matt ended up finding a pre-written driver and controller program
+for the USB Dream Cheeky Rocket Launcher, not much else was required for
+me to do besides test our resources.
+
+% How did you ensure your solution was correct?
+% Testing details, for instance.
+\section*{Testing}
+
+Testing for this project consisted of building the driver against the current
+kernel. Loading the module into the Linux kernel, and then running the
+userspace program.
+
+This was done by using/modifying the example \textbf{Makefile} from LDD3
+for compiling modules outside the Linux tree. It was similar to this:
+
+\input{__kern_make.sh.tex}
+
+once that was written to a file on Squidly 13, making the module was as
+simple as running \emph{make}.
+
+After the module was made, it needed to be loaded into the kernel. This
+was accomplished by running:
+
+\begin{alltt}
+sudo insmod launcher\_driver.ko
+\end{alltt}
+
+I then ran the userspace program compiled from \emph{launcher\_control.c}
+to move and fired the USB rocket launcher. This worked well, but didn't
+allow easy control, so I edited it to continually grab character from
+the user and send those `commands' directly to the launcher.
+
+\subsection*{launcher\_control.c}
+\input{__launcher_control.c.tex}
+
+\section*{Learning}
+
+Since getting the USB Rocket Launcher up and running was no very
+challenging, because our group didn't actually write any code for the
+driver, most of our time was used reading about how USB drivers work and
+how to implement them.
+
+As with the Shortest Seek Time First elevator algorithm, there was
+already a predefined interface to work with in the kernel. This
+interface required that the USB device driver implement the functions:
+
+\begin{itemize}
+\item open
+\item release -- remapped as close
+\item read
+\item write
+\end{itemize}
+
+These were implemented in the driver that we got from Nick Glynn. This
+is what each of them did.
+
+\begin{description}[style=nextline]
+
+\item[Open]
+Open the device for access. Called when an application wants access to
+the device through udev or the \emph{/dev} directory. Similar to opening
+a file.
+
+\item[Release]
+Release the device from being accessed. Similar to closing a file.
+
+\item[Read]
+Read from the device. This does nothing for the USB Rocket Launcher as
+it does not send back any data that is useful to a user.
+
+\item[Write]
+Write to the device. This is the meat of the USB Rocket Launcher driver
+as it handled sending all the commands to the device and setting flags
+for responses.
+
+\end{description}
+
+\section*{Conclusion}
+
+Overall this was a fun assignment as each of us learned how to work with
+devices that don't have pre-existing drivers, and we got to shoot
+each other.
+
+
+\end{document}
