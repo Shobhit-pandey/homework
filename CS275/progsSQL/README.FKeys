@@ -1,0 +1,59 @@
+create table xxx ( ... ) ENGINE=INNODB; is needed.
+
+# Connecting to the INFORMATION_SCHEMA database
+mysql> \u INFORMATION_SCHEMA
+
+mysql> show tables;
+
++---------------------------------------+
+| Tables_in_INFORMATION_SCHEMA          |
++---------------------------------------+
+| CHARACTER_SETS                        |
+| COLLATIONS                            |
+| COLLATION_CHARACTER_SET_APPLICABILITY |
+| COLUMNS                               |
+| COLUMN_PRIVILEGES                     |
+| KEY_COLUMN_USAGE                      |
+| ROUTINES                              |
+| SCHEMATA                              |
+| SCHEMA_PRIVILEGES                     |
+| STATISTICS                            |
+| TABLES                                |
+| TABLE_CONSTRAINTS                     |
+| TABLE_PRIVILEGES                      |
+| TRIGGERS                              |
+| USER_PRIVILEGES                       |
+| VIEWS                                 |
++---------------------------------------+
+16 rows in set (0.00 sec)
+
+# Listing foreign key constraints
+mysql> select * from  key_column_usage where CONSTRAINT_NAME like '%ibfk%';
+
+| CONSTRAINT_CATALOG | CONSTRAINT_SCHEMA | CONSTRAINT_NAME | TABLE_CATALOG | TABLE_SCHEMA | TABLE_NAME | COLUMN_NAME | ORDINAL_POSITION | POSITION_IN_UNIQUE_CONSTRAINT | REFERENCED_TABLE_SCHEMA | REFERENCED_TABLE_NAME | REFERENCED_COLUMN_NAME |
+
+| NULL               | minoura           | sspp_ibfk_1     | NULL          | minoura      | sspp       | ss_id       |                1 |       1 | minoura                 | ss                    | ss_id    |
+| NULL               | minoura           | sspp_ibfk_2     | NULL          | minoura      | sspp       | pp_id       |                1 |       1 | minoura                 | pp                    | pp_id    |
+
+# Another way of checking foreign key constraints
+mysql> show table status from minoura like 'sspp';
+
+| Name | Engine | Version | Row_format | Rows | Avg_row_length | Data_length | Max_data_length | Index_length | Data_free | Auto_increment | Create_time  | Update_time | Check_time | Collation         | Checksum | Create_options | Comment                                                                          
+| sspp | InnoDB |      10 | Compact    |    0 |              0 |       16384 |              0 |        32768 |         0 |              1 | 2006-09-29 20:27:42 | NULL        | NULL       | latin1_swedish_ci |     NULL |                | InnoDB free: 283648 kB; (`ss_id`) REFER `minoura/ss`(`ss_id`); (`pp_id`) REFER ` 
+
+mysql> select * from  TABLE_CONSTRAINTS;
+
+| CONSTRAINT_CATALOG | CONSTRAINT_SCHEMA | CONSTRAINT_NAME | TABLE_SCHEMA | TABLE_NAME     | CONSTRAINT_TYPE |
+
+| NULL               | minoura           | PRIMARY         | minoura      | customer       | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | customer_order | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | emp            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | p            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | pp            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | s            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | sp            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | ss            | PRIMARY KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | sspp           | PRIMARY KEY     |
+| NULL               | minoura           | sspp_ibfk_1     | minoura      | sspp           | FOREIGN KEY     |
+| NULL               | minoura           | sspp_ibfk_2     | minoura      | sspp           | FOREIGN KEY     |
+| NULL               | minoura           | PRIMARY         | minoura      | ztest2         | PRIMARY KEY     |

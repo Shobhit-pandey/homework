@@ -1,0 +1,35 @@
+"Dagwood             ",1,10
+"Dagwood             ",2,8
+"Dagwood             ",3,12
+"Dagwood             ",4,15
+"Dagwood             ",5,17
+"Donkey              ",1,18
+"Donkey              ",2,19
+"Donkey              ",3,17
+"Donkey              ",4,18
+"Donkey              ",5,16
+"Gozilla             ",1,20
+"Gozilla             ",2,20
+"Gozilla             ",3,20
+"Gozilla             ",4,20
+"Gozilla             ",5,20
+"Snoopy              ",1,5
+"Snoopy              ",2,20
+"Snoopy              ",3,15
+"Snoopy              ",4,13
+"Snoopy              ",5,12
+"Momotaro            ",1,13
+"Momotaro            ",2,16
+"Momotaro            ",3,17
+"Momotaro            ",4,14
+"Momotaro            ",5,18
+"Garfiled            ",1,14
+"Garfiled            ",2,16
+"Garfiled            ",3,7
+"Garfiled            ",4,12
+"Garfiled            ",5,9
+"Tom Sawyer          ",1,15
+"Tom Sawyer          ",2,16
+"Tom Sawyer          ",3,17
+"Tom Sawyer          ",4,16
+"Tom Sawyer          ",5,18

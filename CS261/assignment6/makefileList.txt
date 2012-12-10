@@ -1,0 +1,16 @@
+default: prog 
+
+list.o: list.c list.h
+	gcc -Wall -ansi -c list.c
+
+mainList.o: mainList.c
+	gcc -Wall -ansi -c mainList.c
+
+prog: list.o mainList.o
+	gcc -Wall -ansi  -o prog list.o mainList.o
+
+clean:
+	rm list.o	
+
+cleanall: clean
+	rm prog

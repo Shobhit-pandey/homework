@@ -1,0 +1,16 @@
+default: prog 
+
+hashMap.o: hashMap.c hashMap.h 
+	gcc -Wall -ansi -c -g hashMap.c
+
+list.o: list.c list.h
+	gcc -Wall -ansi -c list.c
+
+prog: hashMap.o list.o main.c
+	gcc -Wall -ansi  -o prog hashMap.o list.o main.c
+
+clean:
+	rm hashMap.o	
+
+cleanall: clean
+	rm prog

@@ -1,0 +1,204 @@
++----------------------+
+| CS275 - Assignment 3 |
+| Trevor Bramwell      |
++----------------------+
+
+1)
+select status, sname from s
+where city = 'London' OR city = 'Paris'
+order by status desc, sname;
+
++--------+-------+
+| status | sname |
++--------+-------+
+|     30 | Blake |
+|     20 | Clark |
+|     20 | Smith |
+|     10 | Jones |
++--------+-------+
+
+2)
+select sname, city from s, sp
+where s.sno = sp.sno AND sp.pno = 'P2'
+order by sname asc;
+
++-------+--------+
+| sname | city   |
++-------+--------+
+| Blake | Paris  |
+| Clark | London |
+| Jones | Paris  |
+| Smith | London |
++-------+--------+
+
+3)
+select weight, color from p, s, sp
+where s.city = "London" AND s.sno = sp.sno
+	AND sp.pno = p.pno
+order by color, weight desc;
+
++--------+-------+
+| weight | color |
++--------+-------+
+|     17 | blue  |
+|     12 | blue  |
+|     12 | blue  |
+|     17 | green |
+|     17 | green |
+|     19 | red   |
+|     14 | red   |
+|     14 | red   |
+|     12 | red   |
++--------+-------+
+
+4)
+select distinct sname from s, p, sp
+where (s.city = "London" OR s.city = "Paris")
+	AND s.sno = sp.sno 
+	AND sp.pno = p.pno
+	AND (p.color = "red" OR p.color = "blue")
+	AND sp.qty > 1;
++-------+
+| sname |
++-------+
+| Smith |
+| Jones |
+| Clark |
++-------+
+
+5)
+select sno, sname from s
+where sname LIKE '%s%'
+	OR sname LIKE '%t%';
++-----+-------+
+| sno | sname |
++-----+-------+
+| s1  | Smith |
+| s2  | Jones |
+| s5  | Adams |
++-----+-------+
+
+6)
+select sum(qty) from s, sp
+where s.sno = sp.sno
+	AND s.city = 'Paris';
++----------+
+| sum(qty) |
++----------+
+|      900 |
++----------+
+
+7)
+select sum(weight) from p
+where color = 'red';
++-------------+
+| sum(weight) |
++-------------+
+|          45 |
++-------------+
+
+8)
+select color, sum(qty) as qty_sum from p, sp
+where p.pno = sp.pno
+group by color
+order by qty_sum desc, pname;
++-------+---------+
+| color | qty_sum |
++-------+---------+
+| red   |    1200 |
+| green |    1000 |
+| blue  |     900 |
++-------+---------+
+
+9)
+select sx.sname, sy.sname, sx.city from s sx, s sy
+where sx.city = sy.city
+	AND sx.sname != sy.sname
+	AND sx.sname < sy.sname;
++-------+-------+--------+
+| sname | sname | city   |
++-------+-------+--------+
+| Clark | Smith | London |
+| Blake | Jones | Paris  |
++-------+-------+--------+
+
+10)
+select s.sno, sp1.pno, sp2.pno, p1.color
+from s, p p1, p p2, sp sp1, sp sp2
+where s.sno = sp1.sno AND sp1.pno = p1.pno
+AND s.sno = sp2.sno AND sp2.pno = p2.pno
+AND p1.color = p2.color
+AND sp1.pno != sp2.pno
+AND p1.pno != p2.pno
+AND sp1.pno > sp2.pno;
++-----+-----+-----+-------+
+| sno | pno | pno | color |
++-----+-----+-----+-------+
+| s1  | p4  | p1  | red   | 
+| s1  | p5  | p3  | blue  | 
+| s1  | p6  | p1  | red   | 
+| s1  | p6  | p4  | red   | 
++-----+-----+-----+-------+
+
+
+11)
+select sname from s, sp spx, sp spy
+where city in ('London' OR 'Paris')
+AND s.sno = spx.sno
+AND s.sno = spy.sno
+AND spx.pno IN (select pno from p
+where color = 'red')
+AND spy.pno IN (select pno from p
+where color = 'blue')
+having (count(spy.pno) >= 1
+AND count(spx.pno) >= 1)
+order by sname;
++-------+
+| sname |
++-------+
+| Smith |
++-------+
+
+12)
+select s.sno, sum(qty) from s, sp, p
+where s.sno = sp.sno AND sp.pno = p.pno
+AND p.color in ('green' , 'red' )
+group by s.sno
+having sum(qty) > 300
+order by sum(qty) asc;
++-----+----------+
+| sno | sum(qty) |
++-----+----------+
+| s4  |      500 | 
+| s2  |      700 | 
+| s1  |      800 | 
++-----+----------+
+
+13)
+select pname from p
+where p.color in ('red', 'green')
+AND pno in ( select pno from sp
+               where sno in ( select sno from s
+                              where city = 'London'
+                            )
+           )
+order by pname;
++-------+
+| pname |
++-------+
+| bolt  | 
+| cog   | 
+| nut   | 
+| screw | 
++-------+
+
+14)
+select sname, min(qty) from s, sp
+where sp.sno in ( select sno from sp
+                  having min(qty));
++-------+----------+
+| sname | min(qty) |
++-------+----------+
+| Smith |      100 | 
++-------+----------+
+

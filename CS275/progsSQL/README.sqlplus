@@ -1,0 +1,4 @@
+To show one screenful at a time, issue the command SET PAUSE ON.
+
+To specify the number of lines in a screen, use the command
+SET PAGESIZE 46.
