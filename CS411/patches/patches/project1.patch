@@ -1,0 +1,3365 @@
+Index: kernel/sched.c
+===================================================================
+--- kernel/sched.c	(revision 2)
++++ kernel/sched.c	(revision 15)
+@@ -125,6 +125,9 @@
+ 
+ static inline int rt_policy(int policy)
+ {
++	if (policy == SCHED_FIFO || policy == SCHED_RR) {
++		return 1;
++	}
+ 	return 0;
+ }
+ 
+@@ -2048,8 +2051,8 @@
+ 		 * much confusion -- but then, stop work should not
+ 		 * rely on PI working anyway.
+ 		 */
++		sched_setscheduler_nocheck(stop, SCHED_FIFO, &param);
+ 		
+-		
+ 		stop->sched_class = &stop_sched_class;
+ 	}
+ 
+@@ -2838,7 +2841,11 @@
+ 	 * Revert to default priority/policy on fork if requested.
+ 	 */
+ 	if (unlikely(p->sched_reset_on_fork)) {
+-			
++		
++		if (p->policy == SCHED_FIFO || p->policy == SCHED_RR) {
++			p->policy = SCHED_NORMAL;
++			p->normal_prio = p->static_prio;
++		}	
+ 
+ 		if (PRIO_TO_NICE(p->static_prio) < 0) {
+ 			p->static_prio = NICE_TO_PRIO(0);
+@@ -5081,7 +5088,9 @@
+ 		reset_on_fork = !!(policy & SCHED_RESET_ON_FORK);
+ 		policy &= ~SCHED_RESET_ON_FORK;
+ 
+-	if (policy != policy != SCHED_NORMAL && policy != SCHED_BATCH &&
++	if (policy != SCHED_FIFO && policy != SCHED_RR && 
++				policy != SCHED_NORMAL && 
++				policy != SCHED_BATCH &&
+ 				policy != SCHED_IDLE)
+ 			return -EINVAL;
+ 	}
+@@ -5728,11 +5737,13 @@
+ SYSCALL_DEFINE1(sched_get_priority_max, int, policy)
+ {
+ 	int ret = -EINVAL;
++	printk("-------sched_get_priority_max------\n");
+ 
+ 	switch (policy) {
+-	
+-	
+-	
++	case SCHED_FIFO:
++	case SCHED_RR:
++		ret = MAX_RT_PRIO - 1;
++		break;
+ 	case SCHED_NORMAL:
+ 	case SCHED_BATCH:
+ 	case SCHED_IDLE:
+@@ -5752,11 +5763,13 @@
+ SYSCALL_DEFINE1(sched_get_priority_min, int, policy)
+ {
+ 	int ret = -EINVAL;
++	printk("-------sched_get_priority_min------\n");
+ 
+ 	switch (policy) {
+-	
+-	
+-	
++	case SCHED_FIFO:
++	case SCHED_RR:
++		ret = 1;
++		break;
+ 	case SCHED_NORMAL:
+ 	case SCHED_BATCH:
+ 	case SCHED_IDLE:
+@@ -5797,6 +5810,7 @@
+ 	if (retval)
+ 		goto out_unlock;
+ 
++
+ 	rq = task_rq_lock(p, &flags);
+ 	time_slice = p->sched_class->get_rr_interval(rq, p);
+ 	task_rq_unlock(rq, p, &flags);
+Index: kernel/sched_rt.c
+===================================================================
+--- kernel/sched_rt.c	(revision 2)
++++ kernel/sched_rt.c	(revision 15)
+@@ -25,7 +25,7 @@
+ 	return rt_se->rt_rq;
+ }
+ 
+-#else /* CONFIG_RT_GROUP_SCHED */
++#else				/* CONFIG_RT_GROUP_SCHED */
+ 
+ #define rt_entity_is_task(rt_se) (1)
+ 
+@@ -47,7 +47,7 @@
+ 	return &rq->rt;
+ }
+ 
+-#endif /* CONFIG_RT_GROUP_SCHED */
++#endif				/* CONFIG_RT_GROUP_SCHED */
+ 
+ #ifdef CONFIG_SMP
+ 
+@@ -152,16 +152,16 @@
+ }
+ 
+ static inline
+-void inc_rt_migration(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++    void inc_rt_migration(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ }
+ 
+ static inline
+-void dec_rt_migration(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++    void dec_rt_migration(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ }
+ 
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 
+ static inline int on_rt_rq(struct sched_rt_entity *rt_se)
+ {
+@@ -194,7 +194,7 @@
+ static inline void list_add_leaf_rt_rq(struct rt_rq *rt_rq)
+ {
+ 	list_add_rcu(&rt_rq->leaf_rt_rq_list,
+-			&rq_of_rt_rq(rt_rq)->leaf_rt_rq_list);
++		     &rq_of_rt_rq(rt_rq)->leaf_rt_rq_list);
+ }
+ 
+ static inline void list_del_leaf_rt_rq(struct rt_rq *rt_rq)
+@@ -274,7 +274,7 @@
+ #endif
+ 
+ static inline
+-struct rt_rq *sched_rt_period_rt_rq(struct rt_bandwidth *rt_b, int cpu)
++    struct rt_rq *sched_rt_period_rt_rq(struct rt_bandwidth *rt_b, int cpu)
+ {
+ 	return container_of(rt_b, struct task_group, rt_bandwidth)->rt_rq[cpu];
+ }
+@@ -284,7 +284,7 @@
+ 	return &rt_rq->tg->rt_bandwidth;
+ }
+ 
+-#else /* !CONFIG_RT_GROUP_SCHED */
++#else				/* !CONFIG_RT_GROUP_SCHED */
+ 
+ static inline u64 sched_rt_runtime(struct rt_rq *rt_rq)
+ {
+@@ -341,7 +341,7 @@
+ }
+ 
+ static inline
+-struct rt_rq *sched_rt_period_rt_rq(struct rt_bandwidth *rt_b, int cpu)
++    struct rt_rq *sched_rt_period_rt_rq(struct rt_bandwidth *rt_b, int cpu)
+ {
+ 	return &cpu_rq(cpu)->rt;
+ }
+@@ -351,7 +351,7 @@
+ 	return &def_rt_bandwidth;
+ }
+ 
+-#endif /* CONFIG_RT_GROUP_SCHED */
++#endif				/* CONFIG_RT_GROUP_SCHED */
+ 
+ #ifdef CONFIG_SMP
+ /*
+@@ -390,7 +390,7 @@
+ 		 */
+ 		diff = iter->rt_runtime - iter->rt_time;
+ 		if (diff > 0) {
+-			diff = div_u64((u64)diff, weight);
++			diff = div_u64((u64) diff, weight);
+ 			if (rt_rq->rt_runtime + diff > rt_period)
+ 				diff = rt_period - rt_rq->rt_runtime;
+ 			iter->rt_runtime -= diff;
+@@ -401,7 +401,7 @@
+ 				break;
+ 			}
+ 		}
+-next:
++ next:
+ 		raw_spin_unlock(&iter->rt_runtime_lock);
+ 	}
+ 	raw_spin_unlock(&rt_b->rt_runtime_lock);
+@@ -434,7 +434,7 @@
+ 		 * exactly the right amount of runtime to take out.
+ 		 */
+ 		if (rt_rq->rt_runtime == RUNTIME_INF ||
+-				rt_rq->rt_runtime == rt_b->rt_runtime)
++		    rt_rq->rt_runtime == rt_b->rt_runtime)
+ 			goto balanced;
+ 		raw_spin_unlock(&rt_rq->rt_runtime_lock);
+ 
+@@ -479,7 +479,7 @@
+ 		 * leaked out of the system.
+ 		 */
+ 		BUG_ON(want);
+-balanced:
++ balanced:
+ 		/*
+ 		 * Disable all the borrow logic by pretending we have inf
+ 		 * runtime - in which case borrowing doesn't make sense.
+@@ -544,12 +544,12 @@
+ 
+ 	return more;
+ }
+-#else /* !CONFIG_SMP */
++#else				/* !CONFIG_SMP */
+ static inline int balance_runtime(struct rt_rq *rt_rq)
+ {
+ 	return 0;
+ }
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 
+ static int do_sched_rt_period_timer(struct rt_bandwidth *rt_b, int overrun)
+ {
+@@ -573,7 +573,8 @@
+ 			if (rt_rq->rt_throttled)
+ 				balance_runtime(rt_rq);
+ 			runtime = rt_rq->rt_runtime;
+-			rt_rq->rt_time -= min(rt_rq->rt_time, overrun*runtime);
++			rt_rq->rt_time -=
++			    min(rt_rq->rt_time, overrun * runtime);
+ 			if (rt_rq->rt_throttled && rt_rq->rt_time < runtime) {
+ 				rt_rq->rt_throttled = 0;
+ 				enqueue = 1;
+@@ -582,7 +583,8 @@
+ 				 * Force a clock update if the CPU was idle,
+ 				 * lest wakeup -> unthrottle time accumulate.
+ 				 */
+-				if (rt_rq->rt_nr_running && rq->curr == rq->idle)
++				if (rt_rq->rt_nr_running
++				    && rq->curr == rq->idle)
+ 					rq->skip_clock_update = -1;
+ 			}
+ 			if (rt_rq->rt_time || rt_rq->rt_nr_running)
+@@ -655,10 +657,11 @@
+ 		return;
+ 
+ 	delta_exec = rq->clock_task - curr->se.exec_start;
+-	if (unlikely((s64)delta_exec < 0))
++	if (unlikely((s64) delta_exec < 0))
+ 		delta_exec = 0;
+ 
+-	schedstat_set(curr->se.statistics.exec_max, max(curr->se.statistics.exec_max, delta_exec));
++	schedstat_set(curr->se.statistics.exec_max,
++		      max(curr->se.statistics.exec_max, delta_exec));
+ 
+ 	curr->se.sum_exec_runtime += delta_exec;
+ 	account_group_exec_runtime(curr, delta_exec);
+@@ -698,8 +701,7 @@
+ 		return MAX_RT_PRIO;
+ }
+ 
+-static void
+-inc_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
++static void inc_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
+ {
+ 	struct rq *rq = rq_of_rt_rq(rt_rq);
+ 
+@@ -729,8 +731,7 @@
+ 		rt_rq->highest_prio.next = next_prio(rq);
+ }
+ 
+-static void
+-dec_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
++static void dec_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
+ {
+ 	struct rq *rq = rq_of_rt_rq(rt_rq);
+ 
+@@ -741,18 +742,20 @@
+ 		cpupri_set(&rq->rd->cpupri, rq->cpu, rt_rq->highest_prio.curr);
+ }
+ 
+-#else /* CONFIG_SMP */
++#else				/* CONFIG_SMP */
+ 
+-static inline
+-void inc_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio) {}
+-static inline
+-void dec_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio) {}
++static inline void inc_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
++{
++}
+ 
+-#endif /* CONFIG_SMP */
++static inline void dec_rt_prio_smp(struct rt_rq *rt_rq, int prio, int prev_prio)
++{
++}
+ 
++#endif				/* CONFIG_SMP */
++
+ #if defined CONFIG_SMP || defined CONFIG_RT_GROUP_SCHED
+-static void
+-inc_rt_prio(struct rt_rq *rt_rq, int prio)
++static void inc_rt_prio(struct rt_rq *rt_rq, int prio)
+ {
+ 	int prev_prio = rt_rq->highest_prio.curr;
+ 
+@@ -762,8 +765,7 @@
+ 	inc_rt_prio_smp(rt_rq, prio, prev_prio);
+ }
+ 
+-static void
+-dec_rt_prio(struct rt_rq *rt_rq, int prio)
++static void dec_rt_prio(struct rt_rq *rt_rq, int prio)
+ {
+ 	int prev_prio = rt_rq->highest_prio.curr;
+ 
+@@ -779,7 +781,7 @@
+ 			struct rt_prio_array *array = &rt_rq->active;
+ 
+ 			rt_rq->highest_prio.curr =
+-				sched_find_first_bit(array->bitmap);
++			    sched_find_first_bit(array->bitmap);
+ 		}
+ 
+ 	} else
+@@ -790,15 +792,19 @@
+ 
+ #else
+ 
+-static inline void inc_rt_prio(struct rt_rq *rt_rq, int prio) {}
+-static inline void dec_rt_prio(struct rt_rq *rt_rq, int prio) {}
++static inline void inc_rt_prio(struct rt_rq *rt_rq, int prio)
++{
++}
+ 
+-#endif /* CONFIG_SMP || CONFIG_RT_GROUP_SCHED */
++static inline void dec_rt_prio(struct rt_rq *rt_rq, int prio)
++{
++}
+ 
++#endif				/* CONFIG_SMP || CONFIG_RT_GROUP_SCHED */
++
+ #ifdef CONFIG_RT_GROUP_SCHED
+ 
+-static void
+-inc_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++static void inc_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ 	if (rt_se_boosted(rt_se))
+ 		rt_rq->rt_nr_boosted++;
+@@ -807,8 +813,7 @@
+ 		start_rt_bandwidth(&rt_rq->tg->rt_bandwidth);
+ }
+ 
+-static void
+-dec_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++static void dec_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ 	if (rt_se_boosted(rt_se))
+ 		rt_rq->rt_nr_boosted--;
+@@ -816,21 +821,22 @@
+ 	WARN_ON(!rt_rq->rt_nr_running && rt_rq->rt_nr_boosted);
+ }
+ 
+-#else /* CONFIG_RT_GROUP_SCHED */
++#else				/* CONFIG_RT_GROUP_SCHED */
+ 
+-static void
+-inc_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++static void inc_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ 	start_rt_bandwidth(&def_rt_bandwidth);
+ }
+ 
+ static inline
+-void dec_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq) {}
++    void dec_rt_group(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++{
++}
+ 
+-#endif /* CONFIG_RT_GROUP_SCHED */
++#endif				/* CONFIG_RT_GROUP_SCHED */
+ 
+ static inline
+-void inc_rt_tasks(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++    void inc_rt_tasks(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ 	int prio = rt_se_prio(rt_se);
+ 
+@@ -843,7 +849,7 @@
+ }
+ 
+ static inline
+-void dec_rt_tasks(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
++    void dec_rt_tasks(struct sched_rt_entity *rt_se, struct rt_rq *rt_rq)
+ {
+ 	WARN_ON(!rt_prio(rt_se_prio(rt_se)));
+ 	WARN_ON(!rt_rq->rt_nr_running);
+@@ -919,7 +925,7 @@
+ {
+ 	dequeue_rt_stack(rt_se);
+ 	for_each_sched_rt_entity(rt_se)
+-		__enqueue_rt_entity(rt_se, head);
++	    __enqueue_rt_entity(rt_se, head);
+ }
+ 
+ static void dequeue_rt_entity(struct sched_rt_entity *rt_se)
+@@ -937,11 +943,11 @@
+ /*
+  * Adding/removing a task to/from a priority array:
+  */
+-static void
+-enqueue_task_rt(struct rq *rq, struct task_struct *p, int flags)
++static void enqueue_task_rt(struct rq *rq, struct task_struct *p, int flags)
+ {
+ 	struct sched_rt_entity *rt_se = &p->rt;
+ 
++	printk("CS411: Group13-Project1 -- Enqueuing Task");
+ 	if (flags & ENQUEUE_WAKEUP)
+ 		rt_se->timeout = 0;
+ 
+@@ -955,6 +961,7 @@
+ {
+ 	struct sched_rt_entity *rt_se = &p->rt;
+ 
++	printk("CS411: Group13-Project1 -- Dequeuing Task");
+ 	update_curr_rt(rq);
+ 	dequeue_rt_entity(rt_se);
+ 
+@@ -992,19 +999,20 @@
+ 
+ static void yield_task_rt(struct rq *rq)
+ {
++	printk("CS411: Group13-Kernel1 -- Yielding Task");
+ 	requeue_task_rt(rq, rq->curr, 0);
+ }
+ 
+ #ifdef CONFIG_SMP
+ static int find_lowest_rq(struct task_struct *task);
+ 
+-static int
+-select_task_rq_rt(struct task_struct *p, int sd_flag, int flags)
++static int select_task_rq_rt(struct task_struct *p, int sd_flag, int flags)
+ {
+ 	struct task_struct *curr;
+ 	struct rq *rq;
+ 	int cpu;
+ 
++	printk("CS411: Group13-Kernel1 -- Selecting Task RQ");
+ 	if (sd_flag != SD_BALANCE_WAKE)
+ 		return smp_processor_id();
+ 
+@@ -1012,7 +1020,7 @@
+ 	rq = cpu_rq(cpu);
+ 
+ 	rcu_read_lock();
+-	curr = ACCESS_ONCE(rq->curr); /* unlocked access */
++	curr = ACCESS_ONCE(rq->curr);	/* unlocked access */
+ 
+ 	/*
+ 	 * If the current task on @p's runqueue is an RT task, then
+@@ -1038,8 +1046,7 @@
+ 	 */
+ 	if (curr && unlikely(rt_task(curr)) &&
+ 	    (curr->rt.nr_cpus_allowed < 2 ||
+-	     curr->prio < p->prio) &&
+-	    (p->rt.nr_cpus_allowed > 1)) {
++	     curr->prio < p->prio) && (p->rt.nr_cpus_allowed > 1)) {
+ 		int target = find_lowest_rq(p);
+ 
+ 		if (target != -1)
+@@ -1055,8 +1062,7 @@
+ 	if (rq->curr->rt.nr_cpus_allowed == 1)
+ 		return;
+ 
+-	if (p->rt.nr_cpus_allowed != 1
+-	    && cpupri_find(&rq->rd->cpupri, p, NULL))
++	if (p->rt.nr_cpus_allowed != 1 && cpupri_find(&rq->rd->cpupri, p, NULL))
+ 		return;
+ 
+ 	if (!cpupri_find(&rq->rd->cpupri, rq->curr, NULL))
+@@ -1071,18 +1077,19 @@
+ 	resched_task(rq->curr);
+ }
+ 
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 
+ /*
+  * Preempt the current task with a newly woken task if needed:
+  */
+-static void check_preempt_curr_rt(struct rq *rq, struct task_struct *p, int flags)
++static void check_preempt_curr_rt(struct rq *rq, struct task_struct *p,
++				  int flags)
+ {
++	printk("CS411: Group13-Kernel1 -- Checking Pre-emption of Current");
+ 	if (p->prio < rq->curr->prio) {
+ 		resched_task(rq->curr);
+ 		return;
+ 	}
+-
+ #ifdef CONFIG_SMP
+ 	/*
+ 	 * If:
+@@ -1165,6 +1172,7 @@
+ 
+ static void put_prev_task_rt(struct rq *rq, struct task_struct *p)
+ {
++	printk("CS411: Group13-Kernel1 -- Putting Previous Task");
+ 	update_curr_rt(rq);
+ 	p->se.exec_start = 0;
+ 
+@@ -1204,7 +1212,7 @@
+ 	for_each_leaf_rt_rq(rt_rq, rq) {
+ 		array = &rt_rq->active;
+ 		idx = sched_find_first_bit(array->bitmap);
+-next_idx:
++ next_idx:
+ 		if (idx >= MAX_RT_PRIO)
+ 			continue;
+ 		if (next && next->prio < idx)
+@@ -1222,7 +1230,8 @@
+ 			}
+ 		}
+ 		if (!next) {
+-			idx = find_next_bit(array->bitmap, MAX_RT_PRIO, idx+1);
++			idx =
++			    find_next_bit(array->bitmap, MAX_RT_PRIO, idx + 1);
+ 			goto next_idx;
+ 		}
+ 	}
+@@ -1237,17 +1246,17 @@
+ 	struct sched_domain *sd;
+ 	struct cpumask *lowest_mask = __get_cpu_var(local_cpu_mask);
+ 	int this_cpu = smp_processor_id();
+-	int cpu      = task_cpu(task);
++	int cpu = task_cpu(task);
+ 
+ 	/* Make sure the mask is initialized first */
+ 	if (unlikely(!lowest_mask))
+ 		return -1;
+ 
+ 	if (task->rt.nr_cpus_allowed == 1)
+-		return -1; /* No other targets possible */
++		return -1;	/* No other targets possible */
+ 
+ 	if (!cpupri_find(&task_rq(task)->rd->cpupri, task, lowest_mask))
+-		return -1; /* No targets found */
++		return -1;	/* No targets found */
+ 
+ 	/*
+ 	 * At this point we have built a mask of cpus representing the
+@@ -1265,7 +1274,7 @@
+ 	 * out which cpu is logically closest to our hot cache data.
+ 	 */
+ 	if (!cpumask_test_cpu(this_cpu, lowest_mask))
+-		this_cpu = -1; /* Skip this_cpu opt if not among lowest */
++		this_cpu = -1;	/* Skip this_cpu opt if not among lowest */
+ 
+ 	rcu_read_lock();
+ 	for_each_domain(cpu, sd) {
+@@ -1332,8 +1341,7 @@
+ 			if (unlikely(task_rq(task) != rq ||
+ 				     !cpumask_test_cpu(lowest_rq->cpu,
+ 						       &task->cpus_allowed) ||
+-				     task_running(rq, task) ||
+-				     !task->on_rq)) {
++				     task_running(rq, task) || !task->on_rq)) {
+ 
+ 				raw_spin_unlock(&lowest_rq->lock);
+ 				lowest_rq = NULL;
+@@ -1383,6 +1391,8 @@
+ 	struct task_struct *next_task;
+ 	struct rq *lowest_rq;
+ 
++	printk("-------push_rt_task-------\n");
++
+ 	if (!rq->rt.overloaded)
+ 		return 0;
+ 
+@@ -1390,7 +1400,7 @@
+ 	if (!next_task)
+ 		return 0;
+ 
+-retry:
++ retry:
+ 	if (unlikely(next_task == rq->curr)) {
+ 		WARN_ON(1);
+ 		return 0;
+@@ -1453,7 +1463,7 @@
+ 
+ 	double_unlock_balance(rq, lowest_rq);
+ 
+-out:
++ out:
+ 	put_task_struct(next_task);
+ 
+ 	return 1;
+@@ -1462,8 +1472,7 @@
+ static void push_rt_tasks(struct rq *rq)
+ {
+ 	/* push_rt_task will return true if it moved an RT */
+-	while (push_rt_task(rq))
+-		;
++	while (push_rt_task(rq)) ;
+ }
+ 
+ static int pull_rt_task(struct rq *this_rq)
+@@ -1538,7 +1547,7 @@
+ 			 * but possible)
+ 			 */
+ 		}
+-skip:
++ skip:
+ 		double_unlock_balance(this_rq, src_rq);
+ 	}
+ 
+@@ -1547,6 +1556,7 @@
+ 
+ static void pre_schedule_rt(struct rq *rq, struct task_struct *prev)
+ {
++	printk("CS411: Group13-Kernel1 -- Pre Schedule");
+ 	/* Try to pull RT tasks here if we lower this rq's prio */
+ 	if (unlikely(rt_task(prev)) && rq->rt.highest_prio.curr > prev->prio)
+ 		pull_rt_task(rq);
+@@ -1554,6 +1564,7 @@
+ 
+ static void post_schedule_rt(struct rq *rq)
+ {
++	printk("CS411: Group13-Kernel1 -- Post Schedule");
+ 	push_rt_tasks(rq);
+ }
+ 
+@@ -1563,13 +1574,13 @@
+  */
+ static void task_woken_rt(struct rq *rq, struct task_struct *p)
+ {
++	printk("CS411: Group13-Kernel1 -- Task Woken");
+ 	if (!task_running(rq, p) &&
+ 	    !test_tsk_need_resched(rq->curr) &&
+ 	    has_pushable_tasks(rq) &&
+ 	    p->rt.nr_cpus_allowed > 1 &&
+ 	    rt_task(rq->curr) &&
+-	    (rq->curr->rt.nr_cpus_allowed < 2 ||
+-	     rq->curr->prio < p->prio))
++	    (rq->curr->rt.nr_cpus_allowed < 2 || rq->curr->prio < p->prio))
+ 		push_rt_tasks(rq);
+ }
+ 
+@@ -1578,6 +1589,7 @@
+ {
+ 	int weight = cpumask_weight(new_mask);
+ 
++	printk("CS411: Group13-Kernel1 -- Set CPUs Allowed");
+ 	BUG_ON(!rt_task(p));
+ 
+ 	/*
+@@ -1622,6 +1634,7 @@
+ /* Assumes rq->lock is held */
+ static void rq_online_rt(struct rq *rq)
+ {
++	printk("CS411: Group13-Kernel1 -- RT Online");
+ 	if (rq->rt.overloaded)
+ 		rt_set_overload(rq);
+ 
+@@ -1633,6 +1646,7 @@
+ /* Assumes rq->lock is held */
+ static void rq_offline_rt(struct rq *rq)
+ {
++	printk("CS411: Group13-Kernel1 -- RT Offline");
+ 	if (rq->rt.overloaded)
+ 		rt_clear_overload(rq);
+ 
+@@ -1647,6 +1661,7 @@
+  */
+ static void switched_from_rt(struct rq *rq, struct task_struct *p)
+ {
++	printk("CS411: Group13-Kernel1 -- Switching from RT");
+ 	/*
+ 	 * If there are other RT tasks then we will reschedule
+ 	 * and the scheduling of the other RT tasks will handle
+@@ -1663,10 +1678,10 @@
+ 	unsigned int i;
+ 
+ 	for_each_possible_cpu(i)
+-		zalloc_cpumask_var_node(&per_cpu(local_cpu_mask, i),
+-					GFP_KERNEL, cpu_to_node(i));
++	    zalloc_cpumask_var_node(&per_cpu(local_cpu_mask, i),
++				    GFP_KERNEL, cpu_to_node(i));
+ }
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 
+ /*
+  * When switching a task to RT, we may overload the runqueue
+@@ -1677,6 +1692,7 @@
+ {
+ 	int check_resched = 1;
+ 
++	printk("CS411: Group13-Kernel1 -- Switching To");
+ 	/*
+ 	 * If we are already running, then there's nothing
+ 	 * that needs to be done. But if we are not running
+@@ -1690,7 +1706,7 @@
+ 		    /* Don't resched if we changed runqueues */
+ 		    rq != task_rq(p))
+ 			check_resched = 0;
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 		if (check_resched && p->prio < rq->curr->prio)
+ 			resched_task(rq->curr);
+ 	}
+@@ -1700,9 +1716,10 @@
+  * Priority of the task has changed. This may cause
+  * us to initiate a push or pull.
+  */
+-static void
+-prio_changed_rt(struct rq *rq, struct task_struct *p, int oldprio)
++static void prio_changed_rt(struct rq *rq, struct task_struct *p, int oldprio)
+ {
++
++	printk("CS411: Group13-Kernel1 -- Prio Changed");
+ 	if (!p->on_rq)
+ 		return;
+ 
+@@ -1726,7 +1743,7 @@
+ 		/* For UP simply resched on drop of prio */
+ 		if (oldprio < p->prio)
+ 			resched_task(p);
+-#endif /* CONFIG_SMP */
++#endif				/* CONFIG_SMP */
+ 	} else {
+ 		/*
+ 		 * This task is not running, but if it is
+@@ -1750,7 +1767,7 @@
+ 		unsigned long next;
+ 
+ 		p->rt.timeout++;
+-		next = DIV_ROUND_UP(min(soft, hard), USEC_PER_SEC/HZ);
++		next = DIV_ROUND_UP(min(soft, hard), USEC_PER_SEC / HZ);
+ 		if (p->rt.timeout > next)
+ 			p->cputime_expires.sched_exp = p->se.sum_exec_runtime;
+ 	}
+@@ -1758,6 +1775,7 @@
+ 
+ static void task_tick_rt(struct rq *rq, struct task_struct *p, int queued)
+ {
++	printk("CS411: Group13-Kernel1 -- Task Tick");
+ 	update_curr_rt(rq);
+ 
+ 	watchdog(rq, p);
+@@ -1767,7 +1785,14 @@
+ 	 * FIFO tasks have no timeslices.
+ 	 */
+ 
+-	
++	if (p->policy != SCHED_RR)
++		return;
++
++	if (--p->rt.time_slice)
++		return;
++
++	p->rt.time_slice = DEF_TIMESLICE;
++
+ 	/*
+ 	 * Requeue to the end of queue if we are not the only element
+ 	 * on the queue:
+@@ -1782,6 +1807,7 @@
+ {
+ 	struct task_struct *p = rq->curr;
+ 
++	printk("CS411: Group13-Project1 -- Setting current task");
+ 	p->se.exec_start = rq->clock_task;
+ 
+ 	/* The running task is never eligible for pushing */
+@@ -1790,50 +1816,55 @@
+ 
+ static unsigned int get_rr_interval_rt(struct rq *rq, struct task_struct *task)
+ {
++	printk("CS411: Group13-Project1 -- Getting RR Interval");
+ 	/*
+ 	 * Time slice is 0 for SCHED_FIFO tasks
+ 	 */
+-        if (task->policy == SCHED_FIFO)
+-	{	 
++	if (task->policy == SCHED_RR) {
++		/*
++		 * Time slice for SCHED RR tasks
++		 */
++		printk( "-------This is the RR Scheduluer \n" );
++		return DEF_TIMESLICE;
++	} else {
++		/*
++ 		 *Time slice for other is infinity
++		 */
++		printk( "-------This is the FIFO \n");
+ 		return 0;
+-	} else {
+-	/*
+-	 * Time slice for SCHED RR tasks
+-	 */
+-	        return DEF_TIMESLICE;
+ 	}
+ }
+ 
+ static const struct sched_class rt_sched_class = {
+-	.next			= &fair_sched_class,
+-	.enqueue_task		= enqueue_task_rt,
+-	.dequeue_task		= dequeue_task_rt,
+-	.yield_task		= yield_task_rt,
++	.next 			= &fair_sched_class,
++	.enqueue_task 		= enqueue_task_rt,
++	.dequeue_task 		= dequeue_task_rt,
++	.yield_task 		= yield_task_rt,
+ 
+-	.check_preempt_curr	= check_preempt_curr_rt,
++	.check_preempt_curr 	= check_preempt_curr_rt,
+ 
+-	.pick_next_task		= pick_next_task_rt,
+-	.put_prev_task		= put_prev_task_rt,
++	.pick_next_task 	= pick_next_task_rt,
++	.put_prev_task 		= put_prev_task_rt,
+ 
+ #ifdef CONFIG_SMP
+-	.select_task_rq		= select_task_rq_rt,
++	.select_task_rq 	= select_task_rq_rt,
+ 
+-	.set_cpus_allowed       = set_cpus_allowed_rt,
+-	.rq_online              = rq_online_rt,
+-	.rq_offline             = rq_offline_rt,
+-	.pre_schedule		= pre_schedule_rt,
+-	.post_schedule		= post_schedule_rt,
+-	.task_woken		= task_woken_rt,
+-	.switched_from		= switched_from_rt,
++	.set_cpus_allowed 	= set_cpus_allowed_rt,
++	.rq_online 		= rq_online_rt,
++	.rq_offline 		= rq_offline_rt,
++	.pre_schedule 		= pre_schedule_rt,
++	.post_schedule 		= post_schedule_rt,
++	.task_woken 		= task_woken_rt,
++	.switched_from 		= switched_from_rt,
+ #endif
+ 
+-	.set_curr_task          = set_curr_task_rt,
+-	.task_tick		= task_tick_rt,
++	.set_curr_task 		= set_curr_task_rt,
++	.task_tick 		= task_tick_rt,
+ 
+-	.get_rr_interval	= get_rr_interval_rt,
++	.get_rr_interval 	= get_rr_interval_rt,
+ 
+-	.prio_changed		= prio_changed_rt,
+-	.switched_to		= switched_to_rt,
++	.prio_changed 		= prio_changed_rt,
++	.switched_to 		= switched_to_rt,
+ };
+ 
+ #ifdef CONFIG_SCHED_DEBUG
+@@ -1846,8 +1877,7 @@
+ 
+ 	rcu_read_lock();
+ 	for_each_rt_rq(rt_rq, iter, cpu_rq(cpu))
+-		print_rt_rq(m, cpu, rt_rq);
++	    print_rt_rq(m, cpu, rt_rq);
+ 	rcu_read_unlock();
+ }
+-#endif /* CONFIG_SCHED_DEBUG */
+-
++#endif				/* CONFIG_SCHED_DEBUG */
+Index: scripts/conmakehash
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/basic/fixdep
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/kallsyms
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/mod/elfconfig.h
+===================================================================
+--- scripts/mod/elfconfig.h	(revision 2)
++++ scripts/mod/elfconfig.h	(revision 15)
+@@ -1,4 +1,4 @@
+-#define KERNEL_ELFCLASS ELFCLASS32
++#define KERNEL_ELFCLASS ELFCLASS64
+ #define KERNEL_ELFDATA ELFDATA2LSB
+-#define HOST_ELFCLASS ELFCLASS32
++#define HOST_ELFCLASS ELFCLASS64
+ #define HOST_ELFDATA ELFDATA2LSB
+Index: scripts/mod/mk_elfconfig
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/mod/modpost
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/kconfig/conf
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/selinux/mdp/mdp
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: scripts/selinux/genheaders/genheaders
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/x-executable
+Index: .version
+===================================================================
+--- .version	(revision 2)
++++ .version	(revision 15)
+@@ -1 +1 @@
+-0
++1
+Index: .config
+===================================================================
+--- .config	(revision 2)
++++ .config	(revision 15)
+@@ -1,14 +1,14 @@
+ #
+ # Automatically generated make config: don't edit
+-# Linux/i386 3.0.4 Kernel Configuration
++# Linux/x86_64 3.0.4 Kernel Configuration
+ #
+-# CONFIG_64BIT is not set
+-CONFIG_X86_32=y
+-# CONFIG_X86_64 is not set
++CONFIG_64BIT=y
++# CONFIG_X86_32 is not set
++CONFIG_X86_64=y
+ CONFIG_X86=y
+ CONFIG_INSTRUCTION_DECODER=y
+-CONFIG_OUTPUT_FORMAT="elf32-i386"
+-CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"
++CONFIG_OUTPUT_FORMAT="elf64-x86-64"
++CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"
+ CONFIG_GENERIC_CMOS_UPDATE=y
+ CONFIG_CLOCKSOURCE_WATCHDOG=y
+ CONFIG_GENERIC_CLOCKEVENTS=y
+@@ -18,37 +18,37 @@
+ CONFIG_HAVE_LATENCYTOP_SUPPORT=y
+ CONFIG_MMU=y
+ CONFIG_ZONE_DMA=y
+-# CONFIG_NEED_DMA_MAP_STATE is not set
++CONFIG_NEED_DMA_MAP_STATE=y
+ CONFIG_NEED_SG_DMA_LENGTH=y
+ CONFIG_GENERIC_ISA_DMA=y
+ CONFIG_GENERIC_IOMAP=y
+ CONFIG_GENERIC_BUG=y
++CONFIG_GENERIC_BUG_RELATIVE_POINTERS=y
+ CONFIG_GENERIC_HWEIGHT=y
+ CONFIG_ARCH_MAY_HAVE_PC_FDC=y
+ # CONFIG_RWSEM_GENERIC_SPINLOCK is not set
+ CONFIG_RWSEM_XCHGADD_ALGORITHM=y
+ CONFIG_ARCH_HAS_CPU_IDLE_WAIT=y
+ CONFIG_GENERIC_CALIBRATE_DELAY=y
+-# CONFIG_GENERIC_TIME_VSYSCALL is not set
++CONFIG_GENERIC_TIME_VSYSCALL=y
+ CONFIG_ARCH_HAS_CPU_RELAX=y
+ CONFIG_ARCH_HAS_DEFAULT_IDLE=y
+ CONFIG_ARCH_HAS_CACHE_LINE_SIZE=y
+ CONFIG_HAVE_SETUP_PER_CPU_AREA=y
+ CONFIG_NEED_PER_CPU_EMBED_FIRST_CHUNK=y
+ CONFIG_NEED_PER_CPU_PAGE_FIRST_CHUNK=y
+-# CONFIG_HAVE_CPUMASK_OF_CPU_MAP is not set
++CONFIG_HAVE_CPUMASK_OF_CPU_MAP=y
+ CONFIG_ARCH_HIBERNATION_POSSIBLE=y
+ CONFIG_ARCH_SUSPEND_POSSIBLE=y
+-# CONFIG_ZONE_DMA32 is not set
++CONFIG_ZONE_DMA32=y
+ CONFIG_ARCH_POPULATES_NODE_MAP=y
+-# CONFIG_AUDIT_ARCH is not set
++CONFIG_AUDIT_ARCH=y
+ CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING=y
+ CONFIG_ARCH_SUPPORTS_DEBUG_PAGEALLOC=y
+-CONFIG_X86_32_SMP=y
++CONFIG_X86_64_SMP=y
+ CONFIG_X86_HT=y
+-CONFIG_X86_32_LAZY_GS=y
+-CONFIG_ARCH_HWEIGHT_CFLAGS="-fcall-saved-ecx -fcall-saved-edx"
+-CONFIG_KTIME_SCALAR=y
++CONFIG_ARCH_HWEIGHT_CFLAGS="-fcall-saved-rdi -fcall-saved-rsi -fcall-saved-rdx -fcall-saved-rcx -fcall-saved-r8 -fcall-saved-r9 -fcall-saved-r10 -fcall-saved-r11"
++# CONFIG_KTIME_SCALAR is not set
+ CONFIG_ARCH_CPU_PROBE_RELEASE=y
+ CONFIG_DEFCONFIG_LIST="/lib/modules/$UNAME_RELEASE/.config"
+ CONFIG_HAVE_IRQ_WORK=y
+@@ -209,7 +209,7 @@
+ # GCOV-based kernel profiling
+ #
+ # CONFIG_GCOV_KERNEL is not set
+-CONFIG_HAVE_GENERIC_DMA_COHERENT=y
++# CONFIG_HAVE_GENERIC_DMA_COHERENT is not set
+ CONFIG_SLABINFO=y
+ CONFIG_RT_MUTEXES=y
+ CONFIG_BASE_SMALL=0
+@@ -221,9 +221,9 @@
+ # CONFIG_MODULE_SRCVERSION_ALL is not set
+ CONFIG_STOP_MACHINE=y
+ CONFIG_BLOCK=y
+-CONFIG_LBDAF=y
+ CONFIG_BLK_DEV_BSG=y
+ # CONFIG_BLK_DEV_INTEGRITY is not set
++CONFIG_BLOCK_COMPAT=y
+ 
+ #
+ # IO Schedulers
+@@ -274,72 +274,62 @@
+ CONFIG_HIGH_RES_TIMERS=y
+ CONFIG_GENERIC_CLOCKEVENTS_BUILD=y
+ CONFIG_SMP=y
++# CONFIG_X86_X2APIC is not set
+ CONFIG_X86_MPPARSE=y
+-# CONFIG_X86_BIGSMP is not set
+ CONFIG_X86_EXTENDED_PLATFORM=y
+-# CONFIG_X86_MRST is not set
+-# CONFIG_X86_RDC321X is not set
+-# CONFIG_X86_32_NON_STANDARD is not set
++CONFIG_X86_VSMP=y
+ CONFIG_X86_SUPPORTS_MEMORY_FAILURE=y
+-# CONFIG_X86_32_IRIS is not set
+ CONFIG_SCHED_OMIT_FRAME_POINTER=y
+-# CONFIG_PARAVIRT_GUEST is not set
++CONFIG_PARAVIRT_GUEST=y
++CONFIG_XEN=y
++CONFIG_XEN_DOM0=y
++CONFIG_XEN_PRIVILEGED_GUEST=y
++CONFIG_XEN_PVHVM=y
++CONFIG_XEN_MAX_DOMAIN_MEMORY=128
++CONFIG_XEN_SAVE_RESTORE=y
++CONFIG_XEN_DEBUG_FS=y
++CONFIG_XEN_DEBUG=y
++CONFIG_KVM_CLOCK=y
++CONFIG_KVM_GUEST=y
++CONFIG_PARAVIRT=y
++CONFIG_PARAVIRT_SPINLOCKS=y
++CONFIG_PARAVIRT_CLOCK=y
++CONFIG_PARAVIRT_DEBUG=y
+ CONFIG_NO_BOOTMEM=y
+ # CONFIG_MEMTEST is not set
+-# CONFIG_M386 is not set
+-# CONFIG_M486 is not set
+-# CONFIG_M586 is not set
+-# CONFIG_M586TSC is not set
+-# CONFIG_M586MMX is not set
+-# CONFIG_M686 is not set
+-# CONFIG_MPENTIUMII is not set
+-# CONFIG_MPENTIUMIII is not set
+-# CONFIG_MPENTIUMM is not set
+-# CONFIG_MPENTIUM4 is not set
+-# CONFIG_MK6 is not set
+-# CONFIG_MK7 is not set
+ # CONFIG_MK8 is not set
+-# CONFIG_MCRUSOE is not set
+-# CONFIG_MEFFICEON is not set
+-# CONFIG_MWINCHIPC6 is not set
+-# CONFIG_MWINCHIP3D is not set
+-# CONFIG_MELAN is not set
+-# CONFIG_MGEODEGX1 is not set
+-# CONFIG_MGEODE_LX is not set
+-# CONFIG_MCYRIXIII is not set
+-# CONFIG_MVIAC3_2 is not set
+-# CONFIG_MVIAC7 is not set
++# CONFIG_MPSC is not set
+ # CONFIG_MCORE2 is not set
+ CONFIG_MATOM=y
+-CONFIG_X86_GENERIC=y
+-CONFIG_X86_INTERNODE_CACHE_SHIFT=6
++# CONFIG_GENERIC_CPU is not set
++CONFIG_X86_INTERNODE_CACHE_SHIFT=12
+ CONFIG_X86_CMPXCHG=y
+ CONFIG_CMPXCHG_LOCAL=y
+ CONFIG_X86_L1_CACHE_SHIFT=6
+ CONFIG_X86_XADD=y
+ CONFIG_X86_WP_WORKS_OK=y
+-CONFIG_X86_INVLPG=y
+-CONFIG_X86_BSWAP=y
+-CONFIG_X86_POPAD_OK=y
+-CONFIG_X86_INTEL_USERCOPY=y
+ CONFIG_X86_USE_PPRO_CHECKSUM=y
+ CONFIG_X86_TSC=y
+ CONFIG_X86_CMPXCHG64=y
+ CONFIG_X86_CMOV=y
+-CONFIG_X86_MINIMUM_CPU_FAMILY=5
++CONFIG_X86_MINIMUM_CPU_FAMILY=64
+ CONFIG_X86_DEBUGCTLMSR=y
+ CONFIG_CPU_SUP_INTEL=y
+-CONFIG_CPU_SUP_CYRIX_32=y
+ CONFIG_CPU_SUP_AMD=y
+ CONFIG_CPU_SUP_CENTAUR=y
+-CONFIG_CPU_SUP_TRANSMETA_32=y
+-CONFIG_CPU_SUP_UMC_32=y
+ CONFIG_HPET_TIMER=y
+ CONFIG_HPET_EMULATE_RTC=y
+ CONFIG_DMI=y
+-# CONFIG_IOMMU_HELPER is not set
+-# CONFIG_IOMMU_API is not set
+-CONFIG_NR_CPUS=8
++CONFIG_GART_IOMMU=y
++CONFIG_CALGARY_IOMMU=y
++CONFIG_CALGARY_IOMMU_ENABLED_BY_DEFAULT=y
++CONFIG_AMD_IOMMU=y
++CONFIG_AMD_IOMMU_STATS=y
++CONFIG_SWIOTLB=y
++CONFIG_IOMMU_HELPER=y
++CONFIG_IOMMU_API=y
++CONFIG_MAXSMP=y
++CONFIG_NR_CPUS=4096
+ CONFIG_SCHED_SMT=y
+ CONFIG_SCHED_MC=y
+ # CONFIG_IRQ_TIME_ACCOUNTING is not set
+@@ -352,56 +342,62 @@
+ CONFIG_X86_MCE=y
+ CONFIG_X86_MCE_INTEL=y
+ CONFIG_X86_MCE_AMD=y
+-# CONFIG_X86_ANCIENT_MCE is not set
+ CONFIG_X86_MCE_THRESHOLD=y
+ # CONFIG_X86_MCE_INJECT is not set
+ CONFIG_X86_THERMAL_VECTOR=y
+-CONFIG_VM86=y
+-# CONFIG_TOSHIBA is not set
+ # CONFIG_I8K is not set
+-CONFIG_X86_REBOOTFIXUPS=y
+ CONFIG_MICROCODE=y
+ CONFIG_MICROCODE_INTEL=y
+ CONFIG_MICROCODE_AMD=y
+ CONFIG_MICROCODE_OLD_INTERFACE=y
+ CONFIG_X86_MSR=y
+ CONFIG_X86_CPUID=y
+-# CONFIG_NOHIGHMEM is not set
+-CONFIG_HIGHMEM4G=y
+-# CONFIG_HIGHMEM64G is not set
+-CONFIG_PAGE_OFFSET=0xC0000000
+-CONFIG_HIGHMEM=y
+-# CONFIG_ARCH_PHYS_ADDR_T_64BIT is not set
+-# CONFIG_ARCH_DMA_ADDR_T_64BIT is not set
+-CONFIG_ARCH_FLATMEM_ENABLE=y
++CONFIG_ARCH_PHYS_ADDR_T_64BIT=y
++CONFIG_ARCH_DMA_ADDR_T_64BIT=y
++CONFIG_DIRECT_GBPAGES=y
++CONFIG_NUMA=y
++CONFIG_AMD_NUMA=y
++CONFIG_X86_64_ACPI_NUMA=y
++CONFIG_NODES_SPAN_OTHER_NODES=y
++CONFIG_NUMA_EMU=y
++CONFIG_NODES_SHIFT=10
+ CONFIG_ARCH_SPARSEMEM_ENABLE=y
++CONFIG_ARCH_SPARSEMEM_DEFAULT=y
+ CONFIG_ARCH_SELECT_MEMORY_MODEL=y
+-CONFIG_ILLEGAL_POINTER_VALUE=0
++CONFIG_ARCH_MEMORY_PROBE=y
++CONFIG_ARCH_PROC_KCORE_TEXT=y
++CONFIG_ILLEGAL_POINTER_VALUE=0xdead000000000000
+ CONFIG_SELECT_MEMORY_MODEL=y
+-CONFIG_FLATMEM_MANUAL=y
+-# CONFIG_SPARSEMEM_MANUAL is not set
+-CONFIG_FLATMEM=y
+-CONFIG_FLAT_NODE_MEM_MAP=y
+-CONFIG_SPARSEMEM_STATIC=y
++CONFIG_SPARSEMEM_MANUAL=y
++CONFIG_SPARSEMEM=y
++CONFIG_NEED_MULTIPLE_NODES=y
++CONFIG_HAVE_MEMORY_PRESENT=y
++CONFIG_SPARSEMEM_EXTREME=y
++CONFIG_SPARSEMEM_VMEMMAP_ENABLE=y
++CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER=y
++CONFIG_SPARSEMEM_VMEMMAP=y
+ CONFIG_HAVE_MEMBLOCK=y
++CONFIG_MEMORY_HOTPLUG=y
++CONFIG_MEMORY_HOTPLUG_SPARSE=y
++CONFIG_MEMORY_HOTREMOVE=y
+ CONFIG_PAGEFLAGS_EXTENDED=y
+ CONFIG_SPLIT_PTLOCK_CPUS=4
+ # CONFIG_COMPACTION is not set
+-# CONFIG_PHYS_ADDR_T_64BIT is not set
++CONFIG_MIGRATION=y
++CONFIG_PHYS_ADDR_T_64BIT=y
+ CONFIG_ZONE_DMA_FLAG=1
+ CONFIG_BOUNCE=y
+ CONFIG_VIRT_TO_BUS=y
++CONFIG_MMU_NOTIFIER=y
+ # CONFIG_KSM is not set
+ CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
+ CONFIG_ARCH_SUPPORTS_MEMORY_FAILURE=y
+ # CONFIG_MEMORY_FAILURE is not set
+ # CONFIG_TRANSPARENT_HUGEPAGE is not set
+ # CONFIG_CLEANCACHE is not set
+-CONFIG_HIGHPTE=y
+ CONFIG_X86_CHECK_BIOS_CORRUPTION=y
+ CONFIG_X86_BOOTPARAM_MEMORY_CORRUPTION_CHECK=y
+ CONFIG_X86_RESERVE_LOW=64
+-# CONFIG_MATH_EMULATION is not set
+ CONFIG_MTRR=y
+ # CONFIG_MTRR_SANITIZER is not set
+ CONFIG_X86_PAT=y
+@@ -419,19 +415,29 @@
+ CONFIG_CRASH_DUMP=y
+ CONFIG_PHYSICAL_START=0x1000000
+ CONFIG_RELOCATABLE=y
+-CONFIG_X86_NEED_RELOCS=y
+ CONFIG_PHYSICAL_ALIGN=0x1000000
+ CONFIG_HOTPLUG_CPU=y
+ # CONFIG_COMPAT_VDSO is not set
+ # CONFIG_CMDLINE_BOOL is not set
+ CONFIG_ARCH_ENABLE_MEMORY_HOTPLUG=y
++CONFIG_ARCH_ENABLE_MEMORY_HOTREMOVE=y
++CONFIG_USE_PERCPU_NUMA_NODE_ID=y
+ 
+ #
+ # Power management and ACPI options
+ #
+ # CONFIG_SUSPEND is not set
++CONFIG_HIBERNATE_CALLBACKS=y
+ # CONFIG_HIBERNATION is not set
++CONFIG_PM_SLEEP=y
++CONFIG_PM_SLEEP_SMP=y
+ # CONFIG_PM_RUNTIME is not set
++CONFIG_PM=y
++CONFIG_PM_DEBUG=y
++CONFIG_PM_ADVANCED_DEBUG=y
++CONFIG_CAN_PM_TRACE=y
++CONFIG_PM_TRACE=y
++CONFIG_PM_TRACE_RTC=y
+ CONFIG_ACPI=y
+ CONFIG_ACPI_PROCFS=y
+ # CONFIG_ACPI_PROCFS_POWER is not set
+@@ -447,12 +453,14 @@
+ CONFIG_ACPI_HOTPLUG_CPU=y
+ # CONFIG_ACPI_PROCESSOR_AGGREGATOR is not set
+ CONFIG_ACPI_THERMAL=y
++CONFIG_ACPI_NUMA=y
+ # CONFIG_ACPI_CUSTOM_DSDT is not set
+ CONFIG_ACPI_BLACKLIST_YEAR=0
+ # CONFIG_ACPI_DEBUG is not set
+ # CONFIG_ACPI_PCI_SLOT is not set
+ CONFIG_X86_PM_TIMER=y
+ CONFIG_ACPI_CONTAINER=y
++CONFIG_ACPI_HOTPLUG_MEMORY=y
+ # CONFIG_ACPI_SBS is not set
+ # CONFIG_ACPI_HED is not set
+ # CONFIG_ACPI_CUSTOM_METHOD is not set
+@@ -480,18 +488,9 @@
+ #
+ # CONFIG_X86_PCC_CPUFREQ is not set
+ CONFIG_X86_ACPI_CPUFREQ=y
+-# CONFIG_X86_POWERNOW_K6 is not set
+-# CONFIG_X86_POWERNOW_K7 is not set
+ # CONFIG_X86_POWERNOW_K8 is not set
+-# CONFIG_X86_GX_SUSPMOD is not set
+ # CONFIG_X86_SPEEDSTEP_CENTRINO is not set
+-# CONFIG_X86_SPEEDSTEP_ICH is not set
+-# CONFIG_X86_SPEEDSTEP_SMI is not set
+ # CONFIG_X86_P4_CLOCKMOD is not set
+-# CONFIG_X86_CPUFREQ_NFORCE2 is not set
+-# CONFIG_X86_LONGRUN is not set
+-# CONFIG_X86_LONGHAUL is not set
+-# CONFIG_X86_E_POWERSAVER is not set
+ 
+ #
+ # shared options
+@@ -503,19 +502,22 @@
+ # CONFIG_INTEL_IDLE is not set
+ 
+ #
++# Memory power savings
++#
++CONFIG_I7300_IDLE_IOAT_CHANNEL=y
++CONFIG_I7300_IDLE=y
++
++#
+ # Bus options (PCI etc.)
+ #
+ CONFIG_PCI=y
+-# CONFIG_PCI_GOBIOS is not set
+-# CONFIG_PCI_GOMMCONFIG is not set
+-# CONFIG_PCI_GODIRECT is not set
+-CONFIG_PCI_GOANY=y
+-CONFIG_PCI_BIOS=y
+ CONFIG_PCI_DIRECT=y
+ CONFIG_PCI_MMCONFIG=y
++CONFIG_PCI_XEN=y
+ CONFIG_PCI_DOMAINS=y
+ # CONFIG_PCI_CNB20LE_QUIRK is not set
+ # CONFIG_DMAR is not set
++CONFIG_INTR_REMAP=y
+ CONFIG_PCIEPORTBUS=y
+ CONFIG_PCIEAER=y
+ # CONFIG_PCIE_ECRC is not set
+@@ -526,15 +528,12 @@
+ CONFIG_PCI_MSI=y
+ # CONFIG_PCI_DEBUG is not set
+ # CONFIG_PCI_STUB is not set
++CONFIG_XEN_PCIDEV_FRONTEND=y
+ CONFIG_HT_IRQ=y
+-# CONFIG_PCI_IOV is not set
++CONFIG_PCI_IOV=y
+ CONFIG_PCI_IOAPIC=y
+ CONFIG_PCI_LABEL=y
+ CONFIG_ISA_DMA_API=y
+-# CONFIG_ISA is not set
+-# CONFIG_MCA is not set
+-# CONFIG_SCx200 is not set
+-# CONFIG_OLPC is not set
+ CONFIG_AMD_NB=y
+ # CONFIG_PCCARD is not set
+ # CONFIG_HOTPLUG_PCI is not set
+@@ -544,13 +543,19 @@
+ # Executable file formats / Emulations
+ #
+ CONFIG_BINFMT_ELF=y
++CONFIG_COMPAT_BINFMT_ELF=y
+ CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y
+-CONFIG_HAVE_AOUT=y
+-# CONFIG_BINFMT_AOUT is not set
++# CONFIG_HAVE_AOUT is not set
+ CONFIG_BINFMT_MISC=y
+-CONFIG_HAVE_ATOMIC_IOMAP=y
++CONFIG_IA32_EMULATION=y
++CONFIG_IA32_AOUT=y
++CONFIG_COMPAT=y
++CONFIG_COMPAT_FOR_U64_ALIGNMENT=y
++CONFIG_SYSVIPC_COMPAT=y
++CONFIG_KEYS_COMPAT=y
+ CONFIG_HAVE_TEXT_POKE_SMP=y
+ CONFIG_NET=y
++CONFIG_COMPAT_NETLINK_MESSAGES=y
+ 
+ #
+ # Networking options
+@@ -785,6 +790,8 @@
+ CONFIG_RPS=y
+ CONFIG_RFS_ACCEL=y
+ CONFIG_XPS=y
++CONFIG_HAVE_BPF_JIT=y
++CONFIG_BPF_JIT=y
+ 
+ #
+ # Network testing
+@@ -842,7 +849,7 @@
+ CONFIG_EXTRA_FIRMWARE=""
+ # CONFIG_DEBUG_DRIVER is not set
+ CONFIG_DEBUG_DEVRES=y
+-# CONFIG_SYS_HYPERVISOR is not set
++CONFIG_SYS_HYPERVISOR=y
+ CONFIG_CONNECTOR=y
+ CONFIG_PROC_EVENTS=y
+ # CONFIG_MTD is not set
+@@ -870,6 +877,8 @@
+ # CONFIG_BLK_DEV_RAM is not set
+ # CONFIG_CDROM_PKTCDVD is not set
+ # CONFIG_ATA_OVER_ETH is not set
++CONFIG_XEN_BLKDEV_FRONTEND=y
++CONFIG_XEN_BLKDEV_BACKEND=y
+ # CONFIG_BLK_DEV_HD is not set
+ # CONFIG_BLK_DEV_RBD is not set
+ # CONFIG_SENSORS_LIS3LV02D is not set
+@@ -965,7 +974,6 @@
+ # CONFIG_PATA_CMD64X is not set
+ # CONFIG_PATA_CS5520 is not set
+ # CONFIG_PATA_CS5530 is not set
+-# CONFIG_PATA_CS5535 is not set
+ # CONFIG_PATA_CS5536 is not set
+ # CONFIG_PATA_CYPRESS is not set
+ # CONFIG_PATA_EFAR is not set
+@@ -1153,6 +1161,8 @@
+ #
+ # CAIF transport drivers
+ #
++CONFIG_XEN_NETDEV_FRONTEND=y
++CONFIG_XEN_NETDEV_BACKEND=y
+ # CONFIG_FDDI is not set
+ # CONFIG_HIPPI is not set
+ # CONFIG_PPP is not set
+@@ -1283,20 +1293,19 @@
+ # CONFIG_SERIAL_ALTERA_UART is not set
+ # CONFIG_SERIAL_PCH_UART is not set
+ # CONFIG_SERIAL_XILINX_PS_UART is not set
++CONFIG_HVC_DRIVER=y
++CONFIG_HVC_IRQ=y
++CONFIG_HVC_XEN=y
+ # CONFIG_IPMI_HANDLER is not set
+ CONFIG_HW_RANDOM=y
+ # CONFIG_HW_RANDOM_TIMERIOMEM is not set
+ CONFIG_HW_RANDOM_INTEL=y
+ CONFIG_HW_RANDOM_AMD=y
+-CONFIG_HW_RANDOM_GEODE=y
+ CONFIG_HW_RANDOM_VIA=y
+ CONFIG_NVRAM=y
+ # CONFIG_R3964 is not set
+ # CONFIG_APPLICOM is not set
+-# CONFIG_SONYPI is not set
+ # CONFIG_MWAVE is not set
+-# CONFIG_PC8736x_GPIO is not set
+-# CONFIG_NSC_GPIO is not set
+ # CONFIG_RAW_DRIVER is not set
+ CONFIG_HPET=y
+ # CONFIG_HPET_MMAP is not set
+@@ -1402,7 +1411,6 @@
+ # CONFIG_NV_TCO is not set
+ # CONFIG_60XX_WDT is not set
+ # CONFIG_SBC8360_WDT is not set
+-# CONFIG_SBC7240_WDT is not set
+ # CONFIG_CPU5_WDT is not set
+ # CONFIG_SMSC_SCH311X_WDT is not set
+ # CONFIG_SMSC37B787_WDT is not set
+@@ -1413,6 +1421,7 @@
+ # CONFIG_W83977F_WDT is not set
+ # CONFIG_MACHZ_WDT is not set
+ # CONFIG_SBC_EPX_C3_WATCHDOG is not set
++CONFIG_XEN_WDT=y
+ 
+ #
+ # PCI-based Watchdog Cards
+@@ -1444,16 +1453,10 @@
+ # Graphics support
+ #
+ CONFIG_AGP=y
+-# CONFIG_AGP_ALI is not set
+-# CONFIG_AGP_ATI is not set
+-# CONFIG_AGP_AMD is not set
+ CONFIG_AGP_AMD64=y
+ CONFIG_AGP_INTEL=y
+-# CONFIG_AGP_NVIDIA is not set
+ # CONFIG_AGP_SIS is not set
+-# CONFIG_AGP_SWORKS is not set
+ # CONFIG_AGP_VIA is not set
+-# CONFIG_AGP_EFFICEON is not set
+ CONFIG_VGA_ARB=y
+ CONFIG_VGA_ARB_MAX_GPUS=16
+ # CONFIG_VGA_SWITCHEROO is not set
+@@ -1469,12 +1472,13 @@
+ CONFIG_FB_CFB_COPYAREA=y
+ CONFIG_FB_CFB_IMAGEBLIT=y
+ # CONFIG_FB_CFB_REV_PIXELS_IN_BYTE is not set
+-# CONFIG_FB_SYS_FILLRECT is not set
+-# CONFIG_FB_SYS_COPYAREA is not set
+-# CONFIG_FB_SYS_IMAGEBLIT is not set
++CONFIG_FB_SYS_FILLRECT=y
++CONFIG_FB_SYS_COPYAREA=y
++CONFIG_FB_SYS_IMAGEBLIT=y
+ # CONFIG_FB_FOREIGN_ENDIAN is not set
+-# CONFIG_FB_SYS_FOPS is not set
++CONFIG_FB_SYS_FOPS=y
+ # CONFIG_FB_WMT_GE_ROPS is not set
++CONFIG_FB_DEFERRED_IO=y
+ # CONFIG_FB_SVGALIB is not set
+ # CONFIG_FB_MACMODES is not set
+ # CONFIG_FB_BACKLIGHT is not set
+@@ -1499,7 +1503,6 @@
+ # CONFIG_FB_S1D13XXX is not set
+ # CONFIG_FB_NVIDIA is not set
+ # CONFIG_FB_RIVA is not set
+-# CONFIG_FB_I810 is not set
+ # CONFIG_FB_LE80578 is not set
+ # CONFIG_FB_MATROX is not set
+ # CONFIG_FB_RADEON is not set
+@@ -1521,6 +1524,7 @@
+ # CONFIG_FB_GEODE is not set
+ # CONFIG_FB_UDL is not set
+ # CONFIG_FB_VIRTUAL is not set
++CONFIG_XEN_FBDEV_FRONTEND=y
+ # CONFIG_FB_METRONOME is not set
+ # CONFIG_FB_MB862XX is not set
+ # CONFIG_FB_BROADSHEET is not set
+@@ -1783,9 +1787,24 @@
+ # CONFIG_DMADEVICES is not set
+ # CONFIG_AUXDISPLAY is not set
+ # CONFIG_UIO is not set
++
++#
++# Xen driver support
++#
++CONFIG_XEN_BALLOON=y
++CONFIG_XEN_SCRUB_PAGES=y
++CONFIG_XEN_DEV_EVTCHN=y
++CONFIG_XEN_BACKEND=y
++CONFIG_XENFS=y
++CONFIG_XEN_COMPAT_XENFS=y
++CONFIG_XEN_SYS_HYPERVISOR=y
++CONFIG_XEN_XENBUS_FRONTEND=y
++CONFIG_XEN_GNTDEV=m
++CONFIG_XEN_GRANT_DEV_ALLOC=m
++CONFIG_XEN_PLATFORM_PCI=m
++CONFIG_SWIOTLB_XEN=y
+ # CONFIG_STAGING is not set
+ # CONFIG_X86_PLATFORM_DEVICES is not set
+-CONFIG_CLKSRC_I8253=y
+ 
+ #
+ # Firmware Drivers
+@@ -1838,6 +1857,7 @@
+ # CONFIG_QFMT_V1 is not set
+ CONFIG_QFMT_V2=y
+ CONFIG_QUOTACTL=y
++CONFIG_QUOTACTL_COMPAT=y
+ CONFIG_AUTOFS4_FS=y
+ # CONFIG_FUSE_FS is not set
+ CONFIG_GENERIC_ACL=y
+@@ -1971,7 +1991,6 @@
+ # CONFIG_DEBUG_OBJECTS is not set
+ # CONFIG_SLUB_DEBUG_ON is not set
+ # CONFIG_SLUB_STATS is not set
+-# CONFIG_DEBUG_KMEMLEAK is not set
+ # CONFIG_DEBUG_RT_MUTEXES is not set
+ # CONFIG_RT_MUTEX_TESTER is not set
+ # CONFIG_DEBUG_SPINLOCK is not set
+@@ -1985,7 +2004,6 @@
+ CONFIG_STACKTRACE=y
+ CONFIG_DEBUG_STACK_USAGE=y
+ # CONFIG_DEBUG_KOBJECT is not set
+-# CONFIG_DEBUG_HIGHMEM is not set
+ CONFIG_DEBUG_BUGVERBOSE=y
+ # CONFIG_DEBUG_INFO is not set
+ # CONFIG_DEBUG_VM is not set
+@@ -2064,7 +2082,7 @@
+ # CONFIG_DEBUG_RODATA_TEST is not set
+ # CONFIG_DEBUG_SET_MODULE_RONX is not set
+ CONFIG_DEBUG_NX_TEST=m
+-CONFIG_DOUBLEFAULT=y
++# CONFIG_IOMMU_DEBUG is not set
+ # CONFIG_IOMMU_STRESS is not set
+ CONFIG_HAVE_MMIOTRACE_SUPPORT=y
+ # CONFIG_X86_DECODER_SELFTEST is not set
+@@ -2178,12 +2196,13 @@
+ # CONFIG_CRYPTO_SHA512 is not set
+ # CONFIG_CRYPTO_TGR192 is not set
+ # CONFIG_CRYPTO_WP512 is not set
++# CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL is not set
+ 
+ #
+ # Ciphers
+ #
+ CONFIG_CRYPTO_AES=y
+-CONFIG_CRYPTO_AES_586=y
++# CONFIG_CRYPTO_AES_X86_64 is not set
+ # CONFIG_CRYPTO_AES_NI_INTEL is not set
+ # CONFIG_CRYPTO_ANUBIS is not set
+ CONFIG_CRYPTO_ARC4=y
+@@ -2195,12 +2214,12 @@
+ # CONFIG_CRYPTO_FCRYPT is not set
+ # CONFIG_CRYPTO_KHAZAD is not set
+ # CONFIG_CRYPTO_SALSA20 is not set
+-# CONFIG_CRYPTO_SALSA20_586 is not set
++# CONFIG_CRYPTO_SALSA20_X86_64 is not set
+ # CONFIG_CRYPTO_SEED is not set
+ # CONFIG_CRYPTO_SERPENT is not set
+ # CONFIG_CRYPTO_TEA is not set
+ # CONFIG_CRYPTO_TWOFISH is not set
+-# CONFIG_CRYPTO_TWOFISH_586 is not set
++# CONFIG_CRYPTO_TWOFISH_X86_64 is not set
+ 
+ #
+ # Compression
+@@ -2217,7 +2236,6 @@
+ # CONFIG_CRYPTO_USER_API_SKCIPHER is not set
+ CONFIG_CRYPTO_HW=y
+ # CONFIG_CRYPTO_DEV_PADLOCK is not set
+-# CONFIG_CRYPTO_DEV_GEODE is not set
+ # CONFIG_CRYPTO_DEV_HIFN_795X is not set
+ CONFIG_HAVE_KVM=y
+ # CONFIG_VIRTUALIZATION is not set
+@@ -2235,7 +2253,6 @@
+ CONFIG_CRC32=y
+ # CONFIG_CRC7 is not set
+ # CONFIG_LIBCRC32C is not set
+-CONFIG_AUDIT_GENERIC=y
+ CONFIG_ZLIB_INFLATE=y
+ CONFIG_LZO_DECOMPRESS=y
+ CONFIG_XZ_DEC=y
+@@ -2255,6 +2272,7 @@
+ CONFIG_HAS_IOMEM=y
+ CONFIG_HAS_IOPORT=y
+ CONFIG_HAS_DMA=y
++CONFIG_CPUMASK_OFFSTACK=y
+ CONFIG_CPU_RMAP=y
+ CONFIG_NLATTR=y
+ CONFIG_AVERAGE=y
+Index: include/generated/utsrelease.h
+===================================================================
+--- include/generated/utsrelease.h	(revision 2)
++++ include/generated/utsrelease.h	(revision 15)
+@@ -1 +1 @@
+-#define UTS_RELEASE "3.0.4"
++#define UTS_RELEASE "3.0.4+"
+Index: include/generated/autoconf.h
+===================================================================
+--- include/generated/autoconf.h	(revision 2)
++++ include/generated/autoconf.h	(revision 15)
+@@ -1,9 +1,10 @@
+ /*
+  * Automatically generated C config: don't edit
+- * Linux/i386 3.0.4 Kernel Configuration
++ * Linux/x86_64 3.0.4 Kernel Configuration
+  */
+ #define CONFIG_RING_BUFFER 1
+ #define CONFIG_SCSI_DMA 1
++#define CONFIG_NUMA_EMU 1
+ #define CONFIG_TCP_MD5SIG 1
+ #define CONFIG_KERNEL_GZIP 1
+ #define CONFIG_MICROCODE 1
+@@ -13,45 +14,52 @@
+ #define CONFIG_KPROBE_EVENT 1
+ #define CONFIG_RFS_ACCEL 1
+ #define CONFIG_CRC32 1
+-#define CONFIG_HAVE_AOUT 1
+ #define CONFIG_X86_MCE 1
+ #define CONFIG_EXT3_FS_XATTR 1
+ #define CONFIG_FB_TILEBLITTING 1
+ #define CONFIG_SECCOMP 1
+ #define CONFIG_HIGH_RES_TIMERS 1
+ #define CONFIG_IP_MULTIPLE_TABLES 1
+-#define CONFIG_FLATMEM_MANUAL 1
++#define CONFIG_XEN_DOM0 1
+ #define CONFIG_FIRMWARE_MEMMAP 1
+ #define CONFIG_FIX_EARLYCON_MEM 1
+ #define CONFIG_XZ_DEC_IA64 1
+ #define CONFIG_INOTIFY_USER 1
++#define CONFIG_I7300_IDLE 1
+ #define CONFIG_MODULE_FORCE_UNLOAD 1
+-#define CONFIG_X86_MINIMUM_CPU_FAMILY 5
++#define CONFIG_X86_MINIMUM_CPU_FAMILY 64
+ #define CONFIG_CPU_FREQ_GOV_ONDEMAND 1
++#define CONFIG_AMD_IOMMU_STATS 1
+ #define CONFIG_EXPERIMENTAL 1
++#define CONFIG_PARAVIRT_SPINLOCKS 1
+ #define CONFIG_X86_TSC 1
+ #define CONFIG_ARCH_SUSPEND_POSSIBLE 1
++#define CONFIG_COMPAT_NETLINK_MESSAGES 1
+ #define CONFIG_INLINE_WRITE_UNLOCK_IRQ 1
+ #define CONFIG_PNPACPI 1
+ #define CONFIG_BINFMT_MISC 1
+ #define CONFIG_SSB_POSSIBLE 1
+ #define CONFIG_NF_NAT_SIP 1
++#define CONFIG_MMU_NOTIFIER 1
+ #define CONFIG_USB_OHCI_LITTLE_ENDIAN 1
+ #define CONFIG_NET_SCH_FIFO 1
+ #define CONFIG_FSNOTIFY 1
+-#define CONFIG_ARCH_FLATMEM_ENABLE 1
+ #define CONFIG_NF_CONNTRACK_SIP 1
+ #define CONFIG_CRYPTO_MANAGER_DISABLE_TESTS 1
+ #define CONFIG_HIDRAW 1
+ #define CONFIG_HAVE_KERNEL_LZMA 1
++#define CONFIG_HAVE_MEMORY_PRESENT 1
++#define CONFIG_CPUMASK_OFFSTACK 1
++#define CONFIG_XEN_COMPAT_XENFS 1
+ #define CONFIG_SERIAL_8250_RSA 1
+ #define CONFIG_FIB_RULES 1
+-#define CONFIG_KTIME_SCALAR 1
+ #define CONFIG_IP6_NF_MANGLE 1
+ #define CONFIG_SCSI_CONSTANTS 1
+ #define CONFIG_NETDEV_1000 1
+ #define CONFIG_IPV6 1
+ #define CONFIG_CRYPTO_AEAD 1
++#define CONFIG_AUDIT_ARCH 1
++#define CONFIG_COMPAT 1
+ #define CONFIG_HAVE_KERNEL_BZIP2 1
+ #define CONFIG_DEFAULT_TCP_CONG "cubic"
+ #define CONFIG_UEVENT_HELPER_PATH "/sbin/hotplug"
+@@ -62,22 +70,26 @@
+ #define CONFIG_WLAN 1
+ #define CONFIG_NAMESPACES 1
+ #define CONFIG_DEFAULT_MESSAGE_LOGLEVEL 4
+-#define CONFIG_X86_GENERIC 1
++#define CONFIG_IA32_EMULATION 1
+ #define CONFIG_FRAMEBUFFER_CONSOLE_DETECT_PRIMARY 1
+ #define CONFIG_BLK_DEV_BSG 1
+ #define CONFIG_CONNECTOR 1
+ #define CONFIG_PCIEAER 1
+ #define CONFIG_CRYPTO_RNG2 1
+ #define CONFIG_MSDOS_FS 1
++#define CONFIG_XEN_MAX_DOMAIN_MEMORY 128
+ #define CONFIG_BNX2 1
+ #define CONFIG_CFG80211 1
+ #define CONFIG_SERIAL_8250 1
++#define CONFIG_XEN_GNTDEV_MODULE 1
+ #define CONFIG_LZO_DECOMPRESS 1
+ #define CONFIG_HID_BELKIN 1
++#define CONFIG_COMPAT_BINFMT_ELF 1
+ #define CONFIG_WIRELESS_EXT_SYSFS 1
+ #define CONFIG_RD_LZMA 1
+ #define CONFIG_USB 1
+ #define CONFIG_NEED_PER_CPU_PAGE_FIRST_CHUNK 1
++#define CONFIG_CALGARY_IOMMU_ENABLED_BY_DEFAULT 1
+ #define CONFIG_CRYPTO_HMAC 1
+ #define CONFIG_SCHED_OMIT_FRAME_POINTER 1
+ #define CONFIG_BRANCH_PROFILE_NONE 1
+@@ -86,11 +98,16 @@
+ #define CONFIG_IP6_NF_TARGET_LOG 1
+ #define CONFIG_X86_SUPPORTS_MEMORY_FAILURE 1
+ #define CONFIG_HID_CHERRY 1
++#define CONFIG_XEN_PRIVILEGED_GUEST 1
++#define CONFIG_USE_PERCPU_NUMA_NODE_ID 1
+ #define CONFIG_BCMA_POSSIBLE 1
+ #define CONFIG_VGA_ARB 1
+ #define CONFIG_SENSORS_CORETEMP 1
++#define CONFIG_HAVE_CPUMASK_OF_CPU_MAP 1
++#define CONFIG_CAN_PM_TRACE 1
+ #define CONFIG_PRINTK 1
+ #define CONFIG_NF_CONNTRACK_PROC_COMPAT 1
++#define CONFIG_FB_SYS_FILLRECT 1
+ #define CONFIG_TIMERFD 1
+ #define CONFIG_DNS_RESOLVER 1
+ #define CONFIG_TRACEPOINTS 1
+@@ -98,24 +115,31 @@
+ #define CONFIG_NET_EMATCH_STACK 32
+ #define CONFIG_BOUNCE 1
+ #define CONFIG_SHMEM 1
++#define CONFIG_MIGRATION 1
+ #define CONFIG_HAVE_ARCH_JUMP_LABEL 1
+ #define CONFIG_DECOMPRESS_LZMA 1
++#define CONFIG_PCI_IOV 1
+ #define CONFIG_DNOTIFY 1
+ #define CONFIG_INPUT_MOUSEDEV 1
+ #define CONFIG_ATA 1
+ #define CONFIG_CRYPTO_DES 1
+ #define CONFIG_ENABLE_MUST_CHECK 1
+ #define CONFIG_NLS_CODEPAGE_437 1
++#define CONFIG_ARCH_PROC_KCORE_TEXT 1
+ #define CONFIG_SERIO 1
+ #define CONFIG_SCHEDSTATS 1
+ #define CONFIG_INPUT_MOUSE 1
++#define CONFIG_FB_SYS_IMAGEBLIT 1
+ #define CONFIG_X86 1
+ #define CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS 1
+ #define CONFIG_TIGON3 1
+ #define CONFIG_RTC_INTF_SYSFS 1
+ #define CONFIG_BLK_DEV_INITRD 1
++#define CONFIG_ARCH_ENABLE_MEMORY_HOTREMOVE 1
+ #define CONFIG_X86_MCE_AMD 1
+ #define CONFIG_RT2800_LIB 1
++#define CONFIG_HAVE_BPF_JIT 1
++#define CONFIG_XEN_PVHVM 1
+ #define CONFIG_ZLIB_INFLATE 1
+ #define CONFIG_CRC_T10DIF 1
+ #define CONFIG_PCI_IOAPIC 1
+@@ -127,8 +151,8 @@
+ #define CONFIG_CPU_IDLE_GOV_MENU 1
+ #define CONFIG_ACPI_FAN 1
+ #define CONFIG_STACKTRACE_SUPPORT 1
+-#define CONFIG_PCI_BIOS 1
+-#define CONFIG_OUTPUT_FORMAT "elf32-i386"
++#define CONFIG_MAXSMP 1
++#define CONFIG_OUTPUT_FORMAT "elf64-x86-64"
+ #define CONFIG_ACPI 1
+ #define CONFIG_USB_UHCI_HCD 1
+ #define CONFIG_NVRAM 1
+@@ -148,6 +172,7 @@
+ #define CONFIG_EFI 1
+ #define CONFIG_AGP_AMD64 1
+ #define CONFIG_HAVE_SETUP_PER_CPU_AREA 1
++#define CONFIG_PCI_XEN 1
+ #define CONFIG_IO_DELAY_TYPE_0XED 1
+ #define CONFIG_BLOCK 1
+ #define CONFIG_HAVE_IDE 1
+@@ -160,6 +185,9 @@
+ #define CONFIG_BUG 1
+ #define CONFIG_CONTEXT_SWITCH_TRACER 1
+ #define CONFIG_MAC80211_HAS_RC 1
++#define CONFIG_XEN 1
++#define CONFIG_I7300_IDLE_IOAT_CHANNEL 1
++#define CONFIG_PM 1
+ #define CONFIG_GENERIC_ISA_DMA 1
+ #define CONFIG_NF_CONNTRACK_IRC 1
+ #define CONFIG_DEVKMEM 1
+@@ -170,19 +198,25 @@
+ #define CONFIG_WEXT_CORE 1
+ #define CONFIG_NETLABEL 1
+ #define CONFIG_NLS 1
++#define CONFIG_CALGARY_IOMMU 1
+ #define CONFIG_NETFILTER_XT_TARGET_SECMARK 1
++#define CONFIG_XEN_SAVE_RESTORE 1
+ #define CONFIG_ZONE_DMA 1
+ #define CONFIG_SUN_PARTITION 1
+ #define CONFIG_SYN_COOKIES 1
+ #define CONFIG_IRQ_WORK 1
+ #define CONFIG_PCI_MSI 1
+ #define CONFIG_IP_ADVANCED_ROUTER 1
++#define CONFIG_FB_SYS_COPYAREA 1
++#define CONFIG_X86_64_SMP 1
++#define CONFIG_SPARSEMEM_EXTREME 1
+ #define CONFIG_TASK_XACCT 1
+ #define CONFIG_IP6_NF_IPTABLES 1
+ #define CONFIG_DEBUG_NX_TEST_MODULE 1
+-#define CONFIG_ARCH_DEFCONFIG "arch/x86/configs/i386_defconfig"
++#define CONFIG_ARCH_DEFCONFIG "arch/x86/configs/x86_64_defconfig"
+ #define CONFIG_CPU_FREQ_GOV_USERSPACE 1
+ #define CONFIG_VGA_ARB_MAX_GPUS 16
++#define CONFIG_XEN_BLKDEV_BACKEND 1
+ #define CONFIG_EVENT_TRACING 1
+ #define CONFIG_HID_CYPRESS 1
+ #define CONFIG_ARCH_WANT_OPTIONAL_GPIOLIB 1
+@@ -190,14 +224,13 @@
+ #define CONFIG_NLS_ISO8859_1 1
+ #define CONFIG_CRYPTO_WORKQUEUE 1
+ #define CONFIG_R8169 1
+-#define CONFIG_HAVE_ATOMIC_IOMAP 1
+ #define CONFIG_HID_KENSINGTON 1
+ #define CONFIG_BACKLIGHT_GENERIC 1
+ #define CONFIG_USB_EHCI_HCD 1
+ #define CONFIG_CPU_FREQ_TABLE 1
++#define CONFIG_MEMORY_HOTPLUG 1
+ #define CONFIG_NETDEVICES 1
+ #define CONFIG_IOSCHED_DEADLINE 1
+-#define CONFIG_CLKSRC_I8253 1
+ #define CONFIG_CGROUP_FREEZER 1
+ #define CONFIG_EVENTFD 1
+ #define CONFIG_FS_POSIX_ACL 1
+@@ -214,6 +247,7 @@
+ #define CONFIG_X86_BOOTPARAM_MEMORY_CORRUPTION_CHECK 1
+ #define CONFIG_X86_CMOV 1
+ #define CONFIG_ACPI_HOTPLUG_CPU 1
++#define CONFIG_PM_TRACE_RTC 1
+ #define CONFIG_RD_LZO 1
+ #define CONFIG_ARCH_HAS_CPU_IDLE_WAIT 1
+ #define CONFIG_SCSI_SPI_ATTRS 1
+@@ -225,6 +259,7 @@
+ #define CONFIG_RT2X00_LIB_USB 1
+ #define CONFIG_NF_DEFRAG_IPV4 1
+ #define CONFIG_SELECT_MEMORY_MODEL 1
++#define CONFIG_PM_DEBUG 1
+ #define CONFIG_NETFILTER_NETLINK_LOG 1
+ #define CONFIG_HAVE_DYNAMIC_FTRACE 1
+ #define CONFIG_MAGIC_SYSRQ 1
+@@ -242,9 +277,9 @@
+ #define CONFIG_IP_NF_FILTER 1
+ #define CONFIG_EXT3_FS 1
+ #define CONFIG_FAT_FS 1
+-#define CONFIG_HIGHMEM 1
+ #define CONFIG_INET_TUNNEL 1
+-#define CONFIG_X86_INTERNODE_CACHE_SHIFT 6
++#define CONFIG_X86_INTERNODE_CACHE_SHIFT 12
++#define CONFIG_KVM_CLOCK 1
+ #define CONFIG_X86_CHECK_BIOS_CORRUPTION 1
+ #define CONFIG_GENERIC_CLOCKEVENTS 1
+ #define CONFIG_IOSCHED_CFQ 1
+@@ -252,19 +287,22 @@
+ #define CONFIG_HAVE_KERNEL_XZ 1
+ #define CONFIG_CONSOLE_TRANSLATIONS 1
+ #define CONFIG_STOP_MACHINE 1
++#define CONFIG_SWIOTLB_XEN 1
+ #define CONFIG_DEBUG_DEVRES 1
+ #define CONFIG_CPU_FREQ 1
+ #define CONFIG_USB_OHCI_HCD 1
+ #define CONFIG_DUMMY_CONSOLE 1
+ #define CONFIG_NLS_ASCII 1
++#define CONFIG_PARAVIRT_DEBUG 1
+ #define CONFIG_TRACE_IRQFLAGS_SUPPORT 1
+ #define CONFIG_TCP_CONG_ADVANCED 1
++#define CONFIG_KVM_GUEST 1
+ #define CONFIG_QFMT_V2 1
+ #define CONFIG_RD_GZIP 1
+ #define CONFIG_ARCH_HAS_CPU_RELAX 1
+ #define CONFIG_HAVE_REGS_AND_STACK_ACCESS_API 1
+ #define CONFIG_TREE_RCU 1
+-#define CONFIG_LBDAF 1
++#define CONFIG_SWIOTLB 1
+ #define CONFIG_CRYPTO_MD5 1
+ #define CONFIG_ATA_ACPI 1
+ #define CONFIG_X86_EXTENDED_PLATFORM 1
+@@ -272,10 +310,10 @@
+ #define CONFIG_RT2800USB_RT53XX 1
+ #define CONFIG_HAVE_ARCH_KMEMCHECK 1
+ #define CONFIG_ACPI_PROCESSOR 1
++#define CONFIG_XEN_SCRUB_PAGES 1
+ #define CONFIG_HAVE_KVM 1
+ #define CONFIG_HAVE_GENERIC_HARDIRQS 1
+ #define CONFIG_BINFMT_ELF 1
+-#define CONFIG_AUDIT_GENERIC 1
+ #define CONFIG_SCSI_PROC_FS 1
+ #define CONFIG_HOTPLUG 1
+ #define CONFIG_IP_PIMSM_V1 1
+@@ -288,16 +326,15 @@
+ #define CONFIG_SLABINFO 1
+ #define CONFIG_KEYS_DEBUG_PROC_KEYS 1
+ #define CONFIG_TIMER_STATS 1
++#define CONFIG_PM_SLEEP_SMP 1
+ #define CONFIG_CRYPTO_HW 1
+ #define CONFIG_X86_VERBOSE_BOOTUP 1
+ #define CONFIG_MAC80211_RC_MINSTREL_HT 1
+-#define CONFIG_X86_INVLPG 1
+ #define CONFIG_PCSPKR_PLATFORM 1
+ #define CONFIG_ACPI_AC 1
+ #define CONFIG_VT_HW_CONSOLE_BINDING 1
+ #define CONFIG_XZ_DEC_X86 1
+-#define CONFIG_X86_32 1
+-#define CONFIG_X86_REBOOTFIXUPS 1
++#define CONFIG_HIBERNATE_CALLBACKS 1
+ #define CONFIG_GENERIC_CALIBRATE_DELAY 1
+ #define CONFIG_NET_CLS 1
+ #define CONFIG_X86_CMPXCHG 1
+@@ -311,10 +348,9 @@
+ #define CONFIG_USB_HID 1
+ #define CONFIG_USER_STACKTRACE_SUPPORT 1
+ #define CONFIG_SLUB_DEBUG 1
+-#define CONFIG_X86_INTEL_USERCOPY 1
++#define CONFIG_XENFS 1
+ #define CONFIG_IPV6_NDISC_NODETYPE 1
+ #define CONFIG_PCI_LABEL 1
+-#define CONFIG_CPU_SUP_CYRIX_32 1
+ #define CONFIG_CGROUP_SCHED 1
+ #define CONFIG_SYSVIPC 1
+ #define CONFIG_CRYPTO_PCOMP2 1
+@@ -328,6 +364,7 @@
+ #define CONFIG_AUDIT_WATCH 1
+ #define CONFIG_ARCH_HIBERNATION_POSSIBLE 1
+ #define CONFIG_UNIX 1
++#define CONFIG_XEN_DEV_EVTCHN 1
+ #define CONFIG_CRYPTO_HASH2 1
+ #define CONFIG_DEFAULT_HOSTNAME "(none)"
+ #define CONFIG_CRASH_DUMP 1
+@@ -337,6 +374,7 @@
+ #define CONFIG_HPET_TIMER 1
+ #define CONFIG_NF_CONNTRACK_IPV6 1
+ #define CONFIG_CRYPTO_ALGAPI 1
++#define CONFIG_X86_VSMP 1
+ #define CONFIG_RD_BZIP2 1
+ #define CONFIG_ARCH_SUPPORTS_MSI 1
+ #define CONFIG_KEYBOARD_ATKBD 1
+@@ -348,6 +386,7 @@
+ #define CONFIG_CRYPTO_HASH 1
+ #define CONFIG_EFI_PARTITION 1
+ #define CONFIG_LOG_BUF_SHIFT 18
++#define CONFIG_MEMORY_HOTREMOVE 1
+ #define CONFIG_HZ_1000 1
+ #define CONFIG_HPET 1
+ #define CONFIG_EXTRA_FIRMWARE ""
+@@ -359,18 +398,20 @@
+ #define CONFIG_PID_NS 1
+ #define CONFIG_KEXEC 1
+ #define CONFIG_CMPXCHG_LOCAL 1
++#define CONFIG_HVC_XEN 1
+ #define CONFIG_CPU_RMAP 1
+ #define CONFIG_BLK_DEV_LOOP 1
+ #define CONFIG_HAVE_OPTPROBES 1
+ #define CONFIG_NF_NAT_IRC 1
+ #define CONFIG_E1000E 1
+ #define CONFIG_CRYPTO_CBC 1
+-#define CONFIG_SERIAL_8250_RUNTIME_UARTS 4
++#define CONFIG_SERIAL_8250_RUNTIME_UARTS 6
+ #define CONFIG_KPROBES 1
+ #define CONFIG_FS_MBCACHE 1
+ #define CONFIG_RTC_CLASS 1
+ #define CONFIG_HAVE_LATENCYTOP_SUPPORT 1
+ #define CONFIG_TMPFS_XATTR 1
++#define CONFIG_IOMMU_HELPER 1
+ #define CONFIG_MICROCODE_OLD_INTERFACE 1
+ #define CONFIG_GENERIC_TRACER 1
+ #define CONFIG_HAVE_FUNCTION_TRACER 1
+@@ -378,10 +419,10 @@
+ #define CONFIG_CRYPTO_MANAGER2 1
+ #define CONFIG_SLUB 1
+ #define CONFIG_XZ_DEC_BCJ 1
++#define CONFIG_PM_SLEEP 1
+ #define CONFIG_MATOM 1
+ #define CONFIG_EDAC_DECODE_MCE 1
+ #define CONFIG_GENERIC_PENDING_IRQ 1
+-#define CONFIG_X86_NEED_RELOCS 1
+ #define CONFIG_EARLY_PRINTK_DBGP 1
+ #define CONFIG_FRAME_POINTER 1
+ #define CONFIG_MOUSE_PS2_LOGIPS2PP 1
+@@ -395,7 +436,7 @@
+ #define CONFIG_FB_CFB_IMAGEBLIT 1
+ #define CONFIG_SOLARIS_X86_PARTITION 1
+ #define CONFIG_OSF_PARTITION 1
+-#define CONFIG_X86_32_LAZY_GS 1
++#define CONFIG_XEN_BACKEND 1
+ #define CONFIG_FW_LOADER 1
+ #define CONFIG_KALLSYMS 1
+ #define CONFIG_PCI 1
+@@ -408,31 +449,38 @@
+ #define CONFIG_HAVE_HW_BREAKPOINT 1
+ #define CONFIG_KRETPROBES 1
+ #define CONFIG_CRYPTO_SHA1 1
++#define CONFIG_QUOTACTL_COMPAT 1
+ #define CONFIG_XZ_DEC 1
+ #define CONFIG_SATA_PMP 1
+ #define CONFIG_WATCHDOG 1
+ #define CONFIG_HAS_IOMEM 1
+ #define CONFIG_GENERIC_IRQ_PROBE 1
+ #define CONFIG_X86_WP_WORKS_OK 1
++#define CONFIG_GART_IOMMU 1
+ #define CONFIG_PCI_MMCONFIG 1
++#define CONFIG_PM_TRACE 1
++#define CONFIG_HVC_IRQ 1
+ #define CONFIG_PROC_KCORE 1
++#define CONFIG_NUMA 1
+ #define CONFIG_SCHED_HRTICK 1
+ #define CONFIG_EPOLL 1
+-#define CONFIG_ARCH_HWEIGHT_CFLAGS "-fcall-saved-ecx -fcall-saved-edx"
++#define CONFIG_ARCH_HWEIGHT_CFLAGS "-fcall-saved-rdi -fcall-saved-rsi -fcall-saved-rdx -fcall-saved-rcx -fcall-saved-r8 -fcall-saved-r9 -fcall-saved-r10 -fcall-saved-r11"
+ #define CONFIG_PARTITION_ADVANCED 1
+ #define CONFIG_UNIXWARE_DISKLABEL 1
+-#define CONFIG_X86_BSWAP 1
+ #define CONFIG_NET 1
+ #define CONFIG_INPUT_EVDEV 1
+ #define CONFIG_NETFILTER_XT_TARGET_TCPMSS 1
+ #define CONFIG_HAVE_SPARSE_IRQ 1
+ #define CONFIG_EXT2_FS 1
+ #define CONFIG_NETFILTER_XT_MATCH_CONNTRACK 1
++#define CONFIG_BLOCK_COMPAT 1
+ #define CONFIG_ITCO_WDT_MODULE 1
+ #define CONFIG_QUOTA_TREE 1
+ #define CONFIG_PACKET 1
++#define CONFIG_NODES_SHIFT 10
+ #define CONFIG_NOP_TRACER 1
+ #define CONFIG_BACKLIGHT_LCD_SUPPORT 1
++#define CONFIG_XEN_XENBUS_FRONTEND 1
+ #define CONFIG_INET 1
+ #define CONFIG_IP_ROUTE_VERBOSE 1
+ #define CONFIG_XZ_DEC_POWERPC 1
+@@ -449,9 +497,12 @@
+ #define CONFIG_NETFILTER_XT_MATCH_POLICY 1
+ #define CONFIG_HAVE_KPROBES 1
+ #define CONFIG_CRYPTO_AES 1
++#define CONFIG_KEYS_COMPAT 1
+ #define CONFIG_HID_PID 1
+ #define CONFIG_ISO9660_FS 1
+ #define CONFIG_SKY2 1
++#define CONFIG_XEN_WDT 1
++#define CONFIG_HVC_DRIVER 1
+ #define CONFIG_NETFILTER 1
+ #define CONFIG_X86_MSR 1
+ #define CONFIG_USE_GENERIC_SMP_HELPERS 1
+@@ -462,6 +513,7 @@
+ #define CONFIG_VGA_CONSOLE 1
+ #define CONFIG_NF_NAT_NEEDED 1
+ #define CONFIG_ATA_VERBOSE_ERROR 1
++#define CONFIG_XEN_BLKDEV_FRONTEND 1
+ #define CONFIG_LOCKDEP_SUPPORT 1
+ #define CONFIG_NO_HZ 1
+ #define CONFIG_POSIX_MQUEUE 1
+@@ -469,33 +521,32 @@
+ #define CONFIG_INET6_ESP 1
+ #define CONFIG_AUTOFS4_FS 1
+ #define CONFIG_ACPI_BUTTON 1
+-#define CONFIG_ILLEGAL_POINTER_VALUE 0x0
++#define CONFIG_ILLEGAL_POINTER_VALUE 0xdead000000000000
+ #define CONFIG_SYSCTL_SYSCALL 1
+ #define CONFIG_TASKSTATS 1
+-#define CONFIG_CRYPTO_AES_586 1
+ #define CONFIG_IP6_NF_FILTER 1
+ #define CONFIG_INPUT_MOUSEDEV_SCREEN_X 1024
++#define CONFIG_NEED_DMA_MAP_STATE 1
+ #define CONFIG_RT2500USB 1
+ #define CONFIG_X86_XADD 1
+ #define CONFIG_MOUSE_PS2_LIFEBOOK 1
+ #define CONFIG_SERIO_LIBPS2 1
+ #define CONFIG_X86_CPUID 1
+-#define CONFIG_PAGE_OFFSET 0xC0000000
+ #define CONFIG_FONT_8x8 1
+ #define CONFIG_RELOCATABLE 1
+ #define CONFIG_DMIID 1
+ #define CONFIG_QUOTA_NETLINK_INTERFACE 1
+ #define CONFIG_RT2X00_LIB 1
+-#define CONFIG_SPARSEMEM_STATIC 1
+ #define CONFIG_CFG80211_DEFAULT_PS 1
+ #define CONFIG_GENERIC_IOMAP 1
++#define CONFIG_XEN_FBDEV_FRONTEND 1
++#define CONFIG_SPARSEMEM_MANUAL 1
+ #define CONFIG_RT2X00_LIB_FIRMWARE 1
+ #define CONFIG_SMP 1
+ #define CONFIG_HAVE_KERNEL_GZIP 1
+ #define CONFIG_X86_USE_PPRO_CHECKSUM 1
+ #define CONFIG_PNP 1
+ #define CONFIG_NETFILTER_XT_TARGET_NFLOG 1
+-#define CONFIG_X86_POPAD_OK 1
+ #define CONFIG_GENERIC_BUG 1
+ #define CONFIG_HAVE_FTRACE_MCOUNT_RECORD 1
+ #define CONFIG_HW_CONSOLE 1
+@@ -503,13 +554,15 @@
+ #define CONFIG_HID_EZKEY 1
+ #define CONFIG_IOSCHED_NOOP 1
+ #define CONFIG_SERIAL_NONSTANDARD 1
++#define CONFIG_INTR_REMAP 1
+ #define CONFIG_QUOTACTL 1
++#define CONFIG_PARAVIRT 1
++#define CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER 1
+ #define CONFIG_HAVE_IOREMAP_PROT 1
+ #define CONFIG_GENERIC_ACL 1
+ #define CONFIG_DEBUG_KERNEL 1
+ #define CONFIG_LOCALVERSION ""
+ #define CONFIG_CRYPTO 1
+-#define CONFIG_CPU_SUP_TRANSMETA_32 1
+ #define CONFIG_DEFAULT_MMAP_MIN_ADDR 4096
+ #define CONFIG_IP_NF_IPTABLES 1
+ #define CONFIG_HAVE_DMA_API_DEBUG 1
+@@ -523,6 +576,7 @@
+ #define CONFIG_SERIAL_CORE 1
+ #define CONFIG_UID16 1
+ #define CONFIG_HID_MICROSOFT 1
++#define CONFIG_ARCH_PHYS_ADDR_T_64BIT 1
+ #define CONFIG_HAVE_KRETPROBES 1
+ #define CONFIG_NF_DEFRAG_IPV6 1
+ #define CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE 1
+@@ -539,11 +593,15 @@
+ #define CONFIG_FONT_8x16 1
+ #define CONFIG_SERIAL_8250_MANY_PORTS 1
+ #define CONFIG_X86_MCE_INTEL 1
++#define CONFIG_X86_64 1
+ #define CONFIG_ARCH_ENABLE_MEMORY_HOTPLUG 1
+ #define CONFIG_RTC_DRV_CMOS 1
+ #define CONFIG_DEBUG_STACK_USAGE 1
+ #define CONFIG_ARCH_HAS_CACHE_LINE_SIZE 1
++#define CONFIG_IA32_AOUT 1
++#define CONFIG_SPARSEMEM_VMEMMAP 1
+ #define CONFIG_PHYLIB 1
++#define CONFIG_ARCH_MEMORY_PROBE 1
+ #define CONFIG_OPTIMIZE_INLINING 1
+ #define CONFIG_LSM_MMAP_MIN_ADDR 65536
+ #define CONFIG_IPC_NS 1
+@@ -552,18 +610,24 @@
+ #define CONFIG_CLOCKSOURCE_WATCHDOG 1
+ #define CONFIG_DECOMPRESS_BZIP2 1
+ #define CONFIG_XZ_DEC_SPARC 1
++#define CONFIG_ARCH_SPARSEMEM_DEFAULT 1
+ #define CONFIG_INLINE_READ_UNLOCK_IRQ 1
+ #define CONFIG_PROC_VMCORE 1
+ #define CONFIG_HID_A4TECH 1
++#define CONFIG_XEN_DEBUG 1
+ #define CONFIG_ACPI_PROCFS 1
+ #define CONFIG_RCU_CPU_STALL_TIMEOUT 60
+ #define CONFIG_IP_ROUTE_MULTIPATH 1
++#define CONFIG_XEN_NETDEV_FRONTEND 1
+ #define CONFIG_INPUT_FF_MEMLESS 1
++#define CONFIG_PARAVIRT_CLOCK 1
+ #define CONFIG_CHR_DEV_SG 1
+ #define CONFIG_X86_RESERVE_LOW 64
+ #define CONFIG_NEED_SG_DMA_LENGTH 1
+ #define CONFIG_IP6_NF_MATCH_IPV6HEADER 1
++#define CONFIG_BPF_JIT 1
+ #define CONFIG_PROFILING 1
++#define CONFIG_SPARSEMEM 1
+ #define CONFIG_INET6_XFRM_MODE_TRANSPORT 1
+ #define CONFIG_CRYPTO_ARC4 1
+ #define CONFIG_CRYPTO_MANAGER 1
+@@ -577,6 +641,7 @@
+ #define CONFIG_TASK_IO_ACCOUNTING 1
+ #define CONFIG_FAT_DEFAULT_IOCHARSET "iso8859-1"
+ #define CONFIG_ARCH_POPULATES_NODE_MAP 1
++#define CONFIG_MEMORY_HOTPLUG_SPARSE 1
+ #define CONFIG_FRAME_WARN 2048
+ #define CONFIG_GENERIC_HWEIGHT 1
+ #define CONFIG_INITRAMFS_SOURCE ""
+@@ -592,36 +657,40 @@
+ #define CONFIG_ISA_DMA_API 1
+ #define CONFIG_HZ 1000
+ #define CONFIG_SERIAL_8250_SHARE_IRQ 1
++#define CONFIG_NEED_MULTIPLE_NODES 1
+ #define CONFIG_AGP_INTEL 1
+ #define CONFIG_ACPI_PROC_EVENT 1
+ #define CONFIG_INLINE_SPIN_UNLOCK_IRQ 1
++#define CONFIG_DIRECT_GBPAGES 1
+ #define CONFIG_SERIAL_8250_NR_UARTS 32
+ #define CONFIG_HAVE_USER_RETURN_NOTIFIER 1
+ #define CONFIG_DEFAULT_IOSCHED "cfq"
+ #define CONFIG_NLATTR 1
+ #define CONFIG_TCP_CONG_CUBIC 1
+-#define CONFIG_NR_CPUS 8
++#define CONFIG_NR_CPUS 4096
+ #define CONFIG_HID_KYE 1
+ #define CONFIG_MOUSE_PS2_TRACKPOINT 1
+ #define CONFIG_FIRMWARE_IN_KERNEL 1
+ #define CONFIG_SYSFS 1
+ #define CONFIG_HAVE_FUNCTION_TRACE_MCOUNT_TEST 1
+ #define CONFIG_RT2800USB_UNKNOWN 1
+-#define CONFIG_HIGHMEM4G 1
++#define CONFIG_XEN_PLATFORM_PCI_MODULE 1
+ #define CONFIG_XZ_DEC_ARM 1
+ #define CONFIG_DEFAULT_IO_DELAY_TYPE 0
++#define CONFIG_FB_SYS_FOPS 1
+ #define CONFIG_EXT2_FS_SECURITY 1
+ #define CONFIG_HAVE_SYSCALL_TRACEPOINTS 1
+-#define CONFIG_CPU_SUP_UMC_32 1
+ #define CONFIG_FB 1
+ #define CONFIG_TRACING 1
++#define CONFIG_SPARSEMEM_VMEMMAP_ENABLE 1
+ #define CONFIG_MSDOS_PARTITION 1
+ #define CONFIG_RT2800USB_RT33XX 1
+ #define CONFIG_HAVE_OPROFILE 1
+-#define CONFIG_HAVE_GENERIC_DMA_COHERENT 1
+ #define CONFIG_CPU_IDLE_GOV_LADDER 1
+ #define CONFIG_THERMAL 1
++#define CONFIG_AMD_IOMMU 1
+ #define CONFIG_IP_PNP_RARP 1
++#define CONFIG_AMD_NUMA 1
+ #define CONFIG_HAVE_ARCH_KGDB 1
+ #define CONFIG_VGACON_SOFT_SCROLLBACK_SIZE 64
+ #define CONFIG_USB_ARCH_HAS_OHCI 1
+@@ -635,9 +704,12 @@
+ #define CONFIG_GENERIC_CMOS_UPDATE 1
+ #define CONFIG_DEFAULT_SECURITY "selinux"
+ #define CONFIG_TICK_ONESHOT 1
++#define CONFIG_XEN_PCIDEV_FRONTEND 1
++#define CONFIG_COMPAT_FOR_U64_ALIGNMENT 1
+ #define CONFIG_HW_RANDOM 1
+ #define CONFIG_MUTEX_SPIN_ON_OWNER 1
+ #define CONFIG_IO_DELAY_TYPE_0X80 0
++#define CONFIG_SYS_HYPERVISOR 1
+ #define CONFIG_HAVE_DMA_ATTRS 1
+ #define CONFIG_AMIGA_PARTITION 1
+ #define CONFIG_EARLY_PRINTK 1
+@@ -646,19 +718,23 @@
+ #define CONFIG_ACPI_THERMAL 1
+ #define CONFIG_RT2X00_LIB_CRYPTO 1
+ #define CONFIG_BASE_SMALL 0
++#define CONFIG_XEN_GRANT_DEV_ALLOC_MODULE 1
+ #define CONFIG_CRYPTO_BLKCIPHER2 1
+ #define CONFIG_SECURITY_SELINUX_AVC_STATS 1
+ #define CONFIG_HAVE_TEXT_POKE_SMP 1
+ #define CONFIG_PROC_FS 1
++#define CONFIG_ACPI_HOTPLUG_MEMORY 1
++#define CONFIG_GENERIC_BUG_RELATIVE_POINTERS 1
+ #define CONFIG_IRQ_FORCED_THREADING 1
+ #define CONFIG_EXT2_FS_XATTR 1
+-#define CONFIG_HW_RANDOM_GEODE 1
++#define CONFIG_XEN_SYS_HYPERVISOR 1
+ #define CONFIG_X86_HT 1
+-#define CONFIG_FLATMEM 1
++#define CONFIG_XEN_NETDEV_BACKEND 1
++#define CONFIG_XEN_BALLOON 1
+ #define CONFIG_DEBUG_STACKOVERFLOW 1
+ #define CONFIG_PAGEFLAGS_EXTENDED 1
+-#define CONFIG_VM86 1
+ #define CONFIG_SYSCTL 1
++#define CONFIG_PHYS_ADDR_T_64BIT 1
+ #define CONFIG_HAVE_C_RECORDMCOUNT 1
+ #define CONFIG_HAVE_ARCH_TRACEHOOK 1
+ #define CONFIG_XFRM_USER 1
+@@ -671,19 +747,23 @@
+ #define CONFIG_DEBUG_MEMORY_INIT 1
+ #define CONFIG_AUDIT 1
+ #define CONFIG_PCIEASPM 1
++#define CONFIG_PM_ADVANCED_DEBUG 1
+ #define CONFIG_ATA_PIIX 1
++#define CONFIG_FB_DEFERRED_IO 1
+ #define CONFIG_SATA_AHCI 1
+ #define CONFIG_SECURITY 1
+ #define CONFIG_OPTPROBES 1
+-#define CONFIG_X86_32_SMP 1
++#define CONFIG_ACPI_NUMA 1
+ #define CONFIG_FAT_DEFAULT_CODEPAGE 437
+ #define CONFIG_BLK_DEV 1
+ #define CONFIG_SERIO_I8042 1
+ #define CONFIG_MAC80211_RC_DEFAULT "minstrel_ht"
++#define CONFIG_IOMMU_API 1
+ #define CONFIG_TRACING_SUPPORT 1
+ #define CONFIG_UNIX98_PTYS 1
+ #define CONFIG_MINIX_SUBPARTITION 1
+ #define CONFIG_SECURITY_SELINUX 1
++#define CONFIG_ZONE_DMA32 1
+ #define CONFIG_NET_SCHED 1
+ #define CONFIG_NETFILTER_XT_TARGET_CONNSECMARK 1
+ #define CONFIG_JBD 1
+@@ -701,13 +781,12 @@
+ #define CONFIG_INPUT_POLLDEV 1
+ #define CONFIG_X86_REROUTE_FOR_BROKEN_BOOT_IRQS 1
+ #define CONFIG_INET_LRO 1
+-#define CONFIG_FLAT_NODE_MEM_MAP 1
+ #define CONFIG_VT_CONSOLE 1
+ #define CONFIG_CFG80211_WEXT 1
+ #define CONFIG_NETFILTER_XT_MATCH_STATE 1
++#define CONFIG_PARAVIRT_GUEST 1
+ #define CONFIG_BSD_DISKLABEL 1
+ #define CONFIG_PCI_DIRECT 1
+-#define CONFIG_DOUBLEFAULT 1
+ #define CONFIG_INET6_XFRM_MODE_BEET 1
+ #define CONFIG_POSIX_MQUEUE_SYSCTL 1
+ #define CONFIG_FB_CFB_COPYAREA 1
+@@ -717,11 +796,11 @@
+ #define CONFIG_GENERIC_CLOCKEVENTS_BUILD 1
+ #define CONFIG_SGI_PARTITION 1
+ #define CONFIG_INPUT_SPARSEKMAP 1
+-#define CONFIG_PCI_GOANY 1
+-#define CONFIG_HIGHPTE 1
+ #define CONFIG_SYSVIPC_SYSCTL 1
++#define CONFIG_X86_64_ACPI_NUMA 1
+ #define CONFIG_DECOMPRESS_GZIP 1
+ #define CONFIG_DECOMPRESS_LZO 1
++#define CONFIG_64BIT 1
+ #define CONFIG_QUOTA 1
+ #define CONFIG_CROSS_COMPILE ""
+ #define CONFIG_NETWORK_SECMARK 1
+@@ -734,6 +813,8 @@
+ #define CONFIG_ARCH_WANT_FRAME_POINTERS 1
+ #define CONFIG_NLS_UTF8 1
+ #define CONFIG_CPU_SUP_CENTAUR 1
++#define CONFIG_NODES_SPAN_OTHER_NODES 1
++#define CONFIG_SYSVIPC_COMPAT 1
+ #define CONFIG_ATA_GENERIC 1
+ #define CONFIG_SWAP 1
+ #define CONFIG_MICROCODE_INTEL 1
+@@ -757,12 +838,14 @@
+ #define CONFIG_X86_PAT 1
+ #define CONFIG_PNP_DEBUG_MESSAGES 1
+ #define CONFIG_NF_CONNTRACK 1
++#define CONFIG_ARCH_DMA_ADDR_T_64BIT 1
+ #define CONFIG_FILE_LOCKING 1
+ #define CONFIG_KARMA_PARTITION 1
+ #define CONFIG_AIO 1
+ #define CONFIG_EXT2_FS_XIP 1
+ #define CONFIG_NET_EMATCH 1
+ #define CONFIG_PERF_EVENTS 1
++#define CONFIG_GENERIC_TIME_VSYSCALL 1
+ #define CONFIG_IP_NF_TARGET_REJECT 1
+ #define CONFIG_GENERIC_HARDIRQS 1
+ #define CONFIG_SYSCTL_SYSCALL_CHECK 1
+@@ -776,6 +859,7 @@
+ #define CONFIG_X86_ACPI_CPUFREQ 1
+ #define CONFIG_DEFAULT_SECURITY_SELINUX 1
+ #define CONFIG_CRYPTO_AEAD2 1
++#define CONFIG_XEN_DEBUG_FS 1
+ #define CONFIG_MOUSE_PS2 1
+ #define CONFIG_CRYPTO_ALGAPI2 1
+ #define CONFIG_PHYSICAL_START 0x1000000
+Index: include/generated/asm-offsets.h
+===================================================================
+--- include/generated/asm-offsets.h	(revision 2)
++++ include/generated/asm-offsets.h	(revision 15)
+@@ -7,61 +7,77 @@
+  *
+  */
+ 
+-#define IA32_SIGCONTEXT_ax 44 /* offsetof(struct sigcontext, ax)	# */
+-#define IA32_SIGCONTEXT_bx 32 /* offsetof(struct sigcontext, bx)	# */
+-#define IA32_SIGCONTEXT_cx 40 /* offsetof(struct sigcontext, cx)	# */
+-#define IA32_SIGCONTEXT_dx 36 /* offsetof(struct sigcontext, dx)	# */
+-#define IA32_SIGCONTEXT_si 20 /* offsetof(struct sigcontext, si)	# */
+-#define IA32_SIGCONTEXT_di 16 /* offsetof(struct sigcontext, di)	# */
+-#define IA32_SIGCONTEXT_bp 24 /* offsetof(struct sigcontext, bp)	# */
+-#define IA32_SIGCONTEXT_sp 28 /* offsetof(struct sigcontext, sp)	# */
+-#define IA32_SIGCONTEXT_ip 56 /* offsetof(struct sigcontext, ip)	# */
++#define PV_IRQ_adjust_exception_frame 48 /* offsetof(struct pv_irq_ops, adjust_exception_frame)	# */
++#define PV_CPU_usergs_sysret32 304 /* offsetof(struct pv_cpu_ops, usergs_sysret32)	# */
++#define PV_CPU_usergs_sysret64 296 /* offsetof(struct pv_cpu_ops, usergs_sysret64)	# */
++#define PV_CPU_swapgs 320 /* offsetof(struct pv_cpu_ops, swapgs)	# */
+ 
+-#define CPUINFO_x86 0 /* offsetof(struct cpuinfo_x86, x86)	# */
+-#define CPUINFO_x86_vendor 1 /* offsetof(struct cpuinfo_x86, x86_vendor)	# */
+-#define CPUINFO_x86_model 2 /* offsetof(struct cpuinfo_x86, x86_model)	# */
+-#define CPUINFO_x86_mask 3 /* offsetof(struct cpuinfo_x86, x86_mask)	# */
+-#define CPUINFO_hard_math 6 /* offsetof(struct cpuinfo_x86, hard_math)	# */
+-#define CPUINFO_cpuid_level 20 /* offsetof(struct cpuinfo_x86, cpuid_level)	# */
+-#define CPUINFO_x86_capability 24 /* offsetof(struct cpuinfo_x86, x86_capability)	# */
+-#define CPUINFO_x86_vendor_id 64 /* offsetof(struct cpuinfo_x86, x86_vendor_id)	# */
++#define TI_sysenter_return 88 /* offsetof(struct thread_info, sysenter_return)	# */
+ 
+-#define TI_sysenter_return 60 /* offsetof(struct thread_info, sysenter_return)	# */
+-#define TI_cpu 16 /* offsetof(struct thread_info, cpu)	# */
++#define IA32_SIGCONTEXT_ax 44 /* offsetof(struct sigcontext_ia32, ax)	# */
++#define IA32_SIGCONTEXT_bx 32 /* offsetof(struct sigcontext_ia32, bx)	# */
++#define IA32_SIGCONTEXT_cx 40 /* offsetof(struct sigcontext_ia32, cx)	# */
++#define IA32_SIGCONTEXT_dx 36 /* offsetof(struct sigcontext_ia32, dx)	# */
++#define IA32_SIGCONTEXT_si 20 /* offsetof(struct sigcontext_ia32, si)	# */
++#define IA32_SIGCONTEXT_di 16 /* offsetof(struct sigcontext_ia32, di)	# */
++#define IA32_SIGCONTEXT_bp 24 /* offsetof(struct sigcontext_ia32, bp)	# */
++#define IA32_SIGCONTEXT_sp 28 /* offsetof(struct sigcontext_ia32, sp)	# */
++#define IA32_SIGCONTEXT_ip 56 /* offsetof(struct sigcontext_ia32, ip)	# */
+ 
+-#define PT_EBX 0 /* offsetof(struct pt_regs, bx)	# */
+-#define PT_ECX 4 /* offsetof(struct pt_regs, cx)	# */
+-#define PT_EDX 8 /* offsetof(struct pt_regs, dx)	# */
+-#define PT_ESI 12 /* offsetof(struct pt_regs, si)	# */
+-#define PT_EDI 16 /* offsetof(struct pt_regs, di)	# */
+-#define PT_EBP 20 /* offsetof(struct pt_regs, bp)	# */
+-#define PT_EAX 24 /* offsetof(struct pt_regs, ax)	# */
+-#define PT_DS 28 /* offsetof(struct pt_regs, ds)	# */
+-#define PT_ES 32 /* offsetof(struct pt_regs, es)	# */
+-#define PT_FS 36 /* offsetof(struct pt_regs, fs)	# */
+-#define PT_GS 40 /* offsetof(struct pt_regs, gs)	# */
+-#define PT_ORIG_EAX 44 /* offsetof(struct pt_regs, orig_ax)	# */
+-#define PT_EIP 48 /* offsetof(struct pt_regs, ip)	# */
+-#define PT_CS 52 /* offsetof(struct pt_regs, cs)	# */
+-#define PT_EFLAGS 56 /* offsetof(struct pt_regs, flags)	# */
+-#define PT_OLDESP 60 /* offsetof(struct pt_regs, sp)	# */
+-#define PT_OLDSS 64 /* offsetof(struct pt_regs, ss)	# */
++#define IA32_RT_SIGFRAME_sigcontext 164 /* offsetof(struct rt_sigframe_ia32, uc.uc_mcontext)	# */
+ 
+-#define IA32_RT_SIGFRAME_sigcontext 164 /* offsetof(struct rt_sigframe, uc.uc_mcontext)	# */
++#define pt_regs_bx 40 /* offsetof(struct pt_regs, bx)	# */
++#define pt_regs_bx 40 /* offsetof(struct pt_regs, bx)	# */
++#define pt_regs_cx 88 /* offsetof(struct pt_regs, cx)	# */
++#define pt_regs_dx 96 /* offsetof(struct pt_regs, dx)	# */
++#define pt_regs_sp 152 /* offsetof(struct pt_regs, sp)	# */
++#define pt_regs_bp 32 /* offsetof(struct pt_regs, bp)	# */
++#define pt_regs_si 104 /* offsetof(struct pt_regs, si)	# */
++#define pt_regs_di 112 /* offsetof(struct pt_regs, di)	# */
++#define pt_regs_r8 72 /* offsetof(struct pt_regs, r8)	# */
++#define pt_regs_r9 64 /* offsetof(struct pt_regs, r9)	# */
++#define pt_regs_r10 56 /* offsetof(struct pt_regs, r10)	# */
++#define pt_regs_r11 48 /* offsetof(struct pt_regs, r11)	# */
++#define pt_regs_r12 24 /* offsetof(struct pt_regs, r12)	# */
++#define pt_regs_r13 16 /* offsetof(struct pt_regs, r13)	# */
++#define pt_regs_r14 8 /* offsetof(struct pt_regs, r14)	# */
++#define pt_regs_r15 0 /* offsetof(struct pt_regs, r15)	# */
++#define pt_regs_flags 144 /* offsetof(struct pt_regs, flags)	# */
+ 
+-#define TSS_sysenter_sp0 -8572 /* offsetof(struct tss_struct, x86_tss.sp0) - sizeof(struct tss_struct)	# */
++#define saved_context_cr0 202 /* offsetof(struct saved_context, cr0)	# */
++#define saved_context_cr2 210 /* offsetof(struct saved_context, cr2)	# */
++#define saved_context_cr3 218 /* offsetof(struct saved_context, cr3)	# */
++#define saved_context_cr4 226 /* offsetof(struct saved_context, cr4)	# */
++#define saved_context_cr8 234 /* offsetof(struct saved_context, cr8)	# */
+ 
+-#define TI_flags 8 /* offsetof(struct thread_info, flags)	# */
+-#define TI_status 12 /* offsetof(struct thread_info, status)	# */
+-#define TI_addr_limit 24 /* offsetof(struct thread_info, addr_limit)	# */
+-#define TI_preempt_count 20 /* offsetof(struct thread_info, preempt_count)	# */
++#define TSS_ist 36 /* offsetof(struct tss_struct, x86_tss.ist)	# */
+ 
+-#define crypto_tfm_ctx_offset 48 /* offsetof(struct crypto_tfm, __crt_ctx)	# */
++#define __NR_syscall_max 308 /* sizeof(syscalls) - 1	# */
+ 
++#define TI_flags 16 /* offsetof(struct thread_info, flags)	# */
++#define TI_status 20 /* offsetof(struct thread_info, status)	# */
++#define TI_addr_limit 32 /* offsetof(struct thread_info, addr_limit)	# */
++#define TI_preempt_count 28 /* offsetof(struct thread_info, preempt_count)	# */
++
++#define crypto_tfm_ctx_offset 88 /* offsetof(struct crypto_tfm, __crt_ctx)	# */
++
+ #define pbe_address 0 /* offsetof(struct pbe, address)	# */
+-#define pbe_orig_address 4 /* offsetof(struct pbe, orig_address)	# */
+-#define pbe_next 8 /* offsetof(struct pbe, next)	# */
++#define pbe_orig_address 8 /* offsetof(struct pbe, orig_address)	# */
++#define pbe_next 16 /* offsetof(struct pbe, next)	# */
+ 
++#define PARAVIRT_enabled 8 /* offsetof(struct pv_info, paravirt_enabled)	# */
++#define PARAVIRT_PATCH_pv_cpu_ops 24 /* offsetof(struct paravirt_patch_template, pv_cpu_ops)	# */
++#define PARAVIRT_PATCH_pv_irq_ops 368 /* offsetof(struct paravirt_patch_template, pv_irq_ops)	# */
++#define PV_IRQ_irq_disable 16 /* offsetof(struct pv_irq_ops, irq_disable)	# */
++#define PV_IRQ_irq_enable 24 /* offsetof(struct pv_irq_ops, irq_enable)	# */
++#define PV_CPU_iret 312 /* offsetof(struct pv_cpu_ops, iret)	# */
++#define PV_CPU_irq_enable_sysexit 288 /* offsetof(struct pv_cpu_ops, irq_enable_sysexit)	# */
++#define PV_CPU_read_cr0 24 /* offsetof(struct pv_cpu_ops, read_cr0)	# */
++#define PV_MMU_read_cr2 0 /* offsetof(struct pv_mmu_ops, read_cr2)	# */
++
++#define XEN_vcpu_info_mask 1 /* offsetof(struct vcpu_info, evtchn_upcall_mask)	# */
++#define XEN_vcpu_info_pending 0 /* offsetof(struct vcpu_info, evtchn_upcall_pending)	# */
++
+ #define BP_scratch 484 /* offsetof(struct boot_params, scratch)	# */
+ #define BP_loadflags 529 /* offsetof(struct boot_params, hdr.loadflags)	# */
+ #define BP_hardware_subarch 572 /* offsetof(struct boot_params, hdr.hardware_subarch)	# */
+Index: include/generated/compile.h
+===================================================================
+--- include/generated/compile.h	(revision 2)
++++ include/generated/compile.h	(revision 15)
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 0 */
++/* This file is auto generated, version 1 */
+ /* SMP */
+-#define UTS_MACHINE "i386"
+-#define UTS_VERSION "#0 SMP Thu Aug 9 11:01:31 PDT 2012"
+-#define LINUX_COMPILE_BY "root"
+-#define LINUX_COMPILE_HOST "squidly001"
+-#define LINUX_COMPILER "gcc version 4.5.3 (Gentoo 4.5.3-r2 p1.5, pie-0.4.7) "
++#define UTS_MACHINE "x86_64"
++#define UTS_VERSION "#1 SMP Sat Oct 6 02:01:53 PDT 2012"
++#define LINUX_COMPILE_BY "okazakim"
++#define LINUX_COMPILE_HOST "flip3.engr.oregonstate.edu"
++#define LINUX_COMPILER "gcc version 4.4.6 20120305 (Red Hat 4.4.6-4) (GCC) "
+Index: include/config/kernel.release
+===================================================================
+--- include/config/kernel.release	(revision 2)
++++ include/config/kernel.release	(revision 15)
+@@ -1 +1 @@
+-3.0.4
++3.0.4+
+Index: include/config/auto.conf.cmd
+===================================================================
+--- include/config/auto.conf.cmd	(revision 2)
++++ include/config/auto.conf.cmd	(revision 15)
+@@ -615,7 +615,7 @@
+ ifneq "$(KERNELVERSION)" "3.0.4"
+ include/config/auto.conf: FORCE
+ endif
+-ifneq "$(ARCH)" "i386"
++ifneq "$(ARCH)" "x86_64"
+ include/config/auto.conf: FORCE
+ endif
+ ifneq "$(SRCARCH)" "x86"
+Index: include/config/auto.conf
+===================================================================
+--- include/config/auto.conf	(revision 2)
++++ include/config/auto.conf	(revision 15)
+@@ -1,9 +1,10 @@
+ #
+ # Automatically generated make config: don't edit
+-# Linux/i386 3.0.4 Kernel Configuration
++# Linux/x86_64 3.0.4 Kernel Configuration
+ #
+ CONFIG_RING_BUFFER=y
+ CONFIG_SCSI_DMA=y
++CONFIG_NUMA_EMU=y
+ CONFIG_TCP_MD5SIG=y
+ CONFIG_KERNEL_GZIP=y
+ CONFIG_MICROCODE=y
+@@ -13,45 +14,52 @@
+ CONFIG_KPROBE_EVENT=y
+ CONFIG_RFS_ACCEL=y
+ CONFIG_CRC32=y
+-CONFIG_HAVE_AOUT=y
+ CONFIG_X86_MCE=y
+ CONFIG_EXT3_FS_XATTR=y
+ CONFIG_FB_TILEBLITTING=y
+ CONFIG_SECCOMP=y
+ CONFIG_HIGH_RES_TIMERS=y
+ CONFIG_IP_MULTIPLE_TABLES=y
+-CONFIG_FLATMEM_MANUAL=y
++CONFIG_XEN_DOM0=y
+ CONFIG_FIRMWARE_MEMMAP=y
+ CONFIG_FIX_EARLYCON_MEM=y
+ CONFIG_XZ_DEC_IA64=y
+ CONFIG_INOTIFY_USER=y
++CONFIG_I7300_IDLE=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+-CONFIG_X86_MINIMUM_CPU_FAMILY=5
++CONFIG_X86_MINIMUM_CPU_FAMILY=64
+ CONFIG_CPU_FREQ_GOV_ONDEMAND=y
++CONFIG_AMD_IOMMU_STATS=y
+ CONFIG_EXPERIMENTAL=y
++CONFIG_PARAVIRT_SPINLOCKS=y
+ CONFIG_X86_TSC=y
+ CONFIG_ARCH_SUSPEND_POSSIBLE=y
++CONFIG_COMPAT_NETLINK_MESSAGES=y
+ CONFIG_INLINE_WRITE_UNLOCK_IRQ=y
+ CONFIG_PNPACPI=y
+ CONFIG_BINFMT_MISC=y
+ CONFIG_SSB_POSSIBLE=y
+ CONFIG_NF_NAT_SIP=y
++CONFIG_MMU_NOTIFIER=y
+ CONFIG_USB_OHCI_LITTLE_ENDIAN=y
+ CONFIG_NET_SCH_FIFO=y
+ CONFIG_FSNOTIFY=y
+-CONFIG_ARCH_FLATMEM_ENABLE=y
+ CONFIG_NF_CONNTRACK_SIP=y
+ CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y
+ CONFIG_HIDRAW=y
+ CONFIG_HAVE_KERNEL_LZMA=y
++CONFIG_HAVE_MEMORY_PRESENT=y
++CONFIG_CPUMASK_OFFSTACK=y
++CONFIG_XEN_COMPAT_XENFS=y
+ CONFIG_SERIAL_8250_RSA=y
+ CONFIG_FIB_RULES=y
+-CONFIG_KTIME_SCALAR=y
+ CONFIG_IP6_NF_MANGLE=y
+ CONFIG_SCSI_CONSTANTS=y
+ CONFIG_NETDEV_1000=y
+ CONFIG_IPV6=y
+ CONFIG_CRYPTO_AEAD=y
++CONFIG_AUDIT_ARCH=y
++CONFIG_COMPAT=y
+ CONFIG_HAVE_KERNEL_BZIP2=y
+ CONFIG_DEFAULT_TCP_CONG="cubic"
+ CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
+@@ -62,22 +70,26 @@
+ CONFIG_WLAN=y
+ CONFIG_NAMESPACES=y
+ CONFIG_DEFAULT_MESSAGE_LOGLEVEL=4
+-CONFIG_X86_GENERIC=y
++CONFIG_IA32_EMULATION=y
+ CONFIG_FRAMEBUFFER_CONSOLE_DETECT_PRIMARY=y
+ CONFIG_BLK_DEV_BSG=y
+ CONFIG_CONNECTOR=y
+ CONFIG_PCIEAER=y
+ CONFIG_CRYPTO_RNG2=y
+ CONFIG_MSDOS_FS=y
++CONFIG_XEN_MAX_DOMAIN_MEMORY=128
+ CONFIG_BNX2=y
+ CONFIG_CFG80211=y
+ CONFIG_SERIAL_8250=y
++CONFIG_XEN_GNTDEV=m
+ CONFIG_LZO_DECOMPRESS=y
+ CONFIG_HID_BELKIN=y
++CONFIG_COMPAT_BINFMT_ELF=y
+ CONFIG_WIRELESS_EXT_SYSFS=y
+ CONFIG_RD_LZMA=y
+ CONFIG_USB=y
+ CONFIG_NEED_PER_CPU_PAGE_FIRST_CHUNK=y
++CONFIG_CALGARY_IOMMU_ENABLED_BY_DEFAULT=y
+ CONFIG_CRYPTO_HMAC=y
+ CONFIG_SCHED_OMIT_FRAME_POINTER=y
+ CONFIG_BRANCH_PROFILE_NONE=y
+@@ -86,11 +98,16 @@
+ CONFIG_IP6_NF_TARGET_LOG=y
+ CONFIG_X86_SUPPORTS_MEMORY_FAILURE=y
+ CONFIG_HID_CHERRY=y
++CONFIG_XEN_PRIVILEGED_GUEST=y
++CONFIG_USE_PERCPU_NUMA_NODE_ID=y
+ CONFIG_BCMA_POSSIBLE=y
+ CONFIG_VGA_ARB=y
+ CONFIG_SENSORS_CORETEMP=y
++CONFIG_HAVE_CPUMASK_OF_CPU_MAP=y
++CONFIG_CAN_PM_TRACE=y
+ CONFIG_PRINTK=y
+ CONFIG_NF_CONNTRACK_PROC_COMPAT=y
++CONFIG_FB_SYS_FILLRECT=y
+ CONFIG_TIMERFD=y
+ CONFIG_DNS_RESOLVER=y
+ CONFIG_TRACEPOINTS=y
+@@ -98,24 +115,31 @@
+ CONFIG_NET_EMATCH_STACK=32
+ CONFIG_BOUNCE=y
+ CONFIG_SHMEM=y
++CONFIG_MIGRATION=y
+ CONFIG_HAVE_ARCH_JUMP_LABEL=y
+ CONFIG_DECOMPRESS_LZMA=y
++CONFIG_PCI_IOV=y
+ CONFIG_DNOTIFY=y
+ CONFIG_INPUT_MOUSEDEV=y
+ CONFIG_ATA=y
+ CONFIG_CRYPTO_DES=y
+ CONFIG_ENABLE_MUST_CHECK=y
+ CONFIG_NLS_CODEPAGE_437=y
++CONFIG_ARCH_PROC_KCORE_TEXT=y
+ CONFIG_SERIO=y
+ CONFIG_SCHEDSTATS=y
+ CONFIG_INPUT_MOUSE=y
++CONFIG_FB_SYS_IMAGEBLIT=y
+ CONFIG_X86=y
+ CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y
+ CONFIG_TIGON3=y
+ CONFIG_RTC_INTF_SYSFS=y
+ CONFIG_BLK_DEV_INITRD=y
++CONFIG_ARCH_ENABLE_MEMORY_HOTREMOVE=y
+ CONFIG_X86_MCE_AMD=y
+ CONFIG_RT2800_LIB=y
++CONFIG_HAVE_BPF_JIT=y
++CONFIG_XEN_PVHVM=y
+ CONFIG_ZLIB_INFLATE=y
+ CONFIG_CRC_T10DIF=y
+ CONFIG_PCI_IOAPIC=y
+@@ -127,8 +151,8 @@
+ CONFIG_CPU_IDLE_GOV_MENU=y
+ CONFIG_ACPI_FAN=y
+ CONFIG_STACKTRACE_SUPPORT=y
+-CONFIG_PCI_BIOS=y
+-CONFIG_OUTPUT_FORMAT="elf32-i386"
++CONFIG_MAXSMP=y
++CONFIG_OUTPUT_FORMAT="elf64-x86-64"
+ CONFIG_ACPI=y
+ CONFIG_USB_UHCI_HCD=y
+ CONFIG_NVRAM=y
+@@ -148,6 +172,7 @@
+ CONFIG_EFI=y
+ CONFIG_AGP_AMD64=y
+ CONFIG_HAVE_SETUP_PER_CPU_AREA=y
++CONFIG_PCI_XEN=y
+ CONFIG_IO_DELAY_TYPE_0XED=1
+ CONFIG_BLOCK=y
+ CONFIG_HAVE_IDE=y
+@@ -160,6 +185,9 @@
+ CONFIG_BUG=y
+ CONFIG_CONTEXT_SWITCH_TRACER=y
+ CONFIG_MAC80211_HAS_RC=y
++CONFIG_XEN=y
++CONFIG_I7300_IDLE_IOAT_CHANNEL=y
++CONFIG_PM=y
+ CONFIG_GENERIC_ISA_DMA=y
+ CONFIG_NF_CONNTRACK_IRC=y
+ CONFIG_DEVKMEM=y
+@@ -170,19 +198,25 @@
+ CONFIG_WEXT_CORE=y
+ CONFIG_NETLABEL=y
+ CONFIG_NLS=y
++CONFIG_CALGARY_IOMMU=y
+ CONFIG_NETFILTER_XT_TARGET_SECMARK=y
++CONFIG_XEN_SAVE_RESTORE=y
+ CONFIG_ZONE_DMA=y
+ CONFIG_SUN_PARTITION=y
+ CONFIG_SYN_COOKIES=y
+ CONFIG_IRQ_WORK=y
+ CONFIG_PCI_MSI=y
+ CONFIG_IP_ADVANCED_ROUTER=y
++CONFIG_FB_SYS_COPYAREA=y
++CONFIG_X86_64_SMP=y
++CONFIG_SPARSEMEM_EXTREME=y
+ CONFIG_TASK_XACCT=y
+ CONFIG_IP6_NF_IPTABLES=y
+ CONFIG_DEBUG_NX_TEST=m
+-CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"
++CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"
+ CONFIG_CPU_FREQ_GOV_USERSPACE=y
+ CONFIG_VGA_ARB_MAX_GPUS=16
++CONFIG_XEN_BLKDEV_BACKEND=y
+ CONFIG_EVENT_TRACING=y
+ CONFIG_HID_CYPRESS=y
+ CONFIG_ARCH_WANT_OPTIONAL_GPIOLIB=y
+@@ -190,14 +224,13 @@
+ CONFIG_NLS_ISO8859_1=y
+ CONFIG_CRYPTO_WORKQUEUE=y
+ CONFIG_R8169=y
+-CONFIG_HAVE_ATOMIC_IOMAP=y
+ CONFIG_HID_KENSINGTON=y
+ CONFIG_BACKLIGHT_GENERIC=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_CPU_FREQ_TABLE=y
++CONFIG_MEMORY_HOTPLUG=y
+ CONFIG_NETDEVICES=y
+ CONFIG_IOSCHED_DEADLINE=y
+-CONFIG_CLKSRC_I8253=y
+ CONFIG_CGROUP_FREEZER=y
+ CONFIG_EVENTFD=y
+ CONFIG_FS_POSIX_ACL=y
+@@ -214,6 +247,7 @@
+ CONFIG_X86_BOOTPARAM_MEMORY_CORRUPTION_CHECK=y
+ CONFIG_X86_CMOV=y
+ CONFIG_ACPI_HOTPLUG_CPU=y
++CONFIG_PM_TRACE_RTC=y
+ CONFIG_RD_LZO=y
+ CONFIG_ARCH_HAS_CPU_IDLE_WAIT=y
+ CONFIG_SCSI_SPI_ATTRS=y
+@@ -225,6 +259,7 @@
+ CONFIG_RT2X00_LIB_USB=y
+ CONFIG_NF_DEFRAG_IPV4=y
+ CONFIG_SELECT_MEMORY_MODEL=y
++CONFIG_PM_DEBUG=y
+ CONFIG_NETFILTER_NETLINK_LOG=y
+ CONFIG_HAVE_DYNAMIC_FTRACE=y
+ CONFIG_MAGIC_SYSRQ=y
+@@ -242,9 +277,9 @@
+ CONFIG_IP_NF_FILTER=y
+ CONFIG_EXT3_FS=y
+ CONFIG_FAT_FS=y
+-CONFIG_HIGHMEM=y
+ CONFIG_INET_TUNNEL=y
+-CONFIG_X86_INTERNODE_CACHE_SHIFT=6
++CONFIG_X86_INTERNODE_CACHE_SHIFT=12
++CONFIG_KVM_CLOCK=y
+ CONFIG_X86_CHECK_BIOS_CORRUPTION=y
+ CONFIG_GENERIC_CLOCKEVENTS=y
+ CONFIG_IOSCHED_CFQ=y
+@@ -252,19 +287,22 @@
+ CONFIG_HAVE_KERNEL_XZ=y
+ CONFIG_CONSOLE_TRANSLATIONS=y
+ CONFIG_STOP_MACHINE=y
++CONFIG_SWIOTLB_XEN=y
+ CONFIG_DEBUG_DEVRES=y
+ CONFIG_CPU_FREQ=y
+ CONFIG_USB_OHCI_HCD=y
+ CONFIG_DUMMY_CONSOLE=y
+ CONFIG_NLS_ASCII=y
++CONFIG_PARAVIRT_DEBUG=y
+ CONFIG_TRACE_IRQFLAGS_SUPPORT=y
+ CONFIG_TCP_CONG_ADVANCED=y
++CONFIG_KVM_GUEST=y
+ CONFIG_QFMT_V2=y
+ CONFIG_RD_GZIP=y
+ CONFIG_ARCH_HAS_CPU_RELAX=y
+ CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y
+ CONFIG_TREE_RCU=y
+-CONFIG_LBDAF=y
++CONFIG_SWIOTLB=y
+ CONFIG_CRYPTO_MD5=y
+ CONFIG_ATA_ACPI=y
+ CONFIG_X86_EXTENDED_PLATFORM=y
+@@ -272,10 +310,10 @@
+ CONFIG_RT2800USB_RT53XX=y
+ CONFIG_HAVE_ARCH_KMEMCHECK=y
+ CONFIG_ACPI_PROCESSOR=y
++CONFIG_XEN_SCRUB_PAGES=y
+ CONFIG_HAVE_KVM=y
+ CONFIG_HAVE_GENERIC_HARDIRQS=y
+ CONFIG_BINFMT_ELF=y
+-CONFIG_AUDIT_GENERIC=y
+ CONFIG_SCSI_PROC_FS=y
+ CONFIG_HOTPLUG=y
+ CONFIG_IP_PIMSM_V1=y
+@@ -288,16 +326,15 @@
+ CONFIG_SLABINFO=y
+ CONFIG_KEYS_DEBUG_PROC_KEYS=y
+ CONFIG_TIMER_STATS=y
++CONFIG_PM_SLEEP_SMP=y
+ CONFIG_CRYPTO_HW=y
+ CONFIG_X86_VERBOSE_BOOTUP=y
+ CONFIG_MAC80211_RC_MINSTREL_HT=y
+-CONFIG_X86_INVLPG=y
+ CONFIG_PCSPKR_PLATFORM=y
+ CONFIG_ACPI_AC=y
+ CONFIG_VT_HW_CONSOLE_BINDING=y
+ CONFIG_XZ_DEC_X86=y
+-CONFIG_X86_32=y
+-CONFIG_X86_REBOOTFIXUPS=y
++CONFIG_HIBERNATE_CALLBACKS=y
+ CONFIG_GENERIC_CALIBRATE_DELAY=y
+ CONFIG_NET_CLS=y
+ CONFIG_X86_CMPXCHG=y
+@@ -311,10 +348,9 @@
+ CONFIG_USB_HID=y
+ CONFIG_USER_STACKTRACE_SUPPORT=y
+ CONFIG_SLUB_DEBUG=y
+-CONFIG_X86_INTEL_USERCOPY=y
++CONFIG_XENFS=y
+ CONFIG_IPV6_NDISC_NODETYPE=y
+ CONFIG_PCI_LABEL=y
+-CONFIG_CPU_SUP_CYRIX_32=y
+ CONFIG_CGROUP_SCHED=y
+ CONFIG_SYSVIPC=y
+ CONFIG_CRYPTO_PCOMP2=y
+@@ -328,6 +364,7 @@
+ CONFIG_AUDIT_WATCH=y
+ CONFIG_ARCH_HIBERNATION_POSSIBLE=y
+ CONFIG_UNIX=y
++CONFIG_XEN_DEV_EVTCHN=y
+ CONFIG_CRYPTO_HASH2=y
+ CONFIG_DEFAULT_HOSTNAME="(none)"
+ CONFIG_CRASH_DUMP=y
+@@ -337,6 +374,7 @@
+ CONFIG_HPET_TIMER=y
+ CONFIG_NF_CONNTRACK_IPV6=y
+ CONFIG_CRYPTO_ALGAPI=y
++CONFIG_X86_VSMP=y
+ CONFIG_RD_BZIP2=y
+ CONFIG_ARCH_SUPPORTS_MSI=y
+ CONFIG_KEYBOARD_ATKBD=y
+@@ -348,6 +386,7 @@
+ CONFIG_CRYPTO_HASH=y
+ CONFIG_EFI_PARTITION=y
+ CONFIG_LOG_BUF_SHIFT=18
++CONFIG_MEMORY_HOTREMOVE=y
+ CONFIG_HZ_1000=y
+ CONFIG_HPET=y
+ CONFIG_EXTRA_FIRMWARE=""
+@@ -359,18 +398,20 @@
+ CONFIG_PID_NS=y
+ CONFIG_KEXEC=y
+ CONFIG_CMPXCHG_LOCAL=y
++CONFIG_HVC_XEN=y
+ CONFIG_CPU_RMAP=y
+ CONFIG_BLK_DEV_LOOP=y
+ CONFIG_HAVE_OPTPROBES=y
+ CONFIG_NF_NAT_IRC=y
+ CONFIG_E1000E=y
+ CONFIG_CRYPTO_CBC=y
+-CONFIG_SERIAL_8250_RUNTIME_UARTS=4
++CONFIG_SERIAL_8250_RUNTIME_UARTS=6
+ CONFIG_KPROBES=y
+ CONFIG_FS_MBCACHE=y
+ CONFIG_RTC_CLASS=y
+ CONFIG_HAVE_LATENCYTOP_SUPPORT=y
+ CONFIG_TMPFS_XATTR=y
++CONFIG_IOMMU_HELPER=y
+ CONFIG_MICROCODE_OLD_INTERFACE=y
+ CONFIG_GENERIC_TRACER=y
+ CONFIG_HAVE_FUNCTION_TRACER=y
+@@ -378,10 +419,10 @@
+ CONFIG_CRYPTO_MANAGER2=y
+ CONFIG_SLUB=y
+ CONFIG_XZ_DEC_BCJ=y
++CONFIG_PM_SLEEP=y
+ CONFIG_MATOM=y
+ CONFIG_EDAC_DECODE_MCE=y
+ CONFIG_GENERIC_PENDING_IRQ=y
+-CONFIG_X86_NEED_RELOCS=y
+ CONFIG_EARLY_PRINTK_DBGP=y
+ CONFIG_FRAME_POINTER=y
+ CONFIG_MOUSE_PS2_LOGIPS2PP=y
+@@ -395,7 +436,7 @@
+ CONFIG_FB_CFB_IMAGEBLIT=y
+ CONFIG_SOLARIS_X86_PARTITION=y
+ CONFIG_OSF_PARTITION=y
+-CONFIG_X86_32_LAZY_GS=y
++CONFIG_XEN_BACKEND=y
+ CONFIG_FW_LOADER=y
+ CONFIG_KALLSYMS=y
+ CONFIG_PCI=y
+@@ -408,31 +449,38 @@
+ CONFIG_HAVE_HW_BREAKPOINT=y
+ CONFIG_KRETPROBES=y
+ CONFIG_CRYPTO_SHA1=y
++CONFIG_QUOTACTL_COMPAT=y
+ CONFIG_XZ_DEC=y
+ CONFIG_SATA_PMP=y
+ CONFIG_WATCHDOG=y
+ CONFIG_HAS_IOMEM=y
+ CONFIG_GENERIC_IRQ_PROBE=y
+ CONFIG_X86_WP_WORKS_OK=y
++CONFIG_GART_IOMMU=y
+ CONFIG_PCI_MMCONFIG=y
++CONFIG_PM_TRACE=y
++CONFIG_HVC_IRQ=y
+ CONFIG_PROC_KCORE=y
++CONFIG_NUMA=y
+ CONFIG_SCHED_HRTICK=y
+ CONFIG_EPOLL=y
+-CONFIG_ARCH_HWEIGHT_CFLAGS="-fcall-saved-ecx -fcall-saved-edx"
++CONFIG_ARCH_HWEIGHT_CFLAGS="-fcall-saved-rdi -fcall-saved-rsi -fcall-saved-rdx -fcall-saved-rcx -fcall-saved-r8 -fcall-saved-r9 -fcall-saved-r10 -fcall-saved-r11"
+ CONFIG_PARTITION_ADVANCED=y
+ CONFIG_UNIXWARE_DISKLABEL=y
+-CONFIG_X86_BSWAP=y
+ CONFIG_NET=y
+ CONFIG_INPUT_EVDEV=y
+ CONFIG_NETFILTER_XT_TARGET_TCPMSS=y
+ CONFIG_HAVE_SPARSE_IRQ=y
+ CONFIG_EXT2_FS=y
+ CONFIG_NETFILTER_XT_MATCH_CONNTRACK=y
++CONFIG_BLOCK_COMPAT=y
+ CONFIG_ITCO_WDT=m
+ CONFIG_QUOTA_TREE=y
+ CONFIG_PACKET=y
++CONFIG_NODES_SHIFT=10
+ CONFIG_NOP_TRACER=y
+ CONFIG_BACKLIGHT_LCD_SUPPORT=y
++CONFIG_XEN_XENBUS_FRONTEND=y
+ CONFIG_INET=y
+ CONFIG_IP_ROUTE_VERBOSE=y
+ CONFIG_XZ_DEC_POWERPC=y
+@@ -449,9 +497,12 @@
+ CONFIG_NETFILTER_XT_MATCH_POLICY=y
+ CONFIG_HAVE_KPROBES=y
+ CONFIG_CRYPTO_AES=y
++CONFIG_KEYS_COMPAT=y
+ CONFIG_HID_PID=y
+ CONFIG_ISO9660_FS=y
+ CONFIG_SKY2=y
++CONFIG_XEN_WDT=y
++CONFIG_HVC_DRIVER=y
+ CONFIG_NETFILTER=y
+ CONFIG_X86_MSR=y
+ CONFIG_USE_GENERIC_SMP_HELPERS=y
+@@ -462,6 +513,7 @@
+ CONFIG_VGA_CONSOLE=y
+ CONFIG_NF_NAT_NEEDED=y
+ CONFIG_ATA_VERBOSE_ERROR=y
++CONFIG_XEN_BLKDEV_FRONTEND=y
+ CONFIG_LOCKDEP_SUPPORT=y
+ CONFIG_NO_HZ=y
+ CONFIG_POSIX_MQUEUE=y
+@@ -469,33 +521,32 @@
+ CONFIG_INET6_ESP=y
+ CONFIG_AUTOFS4_FS=y
+ CONFIG_ACPI_BUTTON=y
+-CONFIG_ILLEGAL_POINTER_VALUE=0
++CONFIG_ILLEGAL_POINTER_VALUE=0xdead000000000000
+ CONFIG_SYSCTL_SYSCALL=y
+ CONFIG_TASKSTATS=y
+-CONFIG_CRYPTO_AES_586=y
+ CONFIG_IP6_NF_FILTER=y
+ CONFIG_INPUT_MOUSEDEV_SCREEN_X=1024
++CONFIG_NEED_DMA_MAP_STATE=y
+ CONFIG_RT2500USB=y
+ CONFIG_X86_XADD=y
+ CONFIG_MOUSE_PS2_LIFEBOOK=y
+ CONFIG_SERIO_LIBPS2=y
+ CONFIG_X86_CPUID=y
+-CONFIG_PAGE_OFFSET=0xC0000000
+ CONFIG_FONT_8x8=y
+ CONFIG_RELOCATABLE=y
+ CONFIG_DMIID=y
+ CONFIG_QUOTA_NETLINK_INTERFACE=y
+ CONFIG_RT2X00_LIB=y
+-CONFIG_SPARSEMEM_STATIC=y
+ CONFIG_CFG80211_DEFAULT_PS=y
+ CONFIG_GENERIC_IOMAP=y
++CONFIG_XEN_FBDEV_FRONTEND=y
++CONFIG_SPARSEMEM_MANUAL=y
+ CONFIG_RT2X00_LIB_FIRMWARE=y
+ CONFIG_SMP=y
+ CONFIG_HAVE_KERNEL_GZIP=y
+ CONFIG_X86_USE_PPRO_CHECKSUM=y
+ CONFIG_PNP=y
+ CONFIG_NETFILTER_XT_TARGET_NFLOG=y
+-CONFIG_X86_POPAD_OK=y
+ CONFIG_GENERIC_BUG=y
+ CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y
+ CONFIG_HW_CONSOLE=y
+@@ -503,13 +554,15 @@
+ CONFIG_HID_EZKEY=y
+ CONFIG_IOSCHED_NOOP=y
+ CONFIG_SERIAL_NONSTANDARD=y
++CONFIG_INTR_REMAP=y
+ CONFIG_QUOTACTL=y
++CONFIG_PARAVIRT=y
++CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER=y
+ CONFIG_HAVE_IOREMAP_PROT=y
+ CONFIG_GENERIC_ACL=y
+ CONFIG_DEBUG_KERNEL=y
+ CONFIG_LOCALVERSION=""
+ CONFIG_CRYPTO=y
+-CONFIG_CPU_SUP_TRANSMETA_32=y
+ CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
+ CONFIG_IP_NF_IPTABLES=y
+ CONFIG_HAVE_DMA_API_DEBUG=y
+@@ -523,6 +576,7 @@
+ CONFIG_SERIAL_CORE=y
+ CONFIG_UID16=y
+ CONFIG_HID_MICROSOFT=y
++CONFIG_ARCH_PHYS_ADDR_T_64BIT=y
+ CONFIG_HAVE_KRETPROBES=y
+ CONFIG_NF_DEFRAG_IPV6=y
+ CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE=y
+@@ -539,11 +593,15 @@
+ CONFIG_FONT_8x16=y
+ CONFIG_SERIAL_8250_MANY_PORTS=y
+ CONFIG_X86_MCE_INTEL=y
++CONFIG_X86_64=y
+ CONFIG_ARCH_ENABLE_MEMORY_HOTPLUG=y
+ CONFIG_RTC_DRV_CMOS=y
+ CONFIG_DEBUG_STACK_USAGE=y
+ CONFIG_ARCH_HAS_CACHE_LINE_SIZE=y
++CONFIG_IA32_AOUT=y
++CONFIG_SPARSEMEM_VMEMMAP=y
+ CONFIG_PHYLIB=y
++CONFIG_ARCH_MEMORY_PROBE=y
+ CONFIG_OPTIMIZE_INLINING=y
+ CONFIG_LSM_MMAP_MIN_ADDR=65536
+ CONFIG_IPC_NS=y
+@@ -552,18 +610,24 @@
+ CONFIG_CLOCKSOURCE_WATCHDOG=y
+ CONFIG_DECOMPRESS_BZIP2=y
+ CONFIG_XZ_DEC_SPARC=y
++CONFIG_ARCH_SPARSEMEM_DEFAULT=y
+ CONFIG_INLINE_READ_UNLOCK_IRQ=y
+ CONFIG_PROC_VMCORE=y
+ CONFIG_HID_A4TECH=y
++CONFIG_XEN_DEBUG=y
+ CONFIG_ACPI_PROCFS=y
+ CONFIG_RCU_CPU_STALL_TIMEOUT=60
+ CONFIG_IP_ROUTE_MULTIPATH=y
++CONFIG_XEN_NETDEV_FRONTEND=y
+ CONFIG_INPUT_FF_MEMLESS=y
++CONFIG_PARAVIRT_CLOCK=y
+ CONFIG_CHR_DEV_SG=y
+ CONFIG_X86_RESERVE_LOW=64
+ CONFIG_NEED_SG_DMA_LENGTH=y
+ CONFIG_IP6_NF_MATCH_IPV6HEADER=y
++CONFIG_BPF_JIT=y
+ CONFIG_PROFILING=y
++CONFIG_SPARSEMEM=y
+ CONFIG_INET6_XFRM_MODE_TRANSPORT=y
+ CONFIG_CRYPTO_ARC4=y
+ CONFIG_CRYPTO_MANAGER=y
+@@ -577,6 +641,7 @@
+ CONFIG_TASK_IO_ACCOUNTING=y
+ CONFIG_FAT_DEFAULT_IOCHARSET="iso8859-1"
+ CONFIG_ARCH_POPULATES_NODE_MAP=y
++CONFIG_MEMORY_HOTPLUG_SPARSE=y
+ CONFIG_FRAME_WARN=2048
+ CONFIG_GENERIC_HWEIGHT=y
+ CONFIG_INITRAMFS_SOURCE=""
+@@ -592,36 +657,40 @@
+ CONFIG_ISA_DMA_API=y
+ CONFIG_HZ=1000
+ CONFIG_SERIAL_8250_SHARE_IRQ=y
++CONFIG_NEED_MULTIPLE_NODES=y
+ CONFIG_AGP_INTEL=y
+ CONFIG_ACPI_PROC_EVENT=y
+ CONFIG_INLINE_SPIN_UNLOCK_IRQ=y
++CONFIG_DIRECT_GBPAGES=y
+ CONFIG_SERIAL_8250_NR_UARTS=32
+ CONFIG_HAVE_USER_RETURN_NOTIFIER=y
+ CONFIG_DEFAULT_IOSCHED="cfq"
+ CONFIG_NLATTR=y
+ CONFIG_TCP_CONG_CUBIC=y
+-CONFIG_NR_CPUS=8
++CONFIG_NR_CPUS=4096
+ CONFIG_HID_KYE=y
+ CONFIG_MOUSE_PS2_TRACKPOINT=y
+ CONFIG_FIRMWARE_IN_KERNEL=y
+ CONFIG_SYSFS=y
+ CONFIG_HAVE_FUNCTION_TRACE_MCOUNT_TEST=y
+ CONFIG_RT2800USB_UNKNOWN=y
+-CONFIG_HIGHMEM4G=y
++CONFIG_XEN_PLATFORM_PCI=m
+ CONFIG_XZ_DEC_ARM=y
+ CONFIG_DEFAULT_IO_DELAY_TYPE=0
++CONFIG_FB_SYS_FOPS=y
+ CONFIG_EXT2_FS_SECURITY=y
+ CONFIG_HAVE_SYSCALL_TRACEPOINTS=y
+-CONFIG_CPU_SUP_UMC_32=y
+ CONFIG_FB=y
+ CONFIG_TRACING=y
++CONFIG_SPARSEMEM_VMEMMAP_ENABLE=y
+ CONFIG_MSDOS_PARTITION=y
+ CONFIG_RT2800USB_RT33XX=y
+ CONFIG_HAVE_OPROFILE=y
+-CONFIG_HAVE_GENERIC_DMA_COHERENT=y
+ CONFIG_CPU_IDLE_GOV_LADDER=y
+ CONFIG_THERMAL=y
++CONFIG_AMD_IOMMU=y
+ CONFIG_IP_PNP_RARP=y
++CONFIG_AMD_NUMA=y
+ CONFIG_HAVE_ARCH_KGDB=y
+ CONFIG_VGACON_SOFT_SCROLLBACK_SIZE=64
+ CONFIG_USB_ARCH_HAS_OHCI=y
+@@ -635,9 +704,12 @@
+ CONFIG_GENERIC_CMOS_UPDATE=y
+ CONFIG_DEFAULT_SECURITY="selinux"
+ CONFIG_TICK_ONESHOT=y
++CONFIG_XEN_PCIDEV_FRONTEND=y
++CONFIG_COMPAT_FOR_U64_ALIGNMENT=y
+ CONFIG_HW_RANDOM=y
+ CONFIG_MUTEX_SPIN_ON_OWNER=y
+ CONFIG_IO_DELAY_TYPE_0X80=0
++CONFIG_SYS_HYPERVISOR=y
+ CONFIG_HAVE_DMA_ATTRS=y
+ CONFIG_AMIGA_PARTITION=y
+ CONFIG_EARLY_PRINTK=y
+@@ -646,19 +718,23 @@
+ CONFIG_ACPI_THERMAL=y
+ CONFIG_RT2X00_LIB_CRYPTO=y
+ CONFIG_BASE_SMALL=0
++CONFIG_XEN_GRANT_DEV_ALLOC=m
+ CONFIG_CRYPTO_BLKCIPHER2=y
+ CONFIG_SECURITY_SELINUX_AVC_STATS=y
+ CONFIG_HAVE_TEXT_POKE_SMP=y
+ CONFIG_PROC_FS=y
++CONFIG_ACPI_HOTPLUG_MEMORY=y
++CONFIG_GENERIC_BUG_RELATIVE_POINTERS=y
+ CONFIG_IRQ_FORCED_THREADING=y
+ CONFIG_EXT2_FS_XATTR=y
+-CONFIG_HW_RANDOM_GEODE=y
++CONFIG_XEN_SYS_HYPERVISOR=y
+ CONFIG_X86_HT=y
+-CONFIG_FLATMEM=y
++CONFIG_XEN_NETDEV_BACKEND=y
++CONFIG_XEN_BALLOON=y
+ CONFIG_DEBUG_STACKOVERFLOW=y
+ CONFIG_PAGEFLAGS_EXTENDED=y
+-CONFIG_VM86=y
+ CONFIG_SYSCTL=y
++CONFIG_PHYS_ADDR_T_64BIT=y
+ CONFIG_HAVE_C_RECORDMCOUNT=y
+ CONFIG_HAVE_ARCH_TRACEHOOK=y
+ CONFIG_XFRM_USER=y
+@@ -671,19 +747,23 @@
+ CONFIG_DEBUG_MEMORY_INIT=y
+ CONFIG_AUDIT=y
+ CONFIG_PCIEASPM=y
++CONFIG_PM_ADVANCED_DEBUG=y
+ CONFIG_ATA_PIIX=y
++CONFIG_FB_DEFERRED_IO=y
+ CONFIG_SATA_AHCI=y
+ CONFIG_SECURITY=y
+ CONFIG_OPTPROBES=y
+-CONFIG_X86_32_SMP=y
++CONFIG_ACPI_NUMA=y
+ CONFIG_FAT_DEFAULT_CODEPAGE=437
+ CONFIG_BLK_DEV=y
+ CONFIG_SERIO_I8042=y
+ CONFIG_MAC80211_RC_DEFAULT="minstrel_ht"
++CONFIG_IOMMU_API=y
+ CONFIG_TRACING_SUPPORT=y
+ CONFIG_UNIX98_PTYS=y
+ CONFIG_MINIX_SUBPARTITION=y
+ CONFIG_SECURITY_SELINUX=y
++CONFIG_ZONE_DMA32=y
+ CONFIG_NET_SCHED=y
+ CONFIG_NETFILTER_XT_TARGET_CONNSECMARK=y
+ CONFIG_JBD=y
+@@ -701,13 +781,12 @@
+ CONFIG_INPUT_POLLDEV=y
+ CONFIG_X86_REROUTE_FOR_BROKEN_BOOT_IRQS=y
+ CONFIG_INET_LRO=y
+-CONFIG_FLAT_NODE_MEM_MAP=y
+ CONFIG_VT_CONSOLE=y
+ CONFIG_CFG80211_WEXT=y
+ CONFIG_NETFILTER_XT_MATCH_STATE=y
++CONFIG_PARAVIRT_GUEST=y
+ CONFIG_BSD_DISKLABEL=y
+ CONFIG_PCI_DIRECT=y
+-CONFIG_DOUBLEFAULT=y
+ CONFIG_INET6_XFRM_MODE_BEET=y
+ CONFIG_POSIX_MQUEUE_SYSCTL=y
+ CONFIG_FB_CFB_COPYAREA=y
+@@ -717,11 +796,11 @@
+ CONFIG_GENERIC_CLOCKEVENTS_BUILD=y
+ CONFIG_SGI_PARTITION=y
+ CONFIG_INPUT_SPARSEKMAP=y
+-CONFIG_PCI_GOANY=y
+-CONFIG_HIGHPTE=y
+ CONFIG_SYSVIPC_SYSCTL=y
++CONFIG_X86_64_ACPI_NUMA=y
+ CONFIG_DECOMPRESS_GZIP=y
+ CONFIG_DECOMPRESS_LZO=y
++CONFIG_64BIT=y
+ CONFIG_QUOTA=y
+ CONFIG_CROSS_COMPILE=""
+ CONFIG_NETWORK_SECMARK=y
+@@ -734,6 +813,8 @@
+ CONFIG_ARCH_WANT_FRAME_POINTERS=y
+ CONFIG_NLS_UTF8=y
+ CONFIG_CPU_SUP_CENTAUR=y
++CONFIG_NODES_SPAN_OTHER_NODES=y
++CONFIG_SYSVIPC_COMPAT=y
+ CONFIG_ATA_GENERIC=y
+ CONFIG_SWAP=y
+ CONFIG_MICROCODE_INTEL=y
+@@ -757,12 +838,14 @@
+ CONFIG_X86_PAT=y
+ CONFIG_PNP_DEBUG_MESSAGES=y
+ CONFIG_NF_CONNTRACK=y
++CONFIG_ARCH_DMA_ADDR_T_64BIT=y
+ CONFIG_FILE_LOCKING=y
+ CONFIG_KARMA_PARTITION=y
+ CONFIG_AIO=y
+ CONFIG_EXT2_FS_XIP=y
+ CONFIG_NET_EMATCH=y
+ CONFIG_PERF_EVENTS=y
++CONFIG_GENERIC_TIME_VSYSCALL=y
+ CONFIG_IP_NF_TARGET_REJECT=y
+ CONFIG_GENERIC_HARDIRQS=y
+ CONFIG_SYSCTL_SYSCALL_CHECK=y
+@@ -776,6 +859,7 @@
+ CONFIG_X86_ACPI_CPUFREQ=y
+ CONFIG_DEFAULT_SECURITY_SELINUX=y
+ CONFIG_CRYPTO_AEAD2=y
++CONFIG_XEN_DEBUG_FS=y
+ CONFIG_MOUSE_PS2=y
+ CONFIG_CRYPTO_ALGAPI2=y
+ CONFIG_PHYSICAL_START=0x1000000
+Index: include/config/tristate.conf
+===================================================================
+--- include/config/tristate.conf	(revision 2)
++++ include/config/tristate.conf	(revision 15)
+@@ -3,6 +3,7 @@
+ 
+ CONFIG_MICROCODE=Y
+ CONFIG_CRC32=Y
++CONFIG_I7300_IDLE=Y
+ CONFIG_CPU_FREQ_GOV_ONDEMAND=Y
+ CONFIG_BINFMT_MISC=Y
+ CONFIG_NF_NAT_SIP=Y
+@@ -17,6 +18,7 @@
+ CONFIG_BNX2=Y
+ CONFIG_CFG80211=Y
+ CONFIG_SERIAL_8250=Y
++CONFIG_XEN_GNTDEV=M
+ CONFIG_LZO_DECOMPRESS=Y
+ CONFIG_HID_BELKIN=Y
+ CONFIG_USB=Y
+@@ -26,6 +28,7 @@
+ CONFIG_IP6_NF_TARGET_LOG=Y
+ CONFIG_HID_CHERRY=Y
+ CONFIG_SENSORS_CORETEMP=Y
++CONFIG_FB_SYS_FILLRECT=Y
+ CONFIG_DNS_RESOLVER=Y
+ CONFIG_CRYPTO_AUTHENC=Y
+ CONFIG_DECOMPRESS_LZMA=Y
+@@ -34,6 +37,7 @@
+ CONFIG_CRYPTO_DES=Y
+ CONFIG_NLS_CODEPAGE_437=Y
+ CONFIG_SERIO=Y
++CONFIG_FB_SYS_IMAGEBLIT=Y
+ CONFIG_TIGON3=Y
+ CONFIG_RT2800_LIB=Y
+ CONFIG_ZLIB_INFLATE=Y
+@@ -52,9 +56,11 @@
+ CONFIG_POWER_SUPPLY=Y
+ CONFIG_NLS=Y
+ CONFIG_NETFILTER_XT_TARGET_SECMARK=Y
++CONFIG_FB_SYS_COPYAREA=Y
+ CONFIG_IP6_NF_IPTABLES=Y
+ CONFIG_DEBUG_NX_TEST=M
+ CONFIG_CPU_FREQ_GOV_USERSPACE=Y
++CONFIG_XEN_BLKDEV_BACKEND=Y
+ CONFIG_HID_CYPRESS=Y
+ CONFIG_NLS_ISO8859_1=Y
+ CONFIG_CRYPTO_WORKQUEUE=Y
+@@ -90,10 +96,12 @@
+ CONFIG_NETFILTER_XTABLES=Y
+ CONFIG_ACPI_AC=Y
+ CONFIG_USB_HID=Y
++CONFIG_XENFS=Y
+ CONFIG_CRYPTO_PCOMP2=Y
+ CONFIG_RT2X00=Y
+ CONFIG_NF_CONNTRACK_FTP=Y
+ CONFIG_UNIX=Y
++CONFIG_XEN_DEV_EVTCHN=Y
+ CONFIG_CRYPTO_HASH2=Y
+ CONFIG_NF_CONNTRACK_IPV6=Y
+ CONFIG_CRYPTO_ALGAPI=Y
+@@ -123,23 +131,26 @@
+ CONFIG_ITCO_WDT=M
+ CONFIG_QUOTA_TREE=Y
+ CONFIG_PACKET=Y
++CONFIG_XEN_XENBUS_FRONTEND=Y
+ CONFIG_SERIAL_8250_PNP=Y
+ CONFIG_EFI_VARS=Y
+ CONFIG_NETFILTER_XT_MATCH_POLICY=Y
+ CONFIG_CRYPTO_AES=Y
+ CONFIG_ISO9660_FS=Y
+ CONFIG_SKY2=Y
++CONFIG_XEN_WDT=Y
+ CONFIG_X86_MSR=Y
+ CONFIG_SERIO_SERPORT=Y
++CONFIG_XEN_BLKDEV_FRONTEND=Y
+ CONFIG_INET6_ESP=Y
+ CONFIG_AUTOFS4_FS=Y
+ CONFIG_ACPI_BUTTON=Y
+-CONFIG_CRYPTO_AES_586=Y
+ CONFIG_IP6_NF_FILTER=Y
+ CONFIG_RT2500USB=Y
+ CONFIG_SERIO_LIBPS2=Y
+ CONFIG_X86_CPUID=Y
+ CONFIG_RT2X00_LIB=Y
++CONFIG_XEN_FBDEV_FRONTEND=Y
+ CONFIG_NETFILTER_XT_TARGET_NFLOG=Y
+ CONFIG_HID_MONTEREY=Y
+ CONFIG_HID_EZKEY=Y
+@@ -155,9 +166,11 @@
+ CONFIG_HID=Y
+ CONFIG_HW_RANDOM_AMD=Y
+ CONFIG_RTC_DRV_CMOS=Y
++CONFIG_IA32_AOUT=Y
+ CONFIG_PHYLIB=Y
+ CONFIG_DECOMPRESS_BZIP2=Y
+ CONFIG_HID_A4TECH=Y
++CONFIG_XEN_NETDEV_FRONTEND=Y
+ CONFIG_INPUT_FF_MEMLESS=Y
+ CONFIG_CHR_DEV_SG=Y
+ CONFIG_IP6_NF_MATCH_IPV6HEADER=Y
+@@ -169,14 +182,19 @@
+ CONFIG_AGP_INTEL=Y
+ CONFIG_TCP_CONG_CUBIC=Y
+ CONFIG_HID_KYE=Y
++CONFIG_XEN_PLATFORM_PCI=M
++CONFIG_FB_SYS_FOPS=Y
+ CONFIG_FB=Y
+ CONFIG_THERMAL=Y
+ CONFIG_NF_CONNTRACK_IPV4=Y
++CONFIG_XEN_PCIDEV_FRONTEND=Y
+ CONFIG_HW_RANDOM=Y
+ CONFIG_HW_RANDOM_VIA=Y
+ CONFIG_ACPI_THERMAL=Y
++CONFIG_XEN_GRANT_DEV_ALLOC=M
+ CONFIG_CRYPTO_BLKCIPHER2=Y
+-CONFIG_HW_RANDOM_GEODE=Y
++CONFIG_ACPI_HOTPLUG_MEMORY=Y
++CONFIG_XEN_NETDEV_BACKEND=Y
+ CONFIG_XFRM_USER=Y
+ CONFIG_ATA_PIIX=Y
+ CONFIG_SATA_AHCI=Y
+Index: net/netfilter/Makefile
+===================================================================
+--- net/netfilter/Makefile	(revision 2)
++++ net/netfilter/Makefile	(revision 15)
+@@ -63,7 +63,7 @@
+ obj-$(CONFIG_NETFILTER_XT_TARGET_RATEEST) += xt_RATEEST.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_SECMARK) += xt_SECMARK.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TPROXY) += xt_TPROXY.o
+-obj-$(CONFIG_NETFILTER_XT_TARGET_TCPMSS) += xt_TCPMSS.o
++obj-$(CONFIG_NETFILTER_XT_TARGET_TCPMSS) += xt_TCPMMS.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TCPOPTSTRIP) += xt_TCPOPTSTRIP.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TEE) += xt_TEE.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TRACE) += xt_TRACE.o
+Index: init/main.c
+===================================================================
+--- init/main.c	(revision 2)
++++ init/main.c	(revision 15)
+@@ -485,6 +485,7 @@
+ 	boot_cpu_init();
+ 	page_address_init();
+ 	printk(KERN_NOTICE "%s", linux_banner);
++	printk(KERN_NOTICE "CS411: Group13-Kernel1 -- Init");
+ 	setup_arch(&command_line);
+ 	mm_init_owner(&init_mm, &init_task);
+ 	mm_init_cpumask(&init_mm);

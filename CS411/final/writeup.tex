@@ -1,0 +1,159 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=8.5in, textwidth=6in}
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+\usepackage{geometry}
+
+\def\name{Group 13: Brian Cox, Matthew Okazaki, Trevor Bramwell}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+\parindent = 0.0 in
+\parskip = 0.1 in
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs411 ``operating systems'' Final Exam - Android x86},
+  pdftitle = {CS 411 Final: Android x86} 
+  pdfsubject = {CS 411 Final},
+  pdfpagemode = UseNone
+}
+
+\def\name{Trevor Bramwell}
+\title{CS411: Final\\
+    Comparison of Android x86 kernel and Linux stable kernel}
+\author{\name}
+
+\begin{document}
+\maketitle
+
+
+%
+% Project Overview
+%
+% %Look back at your previous assignments,
+% choose 2 key concepts (plus another for extra
+% credit) and briefly describe what your implementations for those to
+% projects were. 
+%
+% Then, dig into the android source (provided on 
+% \textbf{os-class - /scratch/android/}) and find where that concept is
+% implemented, read through the code to figure out how
+% the Android developers implemented that portion of the Android-specific
+% kernel, and compare and contrast implementation
+% algorithms between the Android version and your implementation.
+% 
+% To be more clear, write a bit about how you implemented the 2 or 3
+% concepts of your choice, then write about how Android
+% either does things differently, or how they are the same. 
+% 
+% Finally, write
+% about why you think the Android Developers chose
+% the implementation that they did - hardware capabilities, restrictions,
+% etc. 
+
+\section{Introduction}
+
+I will briefly describe my changes to the process scheduler,  I/O
+scheduler. Following that I will compare and contrast the Android-x86's
+implementations of those concepts with my own implementations. Finally I
+will explain why I think the Android Developers choose to use the
+implementations they did.
+
+\section{My Designs}
+\subsection*{Process Scheduling}
+
+Since there was already a Round Robin (RR) and First In First Out (FIFO) scheduler
+in the Linux kernel, nothing was actually designed in this project. We
+merely replaced what was missing. This included a policy check, enabling
+of priority scheduling, setting the min and max values of the
+priority, and updating of the process timeslice.
+
+\subsection*{I/O Scheduling}
+
+To implement the Shortest Seek Time algorithm for I/O scheduling, my
+solution was to add all requests to the end of the list. Then, when a
+new request needs to be dispatched, the last dispatched request is
+compared to all the requests in the list until the smallest difference
+in sectors is found. That request is then put on the dispatch queue.
+
+\section{Android-x86 Designs}
+
+% compare & contrast
+\subsection*{Process Scheduling}
+
+The Android process scheduler has no differences from the Linux kernel.
+This is probably because  CFS works quite well as a general purpose
+scheduler. Since CFS is focused on response time, it is a good choice
+for mobile devices.
+
+\subsection*{I/O Scheduling}
+
+The differences between the I/O Scheduler of the Android-x86 kernel and
+the Linux kernel are extremely minimal (as you can see from the
+following patch). These changes also are more along the lines of bug
+fixes than actual implementation.
+
+\input{__io_kernel_diff.patch.tex}
+
+\section{Conclusion}
+
+There is very little to no differences, that I could find, between the
+Android-x86 kernel and Linux kernel in terms of process and I/O
+scheduling.
+
+I find this somewhat surprising considering that Android is specifically
+targeted at mobile devices. Perhaps if we were to go back a few years
+prior to smart phones, when devices had a lot fewer resources available,
+we would see a much larger change.
+
+\section*{Addendum: Group evaluation}
+
+\subsection*{Matthew Okazaki}
+
+Matthew contributed a lot to our group. We would not have been able to
+complete most of the assignments had he not stepped up and done a decent
+bit of research for each project. He did a great job finding useful and
+relevant information for our group. As a group member he worked well
+reminding Brian and I when deadlines were coming up, and scheduling
+meeting times.
+
+During Project 2 Matthew was instrumental in understanding the shortest
+seek time first algorithm, and it's implementation.
+
+\subsection*{Brian Cox}
+
+Brian worked well in our group. He primarily handled the compiling of
+our writeup, and submission of our documents. As a member of our group
+Brian was extremely helpful with his strong knowledge of C and Unix
+programming. Brian designed almost all of the user space program we used
+to test our shortest seek time first I/O scheduler.
+
+During the last assignment Brian was also extremely helpful in his work
+on USB packet sniffing.
+
+
+\end{document}

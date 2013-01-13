@@ -1,0 +1,214 @@
+Index: arch/x86/kernel/syscall_table_32.S
+===================================================================
+--- arch/x86/kernel/syscall_table_32.S	(revision 1)
++++ arch/x86/kernel/syscall_table_32.S	(revision 10)
+@@ -346,3 +346,5 @@
+ 	.long sys_syncfs
+ 	.long sys_sendmmsg		/* 345 */
+ 	.long sys_setns
++	.long sys_slob_claimed
++	.long sys_slob_free
+Index: arch/x86/include/asm/unistd_32.h
+===================================================================
+--- arch/x86/include/asm/unistd_32.h	(revision 1)
++++ arch/x86/include/asm/unistd_32.h	(revision 10)
+@@ -352,10 +352,12 @@
+ #define __NR_syncfs             344
+ #define __NR_sendmmsg		345
+ #define __NR_setns		346
++#define __NR_slob_claimed	347
++#define __NR_slob_free		348
+ 
+ #ifdef __KERNEL__
+ 
+-#define NR_syscalls 347
++#define NR_syscalls 349
+ 
+ #define __ARCH_WANT_IPC_PARSE_VERSION
+ #define __ARCH_WANT_OLD_READDIR
+Index: include/linux/syscalls.h
+===================================================================
+--- include/linux/syscalls.h	(revision 1)
++++ include/linux/syscalls.h	(revision 10)
+@@ -847,4 +847,10 @@
+ 				      struct file_handle __user *handle,
+ 				      int flags);
+ asmlinkage long sys_setns(int fd, int nstype);
++
++/*FIXME*/
++asmlinkage long sys_slob_claimed(void);
++asmlinkage long sys_slob_free(void);
++
++
+ #endif
+Index: mm/slob.c
+===================================================================
+--- mm/slob.c	(revision 1)
++++ mm/slob.c	(revision 10)
+@@ -71,7 +71,11 @@
+ #include <trace/events/kmem.h>
+ 
+ #include <asm/atomic.h>
++#include <linux/linkage.h>
+ 
++/* Hold a count of all the pages */
++unsigned long slob_page_count = 0;
++
+ /*
+  * slob_block has a field 'units', which indicates size of block if +ve,
+  * or offset of next block if -ve (in SLOB_UNITs).
+@@ -320,8 +324,8 @@
+  */
+ static void *slob_alloc(size_t size, gfp_t gfp, int align, int node)
+ {
+-	struct slob_page *sp;
+-	struct list_head *prev;
++	struct slob_page *sp = NULL;
++	struct slob_page *sp_t;
+ 	struct list_head *slob_list;
+ 	slob_t *b = NULL;
+ 	unsigned long flags;
+@@ -335,33 +339,33 @@
+ 
+ 	spin_lock_irqsave(&slob_lock, flags);
+ 	/* Iterate through each partially free page, try to find room */
+-	list_for_each_entry(sp, slob_list, list) {
++	list_for_each_entry(sp_t, slob_list, list) {
+ #ifdef CONFIG_NUMA
+ 		/*
+ 		 * If there's a node specification, search for a partial
+ 		 * page with a matching node id in the freelist.
+ 		 */
+-		if (node != -1 && page_to_nid(&sp->page) != node)
++		if (node != -1 && page_to_nid(&sp_t->page) != node)
+ 			continue;
+ #endif
+ 		/* Enough room on this page? */
+-		if (sp->units < SLOB_UNITS(size))
++		if (sp_t->units < SLOB_UNITS(size))
++			/* Not enough room */
+ 			continue;
+ 
+-		/* Attempt to alloc */
+-		prev = sp->list.prev;
+-		b = slob_page_alloc(sp, size, align);
+-		if (!b)
+-			continue;
++		if (sp == NULL)
++			sp = sp_t;
+ 
+-		/* Improve fragment distribution and reduce our average
+-		 * search time by starting our next search here. (see
+-		 * Knuth vol 1, sec 2.5, pg 449) */
+-		if (prev != slob_list->prev &&
+-				slob_list->next != prev->next)
+-			list_move_tail(slob_list, prev->next);
+-		break;
++		if (sp_t->units < sp->units)
++			/* Get the smallest slob_page that
++ 			 * is large enough for our needs */
++			sp = sp_t;
+ 	}
++
++	/* Attempt to alloc */
++	if(sp != NULL) {
++		b = slob_page_alloc(sp, size, align);
++	}
+ 	spin_unlock_irqrestore(&slob_lock, flags);
+ 
+ 	/* Not enough space: must allocate a new page */
+@@ -371,7 +375,11 @@
+ 			return NULL;
+ 		sp = slob_page(b);
+ 		set_slob_page(sp);
++		
++		/* We allocatted a new page, increment the count */
++		slob_page_count++;
+ 
++
+ 		spin_lock_irqsave(&slob_lock, flags);
+ 		sp->units = SLOB_UNITS(PAGE_SIZE);
+ 		sp->free = b;
+@@ -415,6 +423,9 @@
+ 		clear_slob_page(sp);
+ 		free_slob_page(sp);
+ 		slob_free_pages(b, 0);
++
++		/* Freed a new page, dec the count */
++		slob_page_count--;
+ 		return;
+ 	}
+ 
+@@ -681,6 +692,7 @@
+ 
+ void __init kmem_cache_init(void)
+ {
++	printk("SLOB: Ready!");
+ 	slob_ready = 1;
+ }
+ 
+@@ -688,3 +700,37 @@
+ {
+ 	/* Nothing to do */
+ }
++
++asmlinkage long sys_slob_claimed(void)
++{
++	long slob_total = SLOB_UNITS(PAGE_SIZE) * slob_page_count;
++	return slob_total;
++}
++
++/*
++ * Return a count of all free units across used pages */
++asmlinkage long sys_slob_free(void)
++{
++	long free_units = 0;
++	struct slob_page *sp;
++	struct list_head *slob_list;
++
++	/* Pages with small blocks (page units < 256) */
++	slob_list = &free_slob_small;
++	list_for_each_entry(sp, slob_list, list) {
++		free_units += sp->units;
++	}
++
++	/* Pages with medium blocks (page units < 1024) */
++	slob_list = &free_slob_medium;
++	list_for_each_entry(sp, slob_list, list) {
++		free_units += sp->units;
++	}
++
++	/* Pages with large blocks (1024 < page units < PAGE_SIZE) */
++	slob_list = &free_slob_large;
++	list_for_each_entry(sp, slob_list, list) {
++		free_units += sp->units;
++	}
++	return free_units;
++}
+Index: space.c
+===================================================================
+--- space.c	(revision 0)
++++ space.c	(revision 10)
+@@ -0,0 +1,22 @@
++#include <stdio.h>
++#include <unistd.h>
++
++#define KB 1024
++#define sys_free syscall(348)
++#define sys_claimed syscall(347)
++
++int main() {
++	
++	long free = sys_free/KB;
++	long claimed = sys_claimed/KB;
++	float fragmentation = 0.0f;
++	
++	if(claimed > 0)
++		fragmentation = (sys_free/(float)sys_claimed)*100;
++
++	printf("Slob Free:\t\t%ld kB\n", free);
++	printf("Slob Claimed:\t\t%ld kB\n", claimed);
++	printf("Fragmentation:\t\t%.2f %%\n", fragmentation);
++	
++	return 0;
++}

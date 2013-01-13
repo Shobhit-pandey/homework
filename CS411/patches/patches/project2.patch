@@ -1,0 +1,277 @@
+Index: Makefile
+===================================================================
+--- Makefile	(revision 1)
++++ Makefile	(revision 18)
+@@ -11,6 +11,7 @@
+ obj-$(CONFIG_BLK_CGROUP)	+= blk-cgroup.o
+ obj-$(CONFIG_BLK_DEV_THROTTLING)	+= blk-throttle.o
+ obj-$(CONFIG_IOSCHED_NOOP)	+= noop-iosched.o
++obj-$(CONFIG_IOSCHED_NOOP)	+= sstf-iosched.o
+ obj-$(CONFIG_IOSCHED_DEADLINE)	+= deadline-iosched.o
+ obj-$(CONFIG_IOSCHED_CFQ)	+= cfq-iosched.o
+ 
+Index: Kconfig.iosched
+===================================================================
+--- Kconfig.iosched	(revision 1)
++++ Kconfig.iosched	(revision 18)
+@@ -12,6 +12,15 @@
+ 	  that do their own scheduling and require only minimal assistance from
+ 	  the kernel.
+ 
++config IOSCHED_SSTF
++	bool
++	default y
++	---help---
++	  The SSTF I/O scheduler is a bad choice for a scheduler, but is
++	  included none-the-less. The Shortest Seek Time Scheduler schedules
++	  I/O requests dependent upon their seek time to the current sector
++	  that is being written or read.
++
+ config IOSCHED_DEADLINE
+ 	tristate "Deadline I/O scheduler"
+ 	default y
+@@ -59,6 +68,9 @@
+ 	config DEFAULT_NOOP
+ 		bool "No-op"
+ 
++	config DEFAULT_SSTF
++		bool "SSTF"
++
+ endchoice
+ 
+ config DEFAULT_IOSCHED
+@@ -66,6 +78,7 @@
+ 	default "deadline" if DEFAULT_DEADLINE
+ 	default "cfq" if DEFAULT_CFQ
+ 	default "noop" if DEFAULT_NOOP
++	default "sstf" if DEFAULT_SSTF
+ 
+ endmenu
+ 
+Index: sstf-iosched.c
+===================================================================
+--- sstf-iosched.c	(revision 0)
++++ sstf-iosched.c	(revision 18)
+@@ -0,0 +1,215 @@
++/*
++ * Shortest Seek Time First - I/O Scheduler
++ * Elevator Module
++ */
++#include <linux/blkdev.h>
++#include <linux/elevator.h>
++#include <linux/bio.h>
++#include <linux/module.h>
++#include <linux/slab.h>
++#include <linux/init.h>
++#include <linux/blkdev.h>
++
++
++static sector_t last_sector;
++
++struct sstf_data {
++	struct list_head queue;
++};
++
++
++static void sstf_merged_requests(struct request_queue *q, struct request *rq,
++				 struct request *next)
++{
++	list_del_init(&next->queuelist);
++}
++
++int find_last_sector(struct request *rq) {
++        int abs;
++
++	sector_t sec = blk_rq_pos(rq);
++
++        if( last_sector >= sec) {
++        	abs = last_sector - sec;
++        } else {
++        	abs = sec - last_sector;
++        }
++
++        sec = blk_rq_pos(rq);
++        return abs;
++}
++
++/*
++ * elv_dispatch_sort is the function that actually adds the request to
++ * the dispatch queue. It is exported...so it needs to be edited?
++ */
++static int sstf_dispatch(struct request_queue *q, int force)
++{
++	struct sstf_data *nd = q->elevator->elevator_data;
++	struct request *closest_rq;
++	int abs, closest = -1;
++
++	
++	if (!list_empty(&nd->queue)) {
++		struct request *rq;
++        	/* 
++		 * Go through the request queue and find the smallest difference
++		 * between the last sector in the dispatch queue and the first
++		 * sector of each request 
++		 */
++		list_for_each_entry(rq, &nd->queue, queuelist) {
++		
++			/*
++		 	* For each request, get the difference between the last
++		 	* sector in the dispatch queue, and the first sector of the current request 
++		 	*/
++			abs = find_last_sector(rq);
++			/*
++			 * If the difference is smaller than the current smallest
++			 * difference, update closest and closest_rq. If this is the first
++			 * item in the list, update.
++			 */
++			if( closest > abs || closest == -1 ) {
++				closest = abs;
++				closest_rq = rq;
++			}
++		}
++			 
++		last_sector = blk_rq_pos(closest_rq) + 
++				blk_rq_sectors(closest_rq);
++
++		list_del_init(&closest_rq->queuelist);
++		elv_dispatch_add_tail(q, closest_rq);
++		
++		printk("[SSTF] dsp %u %llu\n", 
++		    (current_rq->cmd_flags & REQ_WRITE),
++		    (unsigned long long)blk_rq_pos(closest_rq));
++		return 1;
++	}
++	return 0;
++}
++
++/*
++ * This will not need to be touched.
++ * adding a request will just add it to the end of the list
++ */
++static void sstf_add_request(struct request_queue *q, struct request *rq)
++{
++	struct sstf_data *nd = q->elevator->elevator_data;
++
++	list_add_tail(&rq->queuelist, &nd->queue);
++	printk("[SSTF] add %u %llu\n",
++		(rq->cmd_flags & REQ_WRITE),
++		(unsigned long long)blk_rq_pos(rq));
++}
++
++/*
++ * Former and Latter request are used by blk-merge.c to handle merging
++ * requests together. They should not need to be changed for implmenting
++ * the SSTF algorithm.
++ */
++static struct request *
++sstf_former_request(struct request_queue *q, struct request *rq)
++{
++	struct sstf_data *nd = q->elevator->elevator_data;
++
++	if (rq->queuelist.prev == &nd->queue)
++		return NULL;
++	return list_entry(rq->queuelist.prev, struct request, queuelist);
++}
++
++/*
++ * This will most likely not need to be touched
++ */
++static struct request *
++sstf_latter_request(struct request_queue *q, struct request *rq)
++{
++	struct sstf_data *nd = q->elevator->elevator_data;
++
++	if (rq->queuelist.next == &nd->queue)
++		return NULL;
++	return list_entry(rq->queuelist.next, struct request, queuelist);
++}
++
++
++/*
++ * We will not need to change how the queue is initialized
++ */
++static void *
++sstf_init_queue(struct request_queue *q)
++{
++	struct sstf_data *nd;
++	last_sector = 0;
++
++	nd = kmalloc_node(sizeof(*nd), GFP_KERNEL, q->node);
++	if (!nd)
++		return NULL;
++	INIT_LIST_HEAD(&nd->queue);
++	return nd;
++}
++
++
++/*
++ * This function removes the queue and does not need to be changed
++ */
++static void
++sstf_exit_queue(struct elevator_queue *e)
++{
++	struct sstf_data *nd = e->elevator_data;
++
++	BUG_ON(!list_empty(&nd->queue));
++	kfree(nd);
++}
++
++/* 
++ Other ops not currenly used
++    .elevator_merge_fn *elevator_merge_fn;
++    .elevator_merged_fn *elevator_merged_fn;
++
++    .elevator_allow_merge_fn *elevator_allow_merge_fn;
++    .elevator_bio_merged_fn *elevator_bio_merged_fn;
++
++    .elevator_activate_req_fn *elevator_activate_req_fn;
++    .elevator_deactivate_req_fn *elevator_deactivate_req_fn;
++
++    .elevator_completed_req_fn *elevator_completed_req_fn;
++
++    .elevator_set_req_fn *elevator_set_req_fn;
++    .elevator_put_req_fn *elevator_put_req_fn;
++
++    .elevator_may_queue_fn *elevator_may_queue_fn;
++*/
++
++static struct elevator_type elevator_sstf = {
++	.ops = {
++		.elevator_merge_req_fn		= sstf_merged_requests,
++		.elevator_dispatch_fn		= sstf_dispatch,
++		.elevator_add_req_fn		= sstf_add_request,
++		.elevator_former_req_fn		= sstf_former_request,
++		.elevator_latter_req_fn		= sstf_latter_request,
++		.elevator_init_fn		= sstf_init_queue,
++		.elevator_exit_fn		= sstf_exit_queue,
++	},
++	.elevator_name = "sstf",
++	.elevator_owner = THIS_MODULE,
++};
++
++static int __init sstf_init(void)
++{
++	elv_register(&elevator_sstf);
++
++	return 0;
++}
++
++static void __exit sstf_exit(void)
++{
++	elv_unregister(&elevator_sstf);
++}
++
++module_init(sstf_init);
++module_exit(sstf_exit);
++
++
++MODULE_AUTHOR("Bramwell, Cox, Okazaki");
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("SSTF IO Scheduler");
+
+Property changes on: sstf-iosched.c
+___________________________________________________________________
+Added: svn:executable
+## -0,0 +1 ##
++*
+\ No newline at end of property
