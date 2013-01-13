@@ -7,7 +7,6 @@ output/
 *.aux
 *.log
 *.out
-*.pdf
 *.swp
 *.mk
 .~lock*
