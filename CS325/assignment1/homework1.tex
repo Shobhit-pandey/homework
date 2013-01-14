@@ -52,13 +52,43 @@ bounds on its growth.
 \item Use induction to prove that $F_n \geq 2^{0.5n}$ for $n \geq 6$.
 \end{enumerate}
 
-% 60
+% 83
 \section*{2.3 from text book}
+Section 2.2 describes a method for solving recurrence relations which is
+based on analyzing the recursion tree and deriving a formula for the
+work done at each level.  Another (closely related) method is to expand
+out the recurrence a few times, until a pattern emerges. For instance,
+let’s start with the familiar $T(n) = 2T(n/2) + \BigO{n}$. Think of
+$\BigO{n}$ as being $\leq cn$ for some constant $c$,
+so: $T(n) \leq 2T(n/2) + cn$. 
+By repeatedly applying this rule, we can bound $T(n)$ in terms of $T(n/2)$,
+then $T(n/4)$, then $T(n/8)$, and so on, at each step getting closer to
+the value of $T(\cdot)$ we do know,
+namely $T(1) = \BigO{1}$.
+\begin{align*}
+T (n) &\leq 2T (n/2) + cn \\
+&\leq 2[2T(n/4) + cn/2] + cn = 4T(n/4) + 2cn \\
+&\leq 4[2T(n/8) + cn/4] + 2cn = 8T(n/8) + 3cn \\
+&\leq 8[2T(n/16) + cn/8] + 3cn = 16T(n/16) + 4cn \\
+&  \vdots
+\end{align*}
 
-% 64
+A pattern is emerging\ldots the general term is 
+\[T(n) \leq 2^kT(n/2^k) + kcn.\]
+
+Plugging in $k = \log_2{n}$, we get $T(n) \leq nT(1) + cn\log_2{n} = \BigO{n\log{n}}.$
+\begin{enumerate}
+\item Do the same thing for the recurrence $T(n) = 3T(n/2) + \BigO{n}$. What
+is the general $k$th term
+in this case? And what value of $k$ should be plugged in to get the
+answer?
+
+\item Now try the recurrence $T(n) = T( n −1 ) + \BigO{1}$, a case which is not
+covered by the master theorem. Can you solve this too?
+\end{enumerate}
+
 \section*{2.4 from text book}
 
-% 83?
 \section*{2.17 from text book}
 
 \end{document}
