@@ -6,7 +6,7 @@
 \usepackage[fleqn]{amsmath}                                         
 \usepackage{amsthm}                                         
 
-%\usepackage{mathabx}
+\usepackage{wasysym}
 
 \usepackage{alltt}                                           
 \usepackage{float}
@@ -114,13 +114,13 @@ If the surface is \emph{surface parameterized} using $u$ and $v$, then
 \subsection*{Integral Form}
 
 \begin{align}
-  \iint_{\partial \Omega} \mathbf{E} \cdot \mathrm{d}\mathbf{S} =&
-    \frac{1}{\varepsilon_0} \iiint_{\Omega} \rho\, \mathrm{d}V \\
-  \iint_{\partial \Omega} \mathbf{B} \cdot \mathrm{d}\mathbf{S} =&\, 0\\
+  \oiint\limits_{\partial \Omega} \mathbf{E} \cdot \mathrm{d}\mathbf{S} =&
+    \frac{1}{\varepsilon_0} \iiint\limits_{\Omega} \rho\, \mathrm{d}V \\
+  \oiint\limits_{\partial \Omega} \mathbf{B} \cdot \mathrm{d}\mathbf{S} =&\, 0\\
   \oint_{\partial \Sigma} \mathbf{E} \cdot \mathrm{d}\ell =&
-    -\frac{d}{dt}\iint_{\Sigma}\mathbf{B} \cdot \mathrm{d}\mathbf{S} \\
+    -\frac{d}{dt}\iint\limits_{\Sigma}\mathbf{B} \cdot \mathrm{d}\mathbf{S} \\
   \oint_{\partial \Sigma} \mathbf{B} \cdot \mathrm{d}\ell =& \mu_0
-      \iint_{\Sigma}
+      \iint\limits_{\Sigma}
       \left(
         \mathbf{J} + \varepsilon_0 \frac{\partial\mathbf{E}}{\partial t}
       \right)
