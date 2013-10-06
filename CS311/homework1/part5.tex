@@ -56,11 +56,45 @@
 
 \section*{Surface Integral}
 \hrule
+\addtocounter{section}{1}
 
 For a scalar function $f$ over a surface parameterized by $u$ and $v$, the surface integral is given by
+
 \begin{align}
   \Phi =& \int_S f \mathrm{d}a\,\\
-       =& \int_S f(u,v) \mathrm{d}u\, \mathrm{d}v
+       =& \int_S f(u,v)\, |\mathbf{T}_u \times \mathbf{T}_v|\,
+          \mathrm{d}u\, \mathrm{d}v
+\end{align}
+
+where $\mathbf{T}_u$ and $\mathbf{T}_v$ are tangent vectors and $a \times b$
+is the corss product.
+
+For a vector function over a surface, the surface integral is given by
+
+\begin{align}
+  \Phi =& \int_S \mathbf{F} \cdot \mathrm{d}\mathbf{a}\,\\
+       =& \int_S (\mathbf{F \cdot \hat{n}})\, \mathrm{d}a\,\\
+       =& \int_S f_x\, \mathrm{d}y\, \mathrm{d}z + f_y\, \mathrm{d}z\,
+          \mathrm{d}x + f_z\, \mathrm{d}x\, \mathrm{d}y
+\end{align}
+
+where $\mathbf{a \cdot b}$ is a dot product and $\mathbf{\hat{n}}$ is a unit normal
+vector. If $z = f (x, y)$, the $\mathrm{d}\mathbf{a}$ is given explicitly by
+
+\begin{align}
+  \mathrm{d}\mathbf{a} = \pm \left( -
+                                \frac{\partial z}{\partial x} \mathbf{\hat{x}} -
+                                \frac{\partial z}{\partial y} \mathbf{\hat{y}} +
+                                \mathbf{\hat{z}}
+                             \right)
+                         \mathrm{d}x\, \mathrm{d}y
+\end{align}
+
+If the surface is \emph{surface parameterized} using $u$ and $v$, then
+
+\begin{align}
+  \Phi = \int_S \mathbf{F} \cdot (\mathbf{T}_u \times \mathbf{T}_v)\;
+         \mathrm{d}u\, \mathrm{d}v.
 \end{align}
 
 \newpage
