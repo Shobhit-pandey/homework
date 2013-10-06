@@ -6,6 +6,8 @@
 \usepackage[fleqn]{amsmath}                                         
 \usepackage{amsthm}                                         
 
+%\usepackage{mathabx}
+
 \usepackage{alltt}                                           
 \usepackage{float}
 \usepackage{color}
@@ -50,8 +52,8 @@
 \parindent = 0.0 in
 \parskip = 0.2 in
 
-\renewcommand{\theequation}{\thesection.\arabic{equation}}
-%\numberwithin{equation}{section}
+%\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\numberwithin{equation}{section}
 \begin{document}
 
 \section*{Surface Integral}
@@ -101,14 +103,41 @@ If the surface is \emph{surface parameterized} using $u$ and $v$, then
 
 \section*{Maxwell's Equations}
 \hrule
+\setcounter{section}{2}
+\setcounter{equation}{0}
 
-\begin{center}
-    \includegraphics[width=0.5\textwidth]{maxwell.eps}
-\end{center}
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth,height=0.4\textheight]{maxwell.eps}
+\end{figure}
 
 \subsection*{Integral Form}
 
+\begin{align}
+  \iint_{\partial \Omega} \mathbf{E} \cdot \mathrm{d}\mathbf{S} =&
+    \frac{1}{\varepsilon_0} \iiint_{\Omega} \rho\, \mathrm{d}V \\
+  \iint_{\partial \Omega} \mathbf{B} \cdot \mathrm{d}\mathbf{S} =&\, 0\\
+  \oint_{\partial \Sigma} \mathbf{E} \cdot \mathrm{d}\ell =&
+    -\frac{d}{dt}\iint_{\Sigma}\mathbf{B} \cdot \mathrm{d}\mathbf{S} \\
+  \oint_{\partial \Sigma} \mathbf{B} \cdot \mathrm{d}\ell =& \mu_0
+      \iint_{\Sigma}
+      \left(
+        \mathbf{J} + \varepsilon_0 \frac{\partial\mathbf{E}}{\partial t}
+      \right)
+      \cdot \mathrm{d}\mathbf{S}
+\end{align}
+
 \subsection*{Differential Form}
+
+\begin{align}
+  \nabla \cdot \mathbf{E} =& \frac{\rho}{\varepsilon_0}\\
+  \nabla \cdot \mathbf{B} =&\, 0\\
+  \nabla \times \mathbf{E} =& - \frac{\partial\mathbf{B}}{\partial t}\\
+  \nabla \times \mathbf{B} =& \mu_0
+      \left(
+        \mathbf{J} + \varepsilon_0 \frac{\partial\mathbf{E}}{\partial t}
+      \right)
+\end{align}
 
 \newpage
 
