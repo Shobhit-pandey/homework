@@ -2,7 +2,7 @@ TARGET=part5
 HTML=main_html
 SRC={$TARGET}
 
-default: pdf
+default: pdf clean
 
 both: pdf html
 
@@ -35,4 +35,4 @@ html:
 	rm -rf ${HTML}
 
 clean:
-	rm *.out *.dvi *.aux *.log *.ps
+	-rm *.out *.dvi *.aux *.ps 2> /dev/null
