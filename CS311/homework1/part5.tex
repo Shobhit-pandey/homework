@@ -3,8 +3,8 @@
 \usepackage{graphicx}                                        
 
 \usepackage{amssymb}                                         
-\usepackage{amsmath}                                         
-\usepackage{amsthm}                                          
+\usepackage[fleqn]{amsmath}                                         
+\usepackage{amsthm}                                         
 
 \usepackage{alltt}                                           
 \usepackage{float}
@@ -18,7 +18,7 @@
 
 \usepackage{pstricks, pst-node}
 
-\usepackage{geometry}
+\usepackage[margin=1.0in]{geometry}
 \geometry{textheight=10in, textwidth=7.5in}
 
 % random comment
@@ -32,6 +32,7 @@
 \usepackage{listings}
 
 \def\name{D. Kevin McGrath}
+
 
 %% The following metadata will show up in the PDF properties
 \hypersetup{
@@ -47,21 +48,76 @@
 \parindent = 0.0 in
 \parskip = 0.2 in
 
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+%\numberwithin{equation}{section}
 \begin{document}
 
 \section*{Surface Integral}
 \hrule
 
 For a scalar function $f$ over a surface parameterized by $u$ and $v$, the surface integral is given by
-
-\begin{eqnarray}
+\begin{align}
   \Phi =& \int_S f \mathrm{d}a\,\\
        =& \int_S f(u,v) \mathrm{d}u\, \mathrm{d}v
-\end{eqnarray}
+\end{align}
+
+\newpage
 
 \section*{Maxwell's Equations}
 \hrule
 
-\includegraphics[width=\textwidth]{maxwell.eps}
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{maxwell.eps}
+\end{center}
+
+\subsection*{Integral Form}
+
+\subsection*{Differential Form}
+
+\newpage
+
+\section*{Grading Policies}
+\hrule
+
+\begin{enumerate}
+    \item All project must be submitted electronically by 23:59:59 on the due
+          date via TEACH – use “Check time on server” if unsure about your clock. TEACH
+          time takes priority over your local computer.
+    \item Only a single late homework assignment allowed. Only allowed up to 7 calendar days late.
+    \item Submit late homework to your assigned TA via email.
+    \item Blatant disrespect to or by the TAs will not be tolerated.
+    \item If you do not demo your project, you do not receive credit for it.
+    \item When you make an appointment to demo, show up. Failure to show up
+          will result in a grade penalty.  Repeated offenses will result in no credit for
+          the assignment.
+    \item If your project does not compile, for any reason, no credit will be
+    \item Compilation will be on os-class. This server is the final say on whether your code compiles.
+    \item No directories in you submissions. You will be penalized for
+          including any sort of hierarchy.
+    \item All assignments submitted to TEACH. No late submissions will be accepted via TEACH.
+    \item Naming convention: CS311 proj x engr username .tar.bz2. Fill in with appropriate values.
+    \item No zip files will be accepted. You must use bzipped tar files.
+    \item All non-code documents must be created with LaTeX, by hand. This
+          will be discussed in class.
+    \item All work must be done individually unless specifically allowed to work in groups.
+\end{enumerate}
+
+\section*{Learning Objectives}
+\hrule
+
+\begin{itemize}
+    \item Explain why multiprogramming is important for modern operating systems.
+    \item Explain the general structure of a multiprogrammed operating system.
+    \item Explain the purpose and operation of system calls.
+    \item Write a program utilizing system calls.
+    \item Write a program using a scripting language.
+    \item Write a program that uses regular expressions to parse input data.
+    \item Write a program that spawns processes and provides mutual exclusion
+          for variables or other resources
+    \item shared by the processes.
+    \item Write a program that uses sockets to implement a client/server system.
+    \item Explain how a common file system works, including structure, I/O operations, and security.
+    \item Describe the memory organization of a typical process in a common operating system.
+\end{itemize}
 
 \end{document}
