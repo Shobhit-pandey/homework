@@ -1,0 +1,113 @@
+%
+% CS 321: Homework 1
+%
+% Due date: October 9, 2013
+%
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{geometry}
+
+\title{CS321 - Homework 1}
+\author{Trevor Bramwell}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% Section 1.2: 6, 7
+%
+% Additional Problem:
+%
+%    Describe via an English sentence each of the languages from the
+%    following Exercises in Section 1.2.
+%
+%    14b, 15a, 18b, 18d
+\section*{Problems from 1.2}
+\begin{description}
+    \item[6] Let $L$ be any language on a non-empty alphabet. Show that $L$ and
+          $\overline{L}$ cannot both be finite.
+
+    \item[7] Are there language for which $\overline{L^*} = (\overline{L})^*$?
+\end{description}
+
+\subsection*{Additional Problems}
+For the additional problems, describe via an English sentence each of
+the languages from the following Exercises in Section 1.2.
+
+\begin{description}
+    \item[14(b)] Let $\Sigma = \{a,b\}$. For each of the following
+                 languages, find a grammar that generates it.
+
+                 $L_2 = \{a^n b^{2n} : n \ge 0\}$.
+\end{description}
+
+\begin{description}
+    \item[15(a)] Find grammars for the following languages on $\Sigma = \{a\}$.
+
+                 $L = \{w : |w|\, \mathrm{mod}\, 3 = 0\}.$
+\end{description}
+
+\begin{description}
+    \item[18(b,d)]
+        Using the notation from Example 1.13:
+        \begin{eqnarray*}
+          S \to& aA, \\
+          A \to& bS,\\
+          S \to& \lambda
+        \end{eqnarray*}
+
+        find grammars for the languages below. Assume $\Sigma = \{a,b\}$.
+
+        (b) $L = \{w : n_a (w) = n_b (w) + 1\}$.
+
+        (d) $L = \{w \in \{a, b\}^* : |n_a(w) - n_b(w)| = 1\}$.
+\end{description}
+
+% Section 2.1: 2(d), 7(c), 9(c), 12, 17 (see hint 1 below)
+%
+% Hint 1: We know that L is regular. Thus there is a DFA M such that
+%         L=L(M). To solve this problem you need to describe how to form
+%         a new DFA M' from M such that L(M')=L-{lambda}. You can
+%         construct such an M' by adding a single state to M with the
+%         appropriate arcs. You need to provide an informal argument as
+%         to why your construction is correct.
+\section*{Problems from 2.1}
+
+\begin{description}
+    \item[2(d)] For $\Sigma = \{a, b\}$. construct dfa's that accept the
+                sets containing of all strings with at least one $a$ and
+                exactly two $b$'s.
+\end{description}
+
+
+\begin{description}
+    \item[7(c)] Find dfa's for the following languages on $\Sigma = {a, b}$.
+
+                $L = \{w : |w|\, \mathrm{mod}\, 3 > 1\}$.
+\end{description}
+
+\begin{description}
+    \item[9(c)] Consider the set of strings on $\{0, 1\}$ defined by the
+                requirements below.  For each, construct an accepting dfa.
+
+                The leftmost symbol differs from the rightmost one.
+\end{description}
+
+\begin{description}
+    \item[12] Show that $L = \{a^n : n \ge 4\}$ is regular.
+
+    \item[17] Show that if $L$ is regular, so is $L - \{\lambda\}$.\\
+              \emph{Hint}: We know that $L$ is regular. Thus there is a
+              DFA $M$ such that $L = L(M)$. To solve this problem you
+              need to describe how to form a new DFA $M'$ from $M$ such
+              that $L(M') = L - \{\lambda\}$.  You can construct such an
+              $M'$ by adding a single state to $M$ with the appropriate
+              arcs. You need to provide an informal argument as to why
+              your construction is correct.
+
+\end{description}
+
+\end{document}
