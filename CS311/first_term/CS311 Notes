@@ -1,0 +1,129 @@
+CS311 - OS I
+
+What is an Operating System?
+ * Extended Machine
+   * Abstracts hardware
+--
+ * Resource Manager
+   * Memory
+      - Protection
+      - Allocates
+      - Virtual memory <--> Real memory  (OxDEADBEEF)
+ Filesystem
+ Security
+ Multiplexing - (Illusion of concurrency)
+--
+
+Process
+-----------
+ - Address space (core image)
+ - Process table entry
+
+
+Process Tree
+       A
+     /   \
+    B     C
+  / | \
+ D  E  F
+
+A - Parent Process
+C, B - Child Process
+D, E, F - Grandchild process
+
+
+Thread
+------------
+ - Processes that _share_
+
+
+System Calls
+------------
+fork
+waitpid
+exec ___
+exit
+kill
+ - file management
+   open
+   close
+   read
+   write
+   lseek
+   stat
+chdir
+mkdir
+rmdir
+link
+unlink - removes file, not really removes link
+mount
+umount
+time - Epoch Jan 1, 1970
+getrusage
+
+IPC
+----
+message queues - related
+pipes - related
+shared memory - arbitrary
+sockets - arbitrary
+signals - arbitrary
+filesystem - arbitrary
+(semaphores/mutexes)
+...threads
+
+
+Python
+------
+os, sys, subprocesses, re, shlex, urllib, getopt
+
+
+
+APIS (web browsers, etc.)
+-----
+Applications -> Java, vm, .net
+-----
+Libraries
+-----
+Kernel
+
+How do we write applications that make library, and kernel calls?
+- program in C
+- use system calls
+    - read, write, open (write != printf)
+    - lseek, stat, socket
+    - raw kernel API
+- libraries wrap syscalls
+- library call
+    - takes arguments, does something (ex. printf("n=%d", n)) -> stdout
+    - does processing
+    - calls syscall appropriately (ex. write(1, "n=5")
+
+library -> makes kernel call (kernel mode) -> performs action ->
+    returns value (user mode)
+
+
+Unix I/O
+---------
+read() @ret How many bytes read
+write() @ret How many bytes written
+lseek() @ret Current location, then moves
+
+Threading yada, yada
+pwrite(fd, buf, count, offset)
+pread(fd, buf, count, offset)
+
+ReadDir
+-------
+struct dirent readdir(DIR *dirp);
+man 3 readdir
+
+
+IPC / Synchronization
+-------
+Inter Process Communication
+
+
+MIDTERM
+--------
+Psudo code how to read TOC of archive
