@@ -1,0 +1,47 @@
+CS311 Notes 11/09/11
+--------------------
+Pipe (FIFO)
+    Unidirectional byte stream
+    between 2 related processes
+
+Reading on a pipe blocks if the pipe empty
+Writing blocks if full
+    - pipes have a limited capacity
+    - Under a value, writes are all atomic: PIPE_BUF
+
+Atomic means each process is either full ran, or not ran at all.
+    1,2 the cat
+    2,1 cat the
+    1212 tca hte <-- Bad (Processes interleaved)
+
+Pipes have limited capacity
+Data ---> O===O ---> Data
+
+int pipe(int fdes[2]);
+fdes[0] -> read (stdin)
+fdes[1] -> write (stdout)
+
+CODE
+-----
+if pipe(filedes) {
+    a = fork();)
+}
+if(a >0) {
+    // parent
+    close(filedes[0]);
+} elseif(a == 0) {
+    // child
+    close(filedes[1]);
+    exec();
+}
+
+Exec replaces co image of child with passed executables
+
+For bidirectional piping use 2 pipes. Possible race condition
+where processes deadlock because read blocks on empty, write on full.
+So if one empty, and one full they will both wait for eachother and block.
+
+Unused ends must be closed
+
+Example: Shell pipeline
+ls | wc -l

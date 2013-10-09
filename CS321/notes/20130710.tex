@@ -1,0 +1,81 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{CS321 Notes}
+\author{
+    Trevor Bramwell \\
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Languages}
+
+\begin{itemize}
+    \item $\lambda \in \Sigma^*$.
+
+    \item $\overline{L} = \Sigma^* - L$.
+
+    \item $L^* | \{aa, bb\} = L$.
+
+    \item $|L| = 2$.
+
+    \item $L^* = \{aa, aabb, bbaa, \ldots \}$.
+    \item $bbbaa \notin L^*$.
+\end{itemize}
+
+\section*{Decision Problems}
+$L = \{ w : w \mathrm{is a valid C program} \}$.
+This is the first thing a syntax checker does. Ensure the strings in the
+program are in the Language.
+
+\subsection*{Halting Problem}
+$L = \{ w : w $ is a valid C program that halts given no input $ \}$.
+
+\subsection*{DFA: Deterministic Finite (Acceptor|Automatan)}
+
+$M = (Q, \Sigma, \delta, q_0, F), F \subseteq Q$
+
+$\delta(q_0, b) = q_1$
+
+$\delta^*(q, w) = $ What state will DFA be in after reading $w$ from $q$.
+
+$\delta^*(q_0, aabb) = q_1$.
+
+$L(M) $ is the language of machine $M$ (The set of strings accepted by
+$M$).
+
+$L(M) = \{ w : w \in \Sigma^*, \delta^*(q_0, w) \in F \}$
+
+$M$ Represents the DFA. $\delta^*(q_0, w) \in F \}$ - end up in final
+sate starting in $q_0$ and reading $w$.
+
+\begin{description}
+    \item[Regular Language] A language $L$ is regular iff there exists
+                            a DFA $M$ such that $L = L(M)$.
+\end{description}
+
+\subsection*{Examples}
+Show the following language is regular.
+
+$L = \{ w: w \in \{a, b\}^*, $ each $a$ in $w$ is immediately preceeded
+by a $b$ $\}$.
+
+\begin{eqnarray*}
+    a \notin L\\
+    ba \in L\\
+    \lambda \in L\\
+    bbaa \notin L\\
+    bb \in L
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
+    \delta^*(q, \lambda) = q_1\\
+    \delta^*(q, a) = \ldots
+\end{eqnarray*}
+
+\end{document}

@@ -1,0 +1,14 @@
+In all cases, you are trying to match on word boundries. This means that if you are searching for cat then the following line does not match (does NOT contain cat):
+
+This line with concatenate and catatonic does not contain a match.
+But the following line will match cat even with the period at the end.
+This line will match cat.
+
+In all cases, you will use case insensitive matching. This means that if you are searching for cat then the following two lines will match:
+
+Cat rhymes with hat.
+My CAT is named Willie.
+
+In all cases, you are not modifying the file. You are simply displaying lines (including line numbers) that contain a match on the screen.
+
+You must verify and validate all options. Incorrect options or insufficient arguments should result in printing a usage message.

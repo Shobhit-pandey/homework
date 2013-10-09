@@ -1,0 +1,58 @@
+Project 2 Outline
+-----------------
+-q  (quickly append named files to archive)
+    open archive
+    for each file in filelist
+        open the file
+        get metadata from the file
+        create an ar_hdr from metadata
+        write ar_hdr to archive
+        write file to archive
+        close the file
+    close the archive
+
+-x  extract named files  
+    open archive
+    for header in headerlist
+        for filename in filelist
+            if filename in header
+                open file (filename)
+                write file
+                change file time w/utime
+                close file
+    close archive
+    
+-t  print a concise table of contents of the archive     
+    open archive
+    for header in headerlist
+        print filename
+    close archive
+        
+-v  print a verbose table of contents of the archive     
+    open archive
+    for header in headerlist
+        print verbose output
+    close archive
+
+del_file struct {
+    offset
+    filesize
+}
+-d  delete named files from archive  
+    open archive
+        unlink archive
+        create new archive
+            set write buffer past archive header
+        for header in headers
+            for filename in filelist
+                if filename in header
+                    skip header ( move write pointer forward )
+                    skip file
+                else
+                    write header and file to archive
+        close new archive
+    close archive
+        
+ 
+-A  quickly append all ``regular'' files in the current directory   (except the archive itself)
+    -q with IS_REG check when building filelist
