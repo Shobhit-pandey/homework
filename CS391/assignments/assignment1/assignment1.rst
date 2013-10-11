@@ -21,26 +21,21 @@ Moral Dilemma
 -------------
 Bursting through the computer lab doors, Abe's face was filled fear and
 anxiety. The other student workers and I could tell something was wrong
-and the first words Abe said were: "I think I'm in huge trouble."
+, when Abe said: "I'm in huge trouble. I think I might get expelled."
 
-The previous weekend, Abe had written a simple program that would guess
-his registration PIN by brute force all the possible numbers, and he put
-the program online freely available. He was using this program to get
-around having to meet with his advisor this term. Advising in COE
-requires you meet with an advisor every term. Apparently word had
-spread about his program, because a university rep emailed him asking
-him to take it offline. 
+The previous weekend, after getting his registration PIN Abe, out of
+curiosity, wrote a simple program that would brute force guess
+his registration PIN, and was surprised it worked.. He then put the
+program online on Github, freely available, and mentioned it offhandedly
+to his friend Ben. Not wanting to have to meet with his
+advisor, Ben used Abe's program to guess his PIN. 
 
+An Advisor noticed Ben had registered for classes without scheduling a
+meeting, and interegated him. Not wanting to rat on his friend, Ben lied
+about how he had gotten it, and then immediately told Abe his situation.
 
-...told some friends about it. One of his friends,
-Ben, downloaded the program and used it to get his pin as well. Later,
-in the term Ben met with his adviser, and the adviser noticed he was
-never actually given his pin. When questioned about his, Ben said he had
-used a program, but did not say where the program came from or who had
-written it.
-
-What do ethical theories say about these choices, and whether or not
-they were ethical?
+Was it ethical for Abe to create such a program, and freely distribute
+it?
 
 Kantanism
 ---------
