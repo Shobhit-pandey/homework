@@ -74,8 +74,7 @@ class CreateDirs(object):
 
         if path.exists(course_path):
             os.chdir(course_path)
-            if Options.verbose:
-                print "Decending into: {0}".format(course_path)
+
             for new_dir in course_dirs:
                 if not path.exists(new_dir):
                     os.mkdir(new_dir)
@@ -83,26 +82,29 @@ class CreateDirs(object):
                         created_dir(new_dir)
                 elif Options.verbose:
                     print "Directory: {0} already exists.".format(new_dir)
+
             if path.exists(symlink_base_path):
-                h = path.join(course_path, 'handin')
-                w = path.join(course_path, 'website')
-                if path.exists(h) and not path.exists(handin_path):
-                    os.symlink(handin_path, 'handin')
-                elif path.exists(w) and not path.exists(website_path):
-                    os.symlink(website_path, 'website')
-                elif Options.verbose:
-                        print "Symlinks already exists."
-                if Options.verbose:
-                    print "Created symlinks: handin, website."
-            elif not os.access(symlink_base_path, os.W_OK):
-                raise os.error("Can't create symlinks 'handin' or "
-                            "'website'. You do not have access to: "
-                            "{0}".format(symlink_base_path))
+                def create_symlink(source, dest):
+                    """
+                    Create a symlink from source to dest
+                    """
+                    if path.exists(source):
+                        if not path.exists(path.join(course_path, dest)):
+                            print source, dest, path.join(course_path, dest)
+                            os.symlink(source, dest)
+                            if Options.verbose:
+                                print "Created symlink: {0}".format(dest)
+                        elif Options.verbose:
+                            print "Symlink: {0} already exists".format(dest)
+                    else:
+                        raise os.error("Symlink destination does not "
+                                       "exist: {0}".format(source))
+
+                create_symlink(handin_path, 'handin')
+                create_symlink(website_path, 'website')
             else:
-                raise os.error("Not symlinking 'handing' or 'website' as "
-                            "you don't seem to be on os-class. "
-                            "Path does not exist: "
-                            "{0}".format(symlink_base_path))
+                raise os.error("Symlinking failed. Base path does not "
+                               "exist: {0}.".format(symlink_base_path))
 
         if Options.verbose:
             print ("Finished creating directories for "
