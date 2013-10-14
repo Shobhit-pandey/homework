@@ -227,7 +227,56 @@ class TriangleNumbers(object):
     Using words.txt, a 16K text file containing nearly two-thousand
     common English words, how many are triangle words? 
     """
-    #words = open('words.txt', 'r')
+    words = open('words.txt', 'r').read().strip('"').split('","')
+    triangles = []
+
+    @classmethod
+    def gen_triangle_numbers(self):
+        """
+        Generate triangle numbers for 1 - (top+1).
+        """
+        top = 200
+
+        if len(self.triangles) < 19:
+            for n in xrange(1,top+1):
+                triangle = int(0.5*n*(n+1))
+                if triangle < top and triangle not in self.triangles:
+                    self.triangles.append(triangle)
+                    yield triangle
+        else:
+            for t in self.triangles:
+                yield t
+
+    @classmethod
+    def to_triangle_number(self, word):
+        """
+        Return the triangle number for a given word.
+        """
+        return AlphabetFun().alpha_value(word)
+
+    @classmethod
+    def is_triangle_word(self, word):
+        """
+        Check if a word is a triangle word
+        """
+        number = self.to_triangle_number(word)
+        outcome = bool(number in self.gen_triangle_numbers())
+        if Options.verbose:
+            print word, number, outcome
+        return outcome
+
+    @classmethod
+    def triangle_words_total(self):
+        """
+        Get a total of words that are triangle numbers.
+        """
+        count = 0
+        for word in self.words:
+            if self.is_triangle_word(word):
+                count += 1
+        if Options.verbose:
+            print "Triangle numbers: {0}".format(self.triangles)
+        return count
 
 
 class Main(object):
@@ -248,15 +297,17 @@ class Main(object):
         except GetoptError as err:
             print err
             sys.exit(2)
-            #self.error("Option not recognized: {0}".format(opt))
-
-        #if len(opts) == 0:
-        #    self.error("Please pass in at least one option.")
 
         self.parse_opts(opts)
     
         self.parse_args(args)
     
+        self.choose_method()
+
+    def choose_method(self):
+        """
+        Choose the method to run given the arguments to the program.
+        """
         if Options.question == 1:
             if Options.term and Options.course:
                 self.question1(Options.term, Options.course)       
@@ -267,7 +318,9 @@ class Main(object):
             self.question2()
         elif Options.question == 3:
             self.question3()
-        elif Options.question > 3:
+        elif Options.question == 4:
+            self.question4()
+        elif Options.question > 4:
             self.error("Argument references a question that does not"
                        " exists.")
         else:
@@ -305,6 +358,9 @@ class Main(object):
                 sys.exit(2)
 
     def usage(self):
+        """
+        Return a long string of how the program should be used.
+        """
         header = ('Usage: {0} [OPTIONS] [QUESTION]\n\nRun question QUESTION '
                   'for assignment 1, where QUESTION is the question '
                   'number. Defaults to 1.\nExample:\n  {0} 2\nWould run '
@@ -338,12 +394,8 @@ class Main(object):
         print AlphabetFun().alpha_total()
 
     def question4(self):
-        print TriangleNumbers().triangle_word_total()
+        print TriangleNumbers().triangle_words_total()
 
 
 if __name__ == "__main__":
-    #Main().question1('fa13','cs421')
-    #Main().question2()
-    #Main().question3()
     Main().run()
-    #Main().greatest_product()
