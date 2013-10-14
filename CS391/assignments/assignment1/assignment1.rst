@@ -25,48 +25,65 @@ anxiety. The other student workers and I could tell something was wrong
 
 The previous weekend, after getting his registration PIN Abe, out of
 curiosity, wrote a simple program that would brute force guess
-his registration PIN, and was surprised it worked.. He then put the
-program online on Github, freely available, and mentioned it offhandedly
+his registration PIN. Surprised it worked, he put the
+program up freely available online, and mentioned it offhandedly
 to his friend Ben. Not wanting to have to meet with his
 advisor, Ben used Abe's program to guess his PIN. 
 
 An Advisor noticed Ben had registered for classes without scheduling a
 meeting, and interegated him. Not wanting to rat on his friend, Ben lied
-about how he had gotten it, and then immediately told Abe his situation.
+about how he had gotten it. This left Abe in the position of having to
+decide to stay quiet, and be found out, or fess up and admit he wrote
+the program.
 
-Was it ethical for Abe to create such a program, and freely distribute
-it?
+ * * *
 
-Kantanism
----------
-Kantanism says:
+Was it ethical for Ben to use the program Abe had created? Would the
+situation be different if Abe hadn't told his friend about the program?
 
-This situation does not meet the second formulation of the Categorical
-Imperative, since the adviser is being treated solely as a means to an
-end (the Pin).
+These questions of ethics I will explore using the frameworks of
+Kantinism and Act Utilitarianism. After exploring the questions I will
+give a moral justification based upon one of the theories.
 
-The first formulation shows that this is again unethical. If everyone
-disobeyed university policies they did not agree with, then university
-policies could no longer be inforced, and we would have anarchy. So it
-is wrong to side-step university policies.
+Kantinism judges choices based on the concept of a 'good will' and
+provides two formulations of the 'Categorical Imperative' to constuct a
+framwork for evaluation. According to the second formulation of the
+Categorical Imperative, Ben's actions were unethical. To get his
+registration PIN, Ben treated his advisor as a means to an end, rather
+than a guide to the complex university registration requirement.
 
-Act Utilitarianism
-------------------
-Act Utilitarianism says:
+The first formulation of the Categorical Imperative would say that
+again, Ben's actions were unethical. Ben abused the computer resources
+of the university and sidestepped policies. If everyone sidestepped
+university policies they did want to deal with, then university policies
+would no longer have use, and there would be no way to enforce
+restrictions on those who were disruptive or cheated. Since these
+polices are required for a university to properly function it is
+therefore wrong to sidestep university policies.
 
-Using the brute force pin guesser was okay, as it increased the
-happiness of all parties involved, because both parties were able to
-save time.
+Lets look at the situation now from the perspective of Act Utilitarianism.
+Act Utilitarianism states that actions are ethical if the sum of the
+consequences are positive. Because Ben saved time by having to meet with
+his advisor, and because the advisor saved time by having to meet with
+one less student, the overall outcome of the situation is positive.
+Therefore Act Utilitarianism would say Ben's actions were ethical.
 
-The advisor had 1 less student to meet with, and the student could
-register for classes 
+Now Kantanism and Act Utilitarianism provide opposite answers to the
+ethics of Ben's actions. I feel Ben's actions were unethical, and that
+Kantanism is a better framework for evaluating his situation. Ben did
+not have a 'good will' in mind, but a selfish will. He also broke
+university policies for his own benefit, and treated his advisors as a
+means to an end. Act Utilitarianism says his actions were ethical, but
+this is only because it focuses on the individual and not society as a
+whole.
 
-Moral Justification
---------------------
+In the end Abe and Ben both recieved disciplinary action, and Abe lost
+his student job. Being unethical doesn't pay.
 
 References
 ----------
-[1] http://oregonstate.edu/fa/manuals/gen/computing-resources
+[1] Leiz. Ethical Theories for the Information Age, 5th Edition.
+[2] http://oregonstate.edu/fa/manuals/gen/computing-resources
 
 
 
