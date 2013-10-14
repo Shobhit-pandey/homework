@@ -152,10 +152,11 @@ class AlphabetFun(object):
         return sum(ord(i)-ord('@') for i in name)
 
     @classmethod
-    def alpha_total(self, names):
+    def alpha_total(self):
         """
         The total score of a list of names.
         """
+        names = self.ns
         return sum(self.alpha_position(name, names) * self.alpha_value(name) for name in names)
 
 
@@ -234,6 +235,10 @@ class Main(object):
     Holds answers/functions for all the questions.
     """
 
+    def exit_with_help(self):
+        print self.usage()
+        sys.exit()
+
     def run(self):
         """
         Parses the arguments and options passed to the script.
@@ -245,32 +250,66 @@ class Main(object):
             sys.exit(2)
             #self.error("Option not recognized: {0}".format(opt))
 
-        if len(opts) == 0:
-            self.error("Please pass in at least one option.")
+        #if len(opts) == 0:
+        #    self.error("Please pass in at least one option.")
 
+        self.parse_opts(opts)
+    
+        self.parse_args(args)
+    
+        if Options.question == 1:
+            if Options.term and Options.course:
+                self.question1(Options.term, Options.course)       
+                sys.exit()
+            elif Options.term or Options.course:
+                self.error("Provided term or course by itself.")
+        elif Options.question == 2:
+            self.question2()
+        elif Options.question == 3:
+            self.question3()
+        elif Options.question > 3:
+            self.error("Argument references a question that does not"
+                       " exists.")
+        else:
+            self.exit_with_help()
+
+    def parse_opts(self, opts):
+        """
+        Parse the options sent to the program.
+        """
         for opt, arg in opts:
             if opt in ('-v'):
                 Options.verbose = True
             elif opt in ('-h'):
-                print self.usage()
-                sys.exit()
+                self.exit_with_help()
             elif opt in ('-c', '--course'):
                 Options.course = arg
             elif opt in ('-t', '--term'):
                 Options.term = arg
 
-        if Options.term and Options.course:
-            self.question1(Options.term, Options.course)       
-            sys.exit()
-        elif Options.term or Options.course:
-            self.error("Provided term or course by itself.")
+    def parse_args(self, args):
+        """
+        Parse the arguments passed to the program.
+        """
+        if len(args) == 0:
+            Options.question = 1
+        elif len(args) > 1:
+            self.error("Too many arguments given")
         else:
-            self.error("Not enough options given")
+            if Options.verbose:
+                print "Arguments: {0}".format(args)
+            try:
+                Options.question = int(args[0])
+            except ValueError as err:
+                print "Argument passed is not a valid integer."
+                sys.exit(2)
 
     def usage(self):
-        header = ('Usage: {0} [OPTIONS]...\nRun question for '
-                  'assignment1\n\nMandatory arguments are '
-                  'mandatory.'.format(__file__))
+        header = ('Usage: {0} [OPTIONS] [QUESTION]\n\nRun question QUESTION '
+                  'for assignment 1, where QUESTION is the question '
+                  'number. Defaults to 1.\nExample:\n  {0} 2\nWould run '
+                  'question 2 ' 'with out any arguments.\n\nMandatory '
+                  'arguments are mandatory.'.format(__file__))
         arguments = [
             ('-h', '', 'Show this text'),
             ('-v', '', 'Enable verbose output'),
@@ -286,8 +325,7 @@ class Main(object):
         return "\n".join(usage)
 
     def error(self, error_msg):
-        print "ERROR:",error_msg,"\n"
-        #print self.usage()
+        print "ERROR:",error_msg
         sys.exit(1)
 
     def question1(self, term, course):
@@ -297,7 +335,10 @@ class Main(object):
         print GreatestProduct().greatest_product()
 
     def question3(self):
-        print AlphabetFun().alpha_total(AlphabetFun.ns)
+        print AlphabetFun().alpha_total()
+
+    def question4(self):
+        print TriangleNumbers().triangle_word_total()
 
 
 if __name__ == "__main__":
