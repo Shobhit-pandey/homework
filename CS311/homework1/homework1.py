@@ -21,6 +21,7 @@ class Options(object):
     verbose = False
     course = None
     term = None
+    prog = ''
 
 
 class CreateDirs(object):
@@ -293,38 +294,44 @@ class Main(object):
         Parses the arguments and options passed to the script.
         """
         try:
-            opts, args = getopt(sys.argv[1:], 'c:t:hv', ['--course', '--term'])
+            opts, args = getopt(sys.argv[1:], 'c:t:dpnwhv', ['help',
+                            'verbose',
+                            'dirs',
+                            'product',
+                            'names',
+                            'words',
+                            'term=',
+                            'course='])#'--names', '--digits', '--numbers'])
         except GetoptError as err:
             print err
             sys.exit(2)
 
         self.parse_opts(opts)
-    
         self.parse_args(args)
-    
         self.choose_method()
 
     def choose_method(self):
         """
         Choose the method to run given the arguments to the program.
         """
-        if Options.question == 1:
+        if Options.prog == 'dirs':
             if Options.term and Options.course:
-                self.question1(Options.term, Options.course)       
-                sys.exit()
-            elif Options.term or Options.course:
-                self.error("Provided term or course by itself.")
-        elif Options.question == 2:
-            self.question2()
-        elif Options.question == 3:
-            self.question3()
-        elif Options.question == 4:
-            self.question4()
-        elif Options.question > 4:
-            self.error("Argument references a question that does not"
-                       " exists.")
+                CreateDirs().create_dirs(Options.term, Options.course)
+            elif not Options.term and not Options.course:
+                self.error("Missing both term and course")
+            elif not Options.term:
+                self.error("Missing term")
+            elif not Options.course:
+                self.error("Missing course")
+        elif Options.prog == 'product':
+            print GreatestProduct().greatest_product()
+        elif Options.prog == 'triangles':
+            print TriangleNumbers().triangle_words_total()
+        elif Options.prog == 'names':
+            print AlphabetFun().alpha_total()
         else:
             self.exit_with_help()
+        sys.exit()
 
     def parse_opts(self, opts):
         """
@@ -333,49 +340,50 @@ class Main(object):
         for opt, arg in opts:
             if opt in ('-v'):
                 Options.verbose = True
-            elif opt in ('-h'):
+            elif opt in ('-h', '--help'):
                 self.exit_with_help()
             elif opt in ('-c', '--course'):
                 Options.course = arg
             elif opt in ('-t', '--term'):
                 Options.term = arg
+            elif opt in ('-d', '--dirs'):
+                Options.prog = 'dirs'
+            elif opt in ('-n', '--names'):
+                Options.prog = 'names'
+            elif opt in ('-p', '--product'):
+                Options.prog = 'product'
+            elif opt in ('-w', '--words'):
+                Options.prog = 'triangles'
 
     def parse_args(self, args):
         """
         Parse the arguments passed to the program.
         """
-        if len(args) == 0:
-            Options.question = 1
-        elif len(args) > 1:
-            self.error("Too many arguments given")
-        else:
-            if Options.verbose:
-                print "Arguments: {0}".format(args)
-            try:
-                Options.question = int(args[0])
-            except ValueError as err:
-                print "Argument passed is not a valid integer."
-                sys.exit(2)
+        if len(args) > 0:
+            self.error("Recieved an argument. This program doesn't take"
+                       " arguments")
 
     def usage(self):
         """
         Return a long string of how the program should be used.
         """
-        header = ('Usage: {0} [OPTIONS] [QUESTION]\n\nRun question QUESTION '
-                  'for assignment 1, where QUESTION is the question '
-                  'number. Defaults to 1.\nExample:\n  {0} 2\nWould run '
-                  'question 2 ' 'with out any arguments.\n\nMandatory '
-                  'arguments are mandatory.'.format(__file__))
+        header = 'Usage: {0} [OPTIONS]\n'.format(__file__)
+        description = ('Main programs can be chosen from the following list:\n  '
+                       '-d, --dirs\tCourse Directory (requires COURSE and TERM)\n  '
+                       '-p, --products\tDigit Products\n  '
+                       '-n, --names\tName Scores\n  '
+                       '-w, --words\tTriangle Words\n\n'
+                       'List of available arguments: ')
         arguments = [
-            ('-h', '', 'Show this text'),
-            ('-v', '', 'Enable verbose output'),
-            ('-c,', '--course', 'The course being taught '
+            ('-h', '--help', 'Show this text'),
+            ('-v', '--verbose', 'Enable verbose output'),
+            ('-c,', '--course', 'The COURSE being taught '
                                '(requires: -t, or --term)'),
-            ('-t,', '--term', 'The term of courses '
-                             '(requires: -c, or --course'),
+            ('-t,', '--term', 'The TERM of courses '
+                             '(requires: -c, or --course)'),
         ]
         
-        usage = [header]
+        usage = [header, description]
         usage.extend(["  {0} {1}\t{2}".format(a1, a2, desc) for
             a1,a2,desc in arguments])
         return "\n".join(usage)
@@ -384,17 +392,6 @@ class Main(object):
         print "ERROR:",error_msg
         sys.exit(1)
 
-    def question1(self, term, course):
-        CreateDirs().create_dirs(term, course)
-
-    def question2(self):
-        print GreatestProduct().greatest_product()
-
-    def question3(self):
-        print AlphabetFun().alpha_total()
-
-    def question4(self):
-        print TriangleNumbers().triangle_words_total()
 
 
 if __name__ == "__main__":
