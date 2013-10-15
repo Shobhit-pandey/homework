@@ -1,6 +1,9 @@
 TARGET=part5
 HTML=main_html
 SRC={$TARGET}
+CC=gcc
+LDFLAGS=-lm
+CFLAGS=-std=c99
 
 default: pdf clean
 
@@ -15,14 +18,15 @@ dvi: ${TARGET}.tex
 #	bibtex $(TARGET)
 	latex $(TARGET).tex
 #	remove the pygmentized output to avoid cluttering up the directory
-#	rm __${TARGET}.tex
-
+#	rm __${TARGET}.tex 
 ps: dvi
 	dvips -R -Poutline -t letter ${TARGET}.dvi -o ${TARGET}.ps
 
 pdf: ps
 	ps2pdf ${TARGET}.ps
 
+sieve: 
+	$(CC) $(CFLAGS) sieve_eratosthenes.c $(LDFLAGS) -o sieve.o
 
 html:
 	cp ${TARGET}.tex ${HTML}.tex
