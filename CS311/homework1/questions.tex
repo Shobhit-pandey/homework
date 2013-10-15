@@ -55,13 +55,16 @@
 \maketitle
 
 \begin{enumerate}
-\item Describe at least 2 ways of transferring files from a remote server to a local machine.
+\item Describe at least 2 ways of transferring files from a remote
+      server to a local machine.
     \begin{enumerate}
         \item \texttt{\$ scp user@remotehost:filepath localpath}
         \item \texttt{\$ \{wget,curl -L\} URL}
     \end{enumerate}
 
-\item What are revision control systems? Why are they useful? Explain how to create a subversion or git repository on os-class (and create it, while you're at it).
+\item What are revision control systems? Why are they useful? Explain
+      how to create a subversion or git repository on os-class (and create
+      it, while you're at it).
 
 A `revision control system' is a program from keeping track of revisions
 to files. They are useful in software development for keeping track of
@@ -74,44 +77,54 @@ the history of a project and keeping code between developers in sync.
 
 \item What is the difference between redirecting and piping? Describe each.
 
-Redirecting on the shell is a way to connect stdin, stdout, and stderr
-of one command to a file descriptor. For example:
-\texttt{\$ echo "hello, world" > newfile} would connect the echo
-command's stdout to newfile's stdin. 
+Redirecting allows you to redirect a command's input or output to a
+file. Since stdin, stdout, and stderr are also files,
+they are include in what you can redirect to.
 
-Piping is shorthand for connecting fd 1 (stdout) to fd 0 (stdin), and
-runs each command as a subprocess.
+For example:
+    \texttt{\$ echo "hello, world" > newfile}
+would redirect echo's stdout to newfile. newfile would now contain
+``hello, world''.
+
+Piping connects the stdout of a command to the stdin of a second
+command by way of a pipe, before any redirection happens. Piping sets up
+a link between two commands so the output of the first can easily be
+chained to the input of the second.
 
 \item What is make, and how is it useful?
 
-Parphrase from the manpage: ``Make is a utility to maintain groups of
-programs.''. In short, Make is a build tool for managing program
-dependencies. When not being used for the C language Make is generally
-used to hold a collection of related shell commands, like how this class
-is currently using it to build LaTeX documents.
+Make is a language and a program for handling build dependencies.
+It is useful for compiling only the parts of a program that have
+changed. For example: say you have a program that is dependend upon
+functions from multiple files of `C' code. If one of those files
+changes, then you will have to recompile every each one of the files
+along with your program. 
+
+Make resolves this by only recompiling the single file that changed, and
+building any other dependencies that it relies on.
+
+Make can also be used as a simple interface for a collection of
+commands; similar to bash aliases.
 
 \item Describe, in detail, the syntax of a make file.
 
-A makefile is made up of 5 elements:
-    \begin{enumerate}
-        \item target rules
-        \item inference rules
-        \item macros
-        \item empty lines
-        \item comments
-    \end{enumerate}
+A makefile is made up of 2 major elements: Rules and Macros. They can
+also contain comments and empty lines.
 
-Since empty lines and comments are self exlanitory, I will skip over
-them.
+A makefile generally has a list of macros at the top, followed by any
+number of rules.
 
-Macros
+Macros are used to easily reference things like CFLAGS and LDFLAGS, and
+the list of objects to be compiled.
 
-Target Rules
+Each rule consists of a target, some optional dependencies, and a list
+of 1 or more commands to execute in order. If make sees a dependency is
+out of date when running a target, it will run the command to rebuild
+that dependency. 
 
-Inference Rules
-
-
-\item Give a find command that will run the file command on every regular file (not directories!) within the current filesystem subtree.
+\item Give a find command that will run the file command on every
+      regular file (not directories!) within the current filesystem
+      subtree.
 
 \texttt{\$ find . -type f -exec file `\{\}' \textbackslash;}
 

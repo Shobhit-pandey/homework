@@ -1,4 +1,4 @@
-TARGET=part5
+TARGET=questions
 HTML=main_html
 SRC={$TARGET}
 CC=icc
