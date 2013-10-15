@@ -379,9 +379,9 @@ class Main(object):
         arguments = [
             ('-h', '--help', 'Show this text'),
             ('-v', '--verbose', 'Enable verbose output'),
-            ('-c,', '--course', 'The COURSE being taught '
+            ('-c COURSE,', '--course=COURSE', 'The COURSE being taught '
                                '(requires: -t, or --term)'),
-            ('-t,', '--term', 'The TERM of courses '
+            ('-t TERM,', '--term=TERM', 'The TERM of courses '
                              '(requires: -c, or --course)'),
         ]
         
