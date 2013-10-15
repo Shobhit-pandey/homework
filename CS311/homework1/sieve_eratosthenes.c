@@ -2,76 +2,210 @@
 Title: Sieve of Eratosthenes
 Author: Trevor Bramwell
 Date: Sun Oct 13 20:11:29 PDT 2013
----
+*/
 
-# Write a prime number sieve.
+/*
+Directions:
 
-The Sieve of Eratosthenes identifies all prime numbers up to a given number n
-as follows:
+Write a C function which returns the number of primes less than a given value,
+as well as the values of all the primes. It might be worth writing this in a
+way that can be easily used later...
+*/
 
-    # Input: integer
-    # Will create an array of size n, where n[0] represents the primality of 1,
-    # n[1] represents the primality of 2, and so on.
-    # In each case:
-    #   0 represents prime
-    #   1 represents composite
-    #
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define SIZE 20
+
+#define DONE -1
+
+#define PRIME 0
+#define UNMARKED 0
+#define SPECIAL 1
+#define COMPOSITE 1
+
+int
+num_zeros(int* array, const int size) {
+    /* Return the number of PRIMES in an array */
+    int counter = 0;
+    for(int i = 0; i < size; i++) {
+        if(array[i] == PRIME) {
+            ++counter;
+        }
+    }
+    return counter;
+}
+
+int
+mark_numbers(int* primes, const int m, const int n) {
+    /*
+    Mark the numbers
+
+    2m, 3m, 4m, ...
+
+    as composite. (Thus in the first run we mark all even numbers greater
+    than 2. In the second run we mark all multiples of 3 greater than 3.)
+    */
+    int i = 1;
+    while(i*m < n) {
+       primes[i*m] = COMPOSITE; 
+       ++i;
+    }
+}
+
+int
+get_larger_prime(int* primes, const int k, const int n) {
+    /*
+    Find the first number in the list greater than k that has not been
+    identified as composite. (The very first number so found is 2.)
+    Call it m.
+    */
+    int m = k;
+    while(m < n) {
+        ++m;
+        //printf("m:%ld n:%ld\n", m, n);
+        if(primes[m] == PRIME) {
+            return m;
+        }
+    }
+    return DONE;
+}
+
+int
+prime_sieve(int* primes, const int n)
+{
+    assert(primes != 0);
+    assert(n > 0);
+    int m = 1;
+    int counter = 0;
+    /*
     Write down the numbers 1, 2, 3, ..., n. We will eliminate composites by
     marking them. Initially all numbers are unmarked.  Mark the number 1 as
     special (it is neither prime nor composite).
+    */
 
-    # Loop through the array from 0 to >= sqrt(i)
+    primes[0] = SPECIAL;
+    //primes[1] = SPECIAL;
 
-    Set k=1. Until k exceeds or equals the square root of n do:
+    /* Set k=1. */ 
+    int k = 1;
 
-        # If n[i] == 0
-        # (counter++) - we want a count at the end as well
-
+    /*
+    Until k exceeds or equals the square root of n do:
+    */
+    while(k < ceil(sqrt(n))) {
+        //++k;
+        /*
         Find the first number in the list greater than k that has not been
         identified as composite. (The very first number so found is 2.)
-        Call it m. Mark the numbers
-
-        # set n[i*j] to 1, where j increases while i*j < n
+        Call it m.
+        */
+        m = get_larger_prime(primes, k, n);
+        ++counter;
+        /*
+        Mark the numbers
 
         2m, 3m, 4m, ...
 
         as composite. (Thus in the first run we mark all even numbers greater
         than 2. In the second run we mark all multiples of 3 greater than 3.)
+        */
+        mark_numbers(primes, m, n);
+
+        /*
         m is a prime number. Put it on your list.
+        */
+        primes[m] = PRIME;
 
-        # Append m to list
-
+        /*
         Set k=m and repeat.
+        */
+        k = m;
+    }
 
-    # i++ until all n[i] == 0 added
-
+    /*
     Put the remaining unmarked numbers in the sequence on your list of prime
     numbers.
+    */
+    --counter;
+    while(k < n) {
+        if (primes[k] == PRIME) {
+            ++counter;
+        }
+        ++k;
+    }
 
-# Return (counter)
+    return counter;
+}
 
-Write a C function which returns the number of primes less than a given value,
-as well as the values of all the primes. It might be worth writing this in a
-way that can be easily used later...
 
-*/
-#include <stdio.h>
+void
+print_array(int* array, const int size) {
+    /* Print an array of size to stdout. */
+    printf("[");
+    for(int i = 0; i < size; i++) {
+        if (i != (size-1))
+        {
+            printf("%ld, ", array[i]);
+        }
+        else
+        {
+            printf("%ld", array[i]);
+        }
+    }
+    printf("]\n");
+}
 
-/* Tests
- 
-   Given the size of the array passed in, and a wrongly sized array, the
-   function returns an error code.
+void
+print_primes(int* array, const int size, const int num) {
+    /* Print the prime numbers in array */
+    assert(size >= 2);
+    int j = 0;
+    printf("[");
+    for(int i = 2; i < size; i++) {
+        if (array[i] == PRIME) {
+            ++j;
+            if(j != num) {
+                printf("%ld, ", i);
+            } else {
+                printf("%ld", i);
+            }
+        }
+    }
+    printf("]\n");
+}
 
-   Given a size of 1, the function returns int(0).
+void
+init_array(int* array, const int size) {
+    /* Initialize an integer array of size to UNMARKED. */
+    for(int i = 0; i < size; i++) {
+        array[i] = UNMARKED;
+    }
+}
 
-   Given a size of 2, the functions return int(1), and the array contains 2.
+int
+main(int argc, char* argv[]) {
+    if(argc < 2) {
+        printf("Please provide a number as a single argument.\n");
+        return 1;
+    }
 
-*/
+    int n = atoi(argv[1]);
+    //printf("%ld\n", atoi(argv[1]));
 
-int main(int argc, char* argv[]) {
+    int* primes = (int *)malloc( sizeof(int)*n );
+    assert(primes != 0);
 
-    printf("hello, world!\n");
+    init_array(primes, n);
 
+    int num_prime = prime_sieve(primes, n);
+
+    printf("%ld Primes less than %ld.\n", (long)num_prime, (long)n);
+    print_primes(primes, n, num_prime);
+
+    free(primes);
     return 0;
 }
