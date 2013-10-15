@@ -1,7 +1,7 @@
 TARGET=part5
 HTML=main_html
 SRC={$TARGET}
-CC=gcc
+CC=icc
 LDFLAGS=-lm
 CFLAGS=-std=c99
 

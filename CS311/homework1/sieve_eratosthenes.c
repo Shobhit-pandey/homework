@@ -39,7 +39,7 @@ num_zeros(int* array, const int size) {
     return counter;
 }
 
-int
+void
 mark_numbers(int* primes, const int m, const int n) {
     /*
     Mark the numbers
@@ -149,11 +149,11 @@ print_array(int* array, const int size) {
     for(int i = 0; i < size; i++) {
         if (i != (size-1))
         {
-            printf("%ld, ", array[i]);
+            printf("%ld, ", (long)array[i]);
         }
         else
         {
-            printf("%ld", array[i]);
+            printf("%ld", (long)array[i]);
         }
     }
     printf("]\n");
@@ -169,9 +169,9 @@ print_primes(int* array, const int size, const int num) {
         if (array[i] == PRIME) {
             ++j;
             if(j != num) {
-                printf("%ld, ", i);
+                printf("%ld, ", (long)i);
             } else {
-                printf("%ld", i);
+                printf("%ld", (long)i);
             }
         }
     }
