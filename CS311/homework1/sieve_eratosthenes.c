@@ -20,8 +20,6 @@ way that can be easily used later...
 
 #define SIZE 20
 
-#define DONE -1
-
 #define PRIME 0
 #define UNMARKED 0
 #define SPECIAL 1
@@ -66,12 +64,11 @@ get_larger_prime(int* primes, const int k, const int n) {
     int m = k;
     while(m < n) {
         ++m;
-        //printf("m:%ld n:%ld\n", m, n);
         if(primes[m] == PRIME) {
             return m;
         }
     }
-    return DONE;
+    return 0;
 }
 
 int
@@ -88,7 +85,6 @@ prime_sieve(int* primes, const int n)
     */
 
     primes[0] = SPECIAL;
-    //primes[1] = SPECIAL;
 
     /* Set k=1. */ 
     int k = 1;
@@ -97,7 +93,6 @@ prime_sieve(int* primes, const int n)
     Until k exceeds or equals the square root of n do:
     */
     while(k < ceil(sqrt(n))) {
-        //++k;
         /*
         Find the first number in the list greater than k that has not been
         identified as composite. (The very first number so found is 2.)
@@ -130,7 +125,9 @@ prime_sieve(int* primes, const int n)
     Put the remaining unmarked numbers in the sequence on your list of prime
     numbers.
     */
-    --counter;
+    if(counter > 0) {
+        --counter;
+    }
     while(k < n) {
         if (primes[k] == PRIME) {
             ++counter;
@@ -162,7 +159,6 @@ print_array(int* array, const int size) {
 void
 print_primes(int* array, const int size, const int num) {
     /* Print the prime numbers in array */
-    assert(size >= 2);
     int j = 0;
     printf("[");
     for(int i = 2; i < size; i++) {
@@ -194,7 +190,6 @@ main(int argc, char* argv[]) {
     }
 
     int n = atoi(argv[1]);
-    //printf("%ld\n", atoi(argv[1]));
 
     int* primes = (int *)malloc( sizeof(int)*n );
     assert(primes != 0);
