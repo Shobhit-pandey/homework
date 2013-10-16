@@ -15,7 +15,7 @@
 \usetikzlibrary{arrows,automata}
 
 \title{CS321 - Homework 2}
-%\author{Trevor Bramwell}
+\author{Trevor Bramwell}
 \date{\today}
 
 \begin{document}
@@ -30,12 +30,15 @@
 % 6, 7, 10a, 12, 14, 18
 \begin{description}
     \item[6] For the nfa in Figure 2.9, find $\delta^*(q_0, 1010)$ and $\delta^*(q_1, 00)$.
+        \begin{align*}
+            \delta^*(q_0, 1010) &= \{q_0, q_2\}\\
+            \delta^*(q_1, 00) &= \{q_0, q_2\}
+        \end{align*}
 
     \item[7] Design an NFA with no more than five states for the set
 
         $\{abab^n : n \ge 0\} \cup \{aba^n : n \ge 0\}$.
 
-        \begin{center}
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
                             thick]
           \tikzstyle{every state}=[fill=white]
@@ -52,14 +55,12 @@
                 (C) edge node [above] {$\lambda$} (A);
                 
         \end{tikzpicture}
-        \end{center}
 
 
     \item[10(a)] Find an NFA with three states that accepts the language
 
         $L = \{a^n: n \ge 1\} \cup \{b^m a^k : m \ge 0, k \ge 0 \}$.
 
-        \begin{center}
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
                             thick]
           \tikzstyle{every state}=[fill=white]
@@ -75,12 +76,10 @@
                 (C) edge [loop below] node [below] {$b$} (D);
                 
         \end{tikzpicture}
-        \end{center}
 
     \item[12] Which of the strings $00$, $01001$, $10010$, $000$, $0000$ are accepted by the following
         nfa?
 
-        \begin{center}
         \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
                             thick]
           \tikzstyle{every state}=[fill=white]
@@ -96,12 +95,35 @@
                 (C) edge [bend right] node [above] {$1$} (B);
                 
         \end{tikzpicture}
-        \end{center}
 
         The strings accepted are: $01001$, and $000$.
  
     \item[14] Let $L$ be the language accepted by the nfa in Figure 2.8. Find an nfa that
         accepts $L \cup \{a^5\}$.
+
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                            thick]
+          \tikzstyle{every state}=[fill=white]
+
+          \node[state,initial]   (A)          {$q_0$};
+          \node[state] (B) [above right of=A] {$q_1$};
+          \node[state] (C) [right of=B]       {$q_2$};
+          \node[state,accepting] (D) [right of=C]       {$q_3$};
+          \node[state] (E) [below right of=A] {$q_4$};
+          \node[state,accepting] (F) [right of=E]       {$q_5$};
+          \node[state] (G) [below of=D]       {$q_6$};
+          \node[state,accepting] (H) [below of=G]       {$q_7$};
+
+          \path (A) edge [bend left] node [left] {$a$} (B)
+                    edge [bend right] node [left] {$a$} (E)
+                (B) edge node [above] {$a$} (C)
+                (C) edge node [above] {$a$} (D)
+                (D) edge node [right] {$a$} (G)
+                (G) edge node [right] {$a$} (H)
+                (E) edge [bend right] node [below] {$a$} (F)
+                (F) edge [bend right] node [above] {$a$} (E);
+                
+        \end{tikzpicture}
 
     \item[18] Consider the following modification of Definition 2.6. An nfa
         with multiple initial states is defined by the quintuple
@@ -111,21 +133,37 @@
         where $Q_0 \subseteq Q$ is a set of possible initial states. The
         language accepted by such an automaton is defined as
         \begin{align*}
-            L(M) = \{w: \delta^*(q_O,w)\, \mathrm{contains},\, q_f,\,
+            L(M) = \{w: \delta^*(q_0,w)\, \mathrm{contains},\, q_f,\,
                      \mathrm{for\, any}\; q_0 \in Q_0, q_f \in F\}.
         \end{align*}
 
-        Show that for every ufa with multiple initial states there exists an
-        nfa with a single initial state that accepts the same language.
+        Show that for every nfa with multiple initial states there exists an
+        nfa with a single initial state that accepts the same
+        language.
+
+        \hrule
+
+        For any nfa with multiple initial states that accepts a language
+        $L$, you can deconstruct that nfa into each possiple combination
+        of initial and final states. An nfa that accepts the same
+        language $L$ can then be chosen from one of the available
+        combinations.
 \end{description}
 
 \section*{Section 2.3}
 \begin{description}
     \item[6] Is it true that for every nfa
-        $M = (Q, \Sigma, \delta, q_o, F)$ the complement of $L(M)$ is
+        $M = (Q, \Sigma, \delta, q_0, F)$ the complement of $L(M)$ is
         equal to the set 
-        $\{w \in \Sigma^*, \delta^*(q_0, w) \cap (Q - F) \ne 0\}$?
+        $\{w \in \Sigma^*, \delta^*(q_0, w) \cap (Q - F) \ne \emptyset\}$?
         If so, prove it; if not, give a counterexample.
+
+        \hrule
+
+        By definition of $L(M)$, if $L(M)$ does not accepts a string
+        $w$, then that string is accepted by $\overline{L(M)}$. Since
+        $w \in F$, in $L(M)$, then $w \in (Q - F)$ in $\overline{L(M)}$.
+        
 \end{description}
 
 \end{document}
