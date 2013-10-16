@@ -35,9 +35,47 @@
 
         $\{abab^n : n \ge 0\} \cup \{aba^n : n \ge 0\}$.
 
+        \begin{center}
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                            thick]
+          \tikzstyle{every state}=[fill=white]
+
+          \node[state,initial,accepting]   (A)              {$q_0$};
+          \node[state] (B) [right of=A] {$q_1$};
+          \node[state] (C) [below of=B] {$q_2$};
+          \node[state] (D) [below of=A] {$q_3$};
+
+          \path (A) edge [bend left] node [above] {$a$} (B)
+                (B) edge [bend left] node [right] {$b$} (C)
+                (C) edge [bend left] node [below] {$a$} (D)
+                (D) edge [bend left] node [right] {$b, \lambda$} (A)
+                (C) edge node [above] {$\lambda$} (A);
+                
+        \end{tikzpicture}
+        \end{center}
+
+
     \item[10(a)] Find an NFA with three states that accepts the language
 
         $L = \{a^n: n \ge 1\} \cup \{b^m a^k : m \ge 0, k \ge 0 \}$.
+
+        \begin{center}
+        \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                            thick]
+          \tikzstyle{every state}=[fill=white]
+
+          \node[state,initial,accepting]   (A)              {$q_0$};
+          \node[state,accepting] (B) [right of=A] {$q_1$};
+          \node[state] (C) [right of=B] {$q_2$};
+
+          \path (A) edge node [above] {$a$} (B)
+                    edge [loop below] node [below] {$b, \lambda$} (A)
+                (B) edge [loop above] node [above] {$a, \lambda$} (B)
+                    edge node [above] {$b$} (C)
+                (C) edge [loop below] node [below] {$b$} (D);
+                
+        \end{tikzpicture}
+        \end{center}
 
     \item[12] Which of the strings $00$, $01001$, $10010$, $000$, $0000$ are accepted by the following
         nfa?
@@ -60,10 +98,10 @@
         \end{tikzpicture}
         \end{center}
 
+        The strings accepted are: $01001$, and $000$.
  
     \item[14] Let $L$ be the language accepted by the nfa in Figure 2.8. Find an nfa that
         accepts $L \cup \{a^5\}$.
-
 
     \item[18] Consider the following modification of Definition 2.6. An nfa
         with multiple initial states is defined by the quintuple
@@ -83,9 +121,11 @@
 
 \section*{Section 2.3}
 \begin{description}
-    \item[6] Is it true that for every nfa $M = (Q, \Sigma, \delta, q_o, F)$ the complement of $L(M)$ is
-        equal to the set $\{w \in \Sigma^*, \delta^*(q_0, w) \cap (Q - F) \ne 0\}$? If so, prove it; if not,
-        give a counterexample.
+    \item[6] Is it true that for every nfa
+        $M = (Q, \Sigma, \delta, q_o, F)$ the complement of $L(M)$ is
+        equal to the set 
+        $\{w \in \Sigma^*, \delta^*(q_0, w) \cap (Q - F) \ne 0\}$?
+        If so, prove it; if not, give a counterexample.
 \end{description}
 
 \end{document}
