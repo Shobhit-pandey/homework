@@ -1,0 +1,215 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title> CS311 - Operating Systems I </title>
+<link rel="stylesheet" type="text/css" href="instructions_files/classes.css">
+</head>
+<body><div id="Header"> CS311 - Operating Systems I  &nbsp; &nbsp; 
+&nbsp;	D. Kevin McGrath &nbsp; &nbsp; &nbsp; MWF 08:00 - 08:50, COVL 216
+ &nbsp; &nbsp; &nbsp; Fall 2013 </div>
+<center><h2></h2></center>
+<div id="Menu">
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?home=1">Home/Announcements</a> <br>
+<a href="https://piazza.com/oregonstate/fall2013/cs311001/home">Piazza discussion page</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?style=1">Style Guide</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?examples=1">Materials from Class</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?assignments=1">Assignments</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?grades=1">Grades</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?schedule=1">Schedule</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?resources=1">Other Resources</a> <br>
+<a href="https://secure.engr.oregonstate.edu:8000/teach.php?type=assignment">Submission</a> <br>
+<a href="http://web.engr.oregonstate.edu/cgi-bin/cgiwrap/dmcgrath/classes/13F/cs311/index.cgi?file=syllabus">Syllabus</a> <br>
+</div>
+<div id="Content">
+<h1>Project 2: UNIX file I/O and getting reacquainted with C</h1>
+
+<h2>Due: Monday, 28 October 2013, 23:59:59</h2>
+
+<p>In this assignment, you will be working with UNIX file I/O system calls.</p>
+
+<p>Write a C program (and yes, I mean C!) on <tt>os-class</tt> called <tt>myar.c</tt>. This program will
+  illustrate the use of file I/O on UNIX by maintaining a UNIX archive library, in the
+  standard archive format.</p>
+
+
+<p>Once compiled your program should run in a manner similar to the standard UNIX command
+  <tt>ar</tt>. You may wish to look at the man page for <tt>ar</tt> for insight, however,
+  for this assignment, the following is the syntax your program must support:</p>
+
+<p><tt>myar key afile name ...</tt></p>
+
+<p>where <tt>afile</tt> is the name of the archive file to be used, and key is one of the
+  following options (all are silent unless otherwise specified):</p>
+
+
+<p>
+</p><table cellpadding="3">
+  <tbody><tr><td align="LEFT"><tt>-v</tt></td>
+    <td align="LEFT">iff specified with other options, print a verbose version of the output</td>
+    <td align="LEFT">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td align="LEFT">
+      <tt>-q</tt>
+    </td>
+    <td align="LEFT">
+      quickly append named files to archive
+    </td>
+    <td align="LEFT">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="LEFT">
+      <tt>-x</tt>
+    </td>
+    <td align="LEFT">
+      extract named files
+    </td>
+    <td align="LEFT">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="LEFT">
+      <tt>-t</tt>
+    </td>
+    <td align="LEFT">
+      print a concise table of contents of the archive
+    </td>
+    <td align="LEFT">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="LEFT"><tt>-d</tt></td>
+    <td align="LEFT">delete named files from archive</td>
+    <td align="LEFT">&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="LEFT">
+      <tt>-A</tt>
+    </td>
+    <td align="LEFT">
+      quickly append all ``regular'' files in the current directory
+    </td>
+    <td align="LEFT">
+      (except the archive itself)
+    </td>
+  </tr>
+  <tr>
+    <td align="LEFT">
+      <tt>-w</tt>
+    </td>
+    <td align="LEFT">
+      Extra credit: for a given timeout, add all modified files to the archive.
+    </td>
+    <td align="LEFT">
+      (except the archive itself)
+    </td>
+  </tr>
+
+</tbody></table>
+
+<br>
+
+<p>You must use <tt>getopt</tt> to parse the command line options (and <bf>only</bf> <tt>getopt</tt> -- do not use <tt>getopt_long</tt>).</p>
+
+<p>The archive file maintained must use exactly the standard format defined in
+  <tt>/usr/inc1ude/ar.h</tt>, and in fact may be tested with archives created with the
+  <tt>ar</tt> command. The options listed above are compatible with the options having
+  the same name in the <tt>ar</tt> command. <tt>-A</tt> is a new option not
+  in the usual <tt>ar</tt> command.</p>
+
+<p>Notes:</p> 
+
+<ol>
+  <li>
+    For the <tt>-q</tt> command <tt>myar</tt> should create an archive file if it doesn't
+    exist, using permissions ``666''. For the other commands <tt>myar</tt> reports an
+    error if the archive does not exist, or is in the wrong format.
+  </li>
+  <li>
+    You will have to use the system calls <tt>stat</tt> and <tt>utime</tt> to properly
+    deal with extracting and restoring the proper timestamps. Since the archive format
+    only allows one timestamp, store the <tt>mtime</tt> and use it to restore both
+    the <tt>atime</tt> and
+    <tt>mtime</tt>. Permissions should also be restored to the original value, subject to
+    <tt>umask</tt> limitation.
+  </li>
+  <li>
+    The <tt>-q</tt> and <tt>-A</tt> commands do not check to see if a file by the chosen name
+    already exists. It simply appends the files to the end of the archive.
+  </li>
+  <li>
+    The <tt>-x</tt> and <tt>-d</tt> commands operate on the first file matched in the archive,
+    without checking for further matches.
+  </li>
+  <li>
+    In the case of the <tt>-d</tt> option, you will have to build a new archive file to recover
+    the space. Do this by unlinking the original file after it is opened, and creating a new archive
+    with the original name.
+  </li>
+  <li>
+    You are required to handle multiple file names as arguments.
+  </li>
+  <li>
+    Since file I/O is expensive, do not make more than one pass through the archive file, an
+    issue especially relevant to the multiple delete case.
+  </li>
+  <li>
+  Compilation will be done with <tt>icc</tt> and use (at minimum) the following flags: '<tt>-std=c99 -Wall</tt>'.
+  </li>
+  <li>
+    For the <tt>-w</tt> flag, the command will take as long as specified by the timeout
+    argument. You should print out a status message upon adding a new file only if <tt>-v</tt> is specified. This may
+    result in many different copies of the same file in the archive.
+  </li>
+  <li>
+    For extra credit, any time a file is added that already exists, 
+remove the old copy from the archive, but ONLY if it is not the same. If
+ identical, do not add the new file. Size is NOT a valid indication of 
+isomorphism. You will need to use a more advanced technique.
+  </li>
+</ol>
+
+<p>
+Your write-up should include (at minimum) the following:
+
+</p><ol>
+  <li> a design for your system, as well as places your implementation deviated from this
+    design</li>
+  <li>a work log, detailing what you did when -- this can fairly easily be created if you
+    are using some form of revision control</li>
+  <li>any challenges you overcame in completing this assignment</li>
+  <li>answers to the following questions:</li>
+  <ol>
+    <li> What do you think the main point of this assignment is?</li>
+    <li> How did you ensure your solution was correct? Testing details, for instance. This section should be very thorough.</li>
+    <li> What did you learn?</li>
+  </ol>
+</ol>
+
+<p>Things to turn in:</p>
+<ol>
+<li> C source code </li>
+<li> write-up, as a tex document </li>
+<li> any support files necessary to compile your tex document or source </li>
+<li> a makefile to build both source code and your tex file </li>
+</ol>
+
+<p>You are not allowed to use Lyx to create the document. You must create the document "by
+hand", instead.</p>
+
+
+
+
+
+<hr>
+&nbsp;&nbsp;&nbsp;<a href="mailto:dmcgrath@eecs.oregonstate.edu"><i>D. Kevin McGrath</i></a>
+<br>&nbsp;&nbsp;&nbsp;<i>Last modified:  Mon Oct 14 14:41:30 2013</i>
+</div>
+
+</body></html>
