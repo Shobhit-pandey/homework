@@ -1,0 +1,94 @@
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage{graphicx}                                        
+
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=10in, textwidth=7.5in}
+
+\usepackage{hyperref}
+
+\usepackage{textcomp}
+\usepackage{listings}
+
+\title{CS311 - FA13: Archive}
+\date{\today}
+\author{Trevor Bramwell}
+
+% Setup the PDF Metadata
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {},
+  pdftitle = {\title},
+  pdfsubject = {},
+  pdfpagemode = UseNone
+}
+
+\parindent = 0.0 in
+\parskip = 0.2 in
+
+\begin{document}
+\maketitle
+
+\section{Design}
+    a design for your system
+
+    Revolves around reading and writing to a single archive file. Takes in
+    multiple files when adding.
+
+    Has the Operations:
+        Append
+        Extract
+        List
+        Remove
+
+    Remove is an Extract w/Delete, Extract should take a flag to also remove
+    the file.
+
+    Append takes the directory, or a list of files. Version that takes a
+    directory will pass in all regular files in the directory to the version
+    that takes a list.
+        
+    fuctions:
+        open_archive
+        to_archive
+
+    Creating:
+        open a new file (argv[1]), 
+
+\subsection{Deviation}
+    places your implementation deviated from this design
+
+\section{Challenge}
+    any challenges you overcame in completing this assignment
+
+\section{Questions}
+\begin{description}
+  \item  What do you think the main point of this assignment is?
+  \item  How did you ensure your solution was correct? Testing details, for
+         instance. This section should be very thorough.
+  \item  What did you learn?
+\end{description}
+
+\section{Work Log}
+    a work log, detailing what you did when -- this can fairly easily be
+    created if you are using some form of revision control
+
+\end{document}
