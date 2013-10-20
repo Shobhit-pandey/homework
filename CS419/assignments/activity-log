@@ -1,0 +1,13 @@
+Each activity log item includes:
+  * Your name/Nic
+  * Project name
+  * Date
+  * Amount of time spent on activity this session (minutes)
+  * Session goal: What did you want to accomplish today?
+  * Activity description: What did you do during this session?
+  * How successful was the session?: Did this activity help you get more
+    involved?  Rate from 1-5, with 1 being 'Strongly Negative', 5 'Strongly
+    Helpful'
+  * What was the most helpful/successful/insightful thing you tried today?
+  * What if anything did not work out as expected?
+  * Who did you interact with (if anyone)?  Names/pseudonyms/emails/nics
