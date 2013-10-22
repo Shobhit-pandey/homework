@@ -1,11 +1,14 @@
 TARGET  = write-up
 HTML    = main_html
-SRC     = myar.c
-CC      = icc
-LDFLAGS = -lm
+SRC     = myar
+CC      = gcc
+#CC      = icc
+LDFLAGS =
 CFLAGS  = -std=c99 -Wall
 
 .PHONY: help clean
+
+default: help
 
 all: pdf myar
 
@@ -32,5 +35,5 @@ pdf: ${TARGET}.tex
 	ps2pdf ${TARGET}.ps
 
 myar: 
-	$(CC) $(CFLAGS) sieve_eratosthenes.c $(LDFLAGS) -o $(SRC)
+	$(CC) $(CFLAGS) $(SRC).c $(LDFLAGS) -o $(SRC).o
 
