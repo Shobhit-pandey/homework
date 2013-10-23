@@ -6,20 +6,23 @@ CC      = gcc
 LDFLAGS =
 CFLAGS  = -std=c99 -Wall
 
-.PHONY: help clean
+.PHONY: help clean all
 
-default: help
+#default: help
+default: myar
+#default: pdf
 
 all: pdf myar
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  myar         to make myar"
-	@echo "  pdf          to make a LaTeX pdf"
+	@echo "  all          to build writeup and myar executable"
+	@echo "  myar         to build a myar executable"
+	@echo "  pdf          to build the writeup"
 	@echo "  clean        to remove unused files"
 
 clean:
-	-rm *.out *.dvi *.aux *.ps 2> /dev/null
+	-rm *.o *.out *.dvi *.log *.aux *.ps 2> /dev/null
 
 pdf: ${TARGET}.tex 
 #	pygmentize the input source file -- THIS NAME SHOULD BE SAFE
