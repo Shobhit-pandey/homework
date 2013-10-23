@@ -41,4 +41,4 @@ myar:
 	$(CC) $(CFLAGS) $(SRC).c $(LDFLAGS) -o $(SRC).o
 
 test:
-	python $(TESTS) $(SRC).o
+	python $(TESTS)
