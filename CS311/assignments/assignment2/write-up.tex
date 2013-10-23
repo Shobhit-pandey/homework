@@ -34,9 +34,9 @@
 \hypersetup{
   colorlinks = true,
   urlcolor = black,
-  pdfauthor = {\name},
+  pdfauthor = {Trevor Bramwell},
   pdfkeywords = {},
-  pdftitle = {\title},
+  pdftitle = {CS311 - FA13: Archive},
   pdfsubject = {},
   pdfpagemode = UseNone
 }
@@ -76,18 +76,20 @@
 
 \subsection{Versions}
 
-Up to 0.x GNU ar will be used for testing.
+Up to 0.5 GNU ar will be used for testing.
 
-    0.0 Tests (all flags, all flags w/verbose)
-    0.1 List (-t)
-    0.x Extract (-x)
-    0.x Append (-q)
-    0.x Quick Append (-A)
-    0.x Create Archive when using (-q, -A)
-    0.x Delete (-d)
-    1.0 Verbose (-v) - Change all printf statements to only execute when flag
-                       passed.
-    1.1 Timeout (-w)
+\begin{itemize}
+    \item 0.0 Tests (all flags, all flags w/verbose)
+    \item 0.1 List (-t)
+    \item 0.2 Extract (-x)
+    \item 0.3 Append (-q)
+    \item 0.4 Quick Append (-A)
+    \item 0.5 Create Archive when using (-q, -A)
+    \item 0.6 Delete (-d)
+    \item 1.0 Verbose (-v) - Change all printf statements to only execute when flag
+          passed.
+    \item 1.1 Timeout (-w)
+\end{itemize}
         
 \subsection{Notes}
     Remove is an Extract w/Delete, Extract should take a flag to also remove
@@ -152,7 +154,7 @@ the following options (all are silent unless verbose is specified):
     (except the archive itself)
 
 You must use getopt to parse the command line options (and only getopt -- do
-not use getopt_long).
+not use getopt\_long).
 
 The archive file maintained must use exactly the standard format defined in
 /usr/inc1ude/ar.h, and in fact may be tested with archives created with the ar
