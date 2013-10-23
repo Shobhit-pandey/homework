@@ -1,8 +1,7 @@
 TARGET  = write-up
-HTML    = main_html
 SRC     = myar
 CC      = gcc
-#CC      = icc
+TESTS   = test-ar.py
 LDFLAGS =
 CFLAGS  = -std=c99 -Wall
 
@@ -17,6 +16,7 @@ all: pdf myar
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  all          to build writeup and myar executable"
+	@echo "  test         run tests on current build of myar"
 	@echo "  myar         to build a myar executable"
 	@echo "  pdf          to build the writeup"
 	@echo "  clean        to remove unused files"
@@ -40,3 +40,5 @@ pdf: ${TARGET}.tex
 myar: 
 	$(CC) $(CFLAGS) $(SRC).c $(LDFLAGS) -o $(SRC).o
 
+test:
+	python $(TESTS) $(SRC).o
