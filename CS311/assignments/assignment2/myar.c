@@ -34,7 +34,8 @@
 
 /* Append all regular files 
  * 
- * get list of regular files in current directory
+ * get list of regular files in current directory (except archive
+ *   itself)
  *  - uses stat and checks file type
  * pass list to 'quick append' function
  *
