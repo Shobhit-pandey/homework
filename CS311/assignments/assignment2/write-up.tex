@@ -48,17 +48,33 @@
 \maketitle
 
 \section{Design}
-    a design for your system
+    This assignment is to create a simple implementation of the UNIX
+    utility \emph{ar}. The utility will support the operations on archive files
+    of appending, creating, extracting, listing and deleting. It will
+    also provide a flag for verbose output and if time permits, a way to
+    add modified files, after a delay, from a directory.
 
-    Revolves around reading and writing to a single archive file. Takes in
-    multiple files when adding.
+    Since this \emph{ar} revolves around the previously mentioned
+    operations, I will be structuring the code in the same manner.
+    Depending on the flag passed in, the program will call the
+    corresponding function to perform the operation. A set of utility
+    functions will be created as well to reduce code duplication, and
+    improve code in a more self-documenting way.
 
-    Has the Operations:
-        Append
-        Extract
-        List
-        Remove
+    When I start writing my program, I will begin with the user
+    interface, that is the command line. Having the interface created
+    first will make it easier for me to focus on the functionality of
+    the program.
 
+    I will then walk though each operation that can happen document the
+    steps it needs to take, i.e. open archive file, write file, etc. to
+    flesh out what the utility functions might be. I will then focus on
+    the single operation of \emph{listing}, and use a pre-created
+    archive file so as to reduce the number of concerns. From there I
+    will itertively enable each flag until they all work and the program
+    works as intended.
+
+\subsection{Notes}
     Remove is an Extract w/Delete, Extract should take a flag to also remove
     the file.
 
@@ -66,13 +82,6 @@
     directory will pass in all regular files in the directory to the version
     that takes a list.
         
-    fuctions:
-        open_archive
-        to_archive
-
-    Creating:
-        open a new file (argv[1]), 
-
 \subsection{Deviation}
     places your implementation deviated from this design
 
@@ -82,8 +91,19 @@
 \section{Questions}
 \begin{description}
   \item  What do you think the main point of this assignment is?
+
+         The main point of this assignment is to get us reaquanted with
+         the C programming language, and to learn UNIX system calls.
+
   \item  How did you ensure your solution was correct? Testing details, for
          instance. This section should be very thorough.
+
+         I ensured my program was correct by writing a suite of
+         interface tests. For example: I test for the listing
+         functionality by having a pre-determined list of files in an
+         archive, running my \emph{ar}, and ensuring the returned list
+         matches my pre-determined one.
+
   \item  What did you learn?
 \end{description}
 
