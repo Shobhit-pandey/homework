@@ -22,15 +22,6 @@
  *
  * Note: archive here means the path to the archive file.
  *
- * open_archive(archive, flag) - given a ar filename, return a fd for the ar.
- *   Check to ensure fd is valid, and use perror to output failure. Also
- *   contains an optional argument to create the archive if it doesn't
- *   exist.
- *   - This may return a struct containing the file and stat of file...
- *     operation will most likely need the size...
- *
- * close_archive(fd) - closes the archive at the given fd, checks result
- *   to make sure no errors given. If errors, perror and fail
  *
  * find_file(fd, file) - if file in archive: return
  *   byte (start) and (end+1); if file not in archive: return -1.
@@ -39,7 +30,46 @@
  *   open_file, writes the file to the archive.
  *
  */
+int open_archive(const char *archive) {
+    /*
+     * given a ar filename, return a fd for the ar.
+     *   Check to ensure fd is valid, and use perror to output failure. Also
+     *   contains an optional argument to create the archive if it doesn't
+     *   exist.
+     *   - This may return a struct containing the file and stat of file...
+     *     operation will most likely need the size...
+    */
+    int fd;
+    char armag[SARMAG];
 
+    if ((fd = open(archive, O_RDONLY)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    if (read(fd, armag, SARMAG) != SARMAG) {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+
+    if (memcmp(armag, ARMAG, SARMAG) != 0) {
+        fprintf(stderr, "Aborting: Not a valid archive file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return fd;
+}
+
+void close_archive(int fd) {
+    /*
+     * close_archive(fd) - closes the archive at the given fd, checks result
+     *   to make sure no errors given. If errors, perror and fail
+     */
+    if(close(fd) == -1) {
+        perror("close");
+        exit(EXIT_FAILURE);
+    }
+}
 /* Append all regular files 
  * 
  * get list of regular files in current directory (except archive
@@ -78,24 +108,11 @@ void table(const char *archive) {
     int fd;
     int ar_pos = SARMAG+1;
     int size = 0;
-    int count = 0;
     struct ar_hdr file_header;
     struct stat ar_stat;
-    char armag[SARMAG];
     char **endptr = NULL;
 
-    if ((fd = open(archive, O_RDONLY)) == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-    if ((count = read(fd, armag, SARMAG)) != SARMAG) {
-        perror("read");
-        exit(EXIT_FAILURE);
-    }
-    if (memcmp(armag, ARMAG, SARMAG) != 0) {
-        fprintf(stderr, "Aborting: Not a valid archive file.\n");
-        exit(EXIT_FAILURE);
-    }
+    fd = open_archive(archive);
 
     if (fstat(fd, &ar_stat) == -1) {
         perror("fstat");
@@ -103,8 +120,7 @@ void table(const char *archive) {
     }
 
     while(ar_pos < ar_stat.st_size) {
-        if((count = read(fd, &file_header, AR_STRUCT_SIZE)) != AR_STRUCT_SIZE)
-        {
+        if(read(fd, &file_header, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
             perror("read");
             exit(EXIT_FAILURE);
         }
@@ -123,10 +139,7 @@ void table(const char *archive) {
         }
     }
 
-    if(close(fd) == -1) {
-        perror("close");
-        exit(EXIT_FAILURE);
-    }
+    close_archive(fd);
 }
 
 /* Delete
