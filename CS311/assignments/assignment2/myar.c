@@ -4,11 +4,19 @@
  * Author: Trevor Bramwell
  * Class: CS311
  */
+#include <ar.h>
+
+#include <fcntl.h>
 #include <getopt.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+
+#define AR_STRUCT_SIZE 60
 
 /* Utility Functions
  *
@@ -53,12 +61,13 @@
  *
  * */
 
+void table(const char *archive) {
 /* Table
  *
  * Open archive file
  * byte = size of ar header +1
  * while not at end of file
- *   read in till size of ar_struct as ar_struct
+ *   read in till size of ar_struct as ar_struct (60 chars)
  *   if verbose print all file info
  *   else print ar_struct.name
  *   seek to ar_struct.size (+1 ?)
@@ -66,6 +75,59 @@
  * close archive
  *
  */
+    int fd;
+    int ar_pos = SARMAG+1;
+    int size = 0;
+    int count = 0;
+    struct ar_hdr file_header;
+    struct stat ar_stat;
+    char armag[SARMAG];
+    char **endptr = NULL;
+
+    if ((fd = open(archive, O_RDONLY)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    if ((count = read(fd, armag, SARMAG)) != SARMAG) {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+    if (memcmp(armag, ARMAG, SARMAG) != 0) {
+        fprintf(stderr, "Aborting: Not a valid archive file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (fstat(fd, &ar_stat) == -1) {
+        perror("fstat");
+        exit(EXIT_FAILURE);
+    }
+
+    while(ar_pos < ar_stat.st_size) {
+        if((count = read(fd, &file_header, AR_STRUCT_SIZE)) != AR_STRUCT_SIZE)
+        {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("%.*s", 60, (char *)&file_header);
+
+        if ((size = strtol(file_header.ar_size, endptr, 10)) < 1)
+        {
+            perror("strtol");
+            exit(EXIT_FAILURE);
+        }
+
+        if ((ar_pos = lseek(fd, (size+1), SEEK_CUR)) == -1) {
+            perror("lseek");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if(close(fd) == -1) {
+        perror("close");
+        exit(EXIT_FAILURE);
+    }
+}
 
 /* Delete
  *
@@ -155,11 +217,13 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    printf("Argument(s): ");
-    while(optind < argc) {
-        printf("%s ", argv[optind++]);
-    }
-    printf("\n");
+    //printf("Argument(s): ");
+    //while(optind < argc) {
+    //    printf("%s ", argv[optind++]);
+    //}
+    //printf("\n");
+
+    table(argv[optind]);
 
     exit(EXIT_SUCCESS);
 }
