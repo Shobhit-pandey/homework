@@ -18,6 +18,18 @@
 
 #define AR_STRUCT_SIZE 60
 
+#define F_TABLE   0x01
+#define F_QUICK   0x02
+#define F_APPEND  0x04
+#define F_XTRACT  0x08
+#define F_DELETE  0x10
+#define F_WAIT    0x20
+
+#define TRUE 0
+#define FALSE 1
+
+int verbose = FALSE;
+
 /* Utility Functions
  *
  * Note: archive here means the path to the archive file.
@@ -185,13 +197,6 @@ void table(const char *archive) {
  *   be the same)
  */
 
-#define F_TABLE   0x001
-#define F_QUICK   0x002
-#define F_APPEND  0x004
-#define F_XTRACT  0x008
-#define F_DELETE  0x010
-#define F_WAIT    0x020
-#define F_VERBOSE 0x100
 /*
  * myar is an simple implementation of the UNIX archive (ar) program.
  *  It is design to create archives, extract files, delete files, and add
@@ -221,8 +226,8 @@ int main(int argc, char *argv[])
             flags |= F_TABLE;
             break;
         case 'v':
-            // Verbose flag
-            flags |= F_VERBOSE;
+            // Enable Verbosity
+            verbose = TRUE;
             break;
         case 'w':
             // Append modified with timeout
@@ -241,22 +246,28 @@ int main(int argc, char *argv[])
         }
     }
 
+
     if (optind >= argc) {
         fprintf(stderr, "Expected argument after options\n");
         exit(EXIT_FAILURE);
     }
 
-    if (flags & F_VERBOSE) {
-        printf("0x%03o\n", flags);
+    if (flags == 0) {
+        fprintf(stderr, "At least one non-verbose option required.\n");
+        exit(EXIT_FAILURE);
     }
 
-    //printf("Argument(s): ");
-    //while(optind < argc) {
-    //    printf("%s ", argv[optind++]);
-    //}
-    //printf("\n");
+    if (verbose == TRUE) {
+        printf("argc: %ld, optind: %ld, flags: 0X%03o\n", (long)argc,
+                (long)optind, flags);
+    }
 
-    table(argv[optind]);
+    if ((flags ^ F_TABLE) == 0) {
+        table(argv[optind]);
+    } else {
+        fprintf(stderr, "Option not supported yet.\n");
+        exit(EXIT_FAILURE);
+    }
 
     exit(EXIT_SUCCESS);
 }
