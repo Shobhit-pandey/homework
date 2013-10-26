@@ -30,6 +30,7 @@
  *   open_file, writes the file to the archive.
  *
  */
+
 int open_archive(const char *archive) {
     /*
      * given a ar filename, return a fd for the ar.
@@ -184,6 +185,13 @@ void table(const char *archive) {
  *   be the same)
  */
 
+#define F_TABLE   0x001
+#define F_QUICK   0x002
+#define F_APPEND  0x004
+#define F_XTRACT  0x008
+#define F_DELETE  0x010
+#define F_WAIT    0x020
+#define F_VERBOSE 0x100
 /*
  * myar is an simple implementation of the UNIX archive (ar) program.
  *  It is design to create archives, extract files, delete files, and add
@@ -192,29 +200,37 @@ void table(const char *archive) {
 int main(int argc, char *argv[])
 {
     int opt;
+    short flags = 0;
 
     while ((opt = getopt(argc, argv, "Adqtvw:x")) != -1) {
         switch (opt) {
         case 'A':
             // Append all regular files
+            flags |= F_APPEND;
             break;
         case 'd':
             // Delete files
+            flags |= F_DELETE;
             break;
         case 'q':
             // Quick append
+            flags |= F_QUICK;
             break;
         case 't':
             // Table
+            flags |= F_TABLE;
             break;
         case 'v':
             // Verbose flag
+            flags |= F_VERBOSE;
             break;
         case 'w':
             // Append modified with timeout
+            flags |= F_WAIT;
             break;
         case 'x':
             // Extract files
+            flags |= F_XTRACT;
             break;
         default:
             // ? or : characters
@@ -228,6 +244,10 @@ int main(int argc, char *argv[])
     if (optind >= argc) {
         fprintf(stderr, "Expected argument after options\n");
         exit(EXIT_FAILURE);
+    }
+
+    if (flags & F_VERBOSE) {
+        printf("0x%03o\n", flags);
     }
 
     //printf("Argument(s): ");
