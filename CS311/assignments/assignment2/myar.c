@@ -123,7 +123,6 @@ void table(const char *archive) {
     int size = 0;
     struct ar_hdr file_header;
     struct stat ar_stat;
-    char **endptr = NULL;
 
     fd = open_archive(archive);
 
@@ -140,7 +139,7 @@ void table(const char *archive) {
 
         printf("%.*s", 60, (char *)&file_header);
 
-        if ((size = strtol(file_header.ar_size, endptr, 10)) < 1)
+        if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) < 1)
         {
             perror("strtol");
             exit(EXIT_FAILURE);
