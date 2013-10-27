@@ -205,6 +205,8 @@ int main(int argc, char *argv[])
 {
     int opt;
     short flags = 0;
+    const char *archive;
+    char *files[argc];
 
     while ((opt = getopt(argc, argv, "Adqtvw:x")) != -1) {
         switch (opt) {
@@ -261,8 +263,18 @@ int main(int argc, char *argv[])
                 (long)optind, flags);
     }
 
+    archive = argv[optind++];
     if ((flags ^ F_TABLE) == 0) {
-        table(argv[optind]);
+        table(archive);
+    } else if ((flags ^ F_QUICK) == 0) {
+        int i = 0;
+        while (optind < argc) {
+            files[i++] = argv[optind++];
+        }
+        if (optind < 4) {
+            fprintf(stderr, "At least one file required for appending.\n");
+        }
+        //quick_append(archive, files, i);
     } else {
         fprintf(stderr, "Option not supported yet.\n");
         exit(EXIT_FAILURE);
