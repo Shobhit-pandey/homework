@@ -37,10 +37,6 @@ int verbose = FALSE;
  *
  * find_file(fd, file) - if file in archive: return
  *   byte (start) and (end+1); if file not in archive: return -1.
- *
- * append_file(fd, file) - takes both paths, calls out to
- *   open_file, writes the file to the archive.
- *
  */
 
 void print_hdr(struct ar_hdr *hdr) {
@@ -78,6 +74,56 @@ long build_hdr(const char *file, struct ar_hdr* hdr) {
     memcpy(hdr->ar_fmag, ARFMAG, 2);
 
     return ((long) st.st_blksize);
+}
+
+void append_file(int archive, const char *filename) {
+    /*
+    * Append File
+    *
+    * Given an already open archive file, and a file to append,
+    * build a ar_hdr, and append it, along with the file to the archive.
+    *
+    */
+    int fd;
+    ssize_t b_read;
+    long blk_size;
+    struct ar_hdr file_hdr;
+    char *buf;
+
+    // open filename
+    if((fd = open(filename, O_RDONLY)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    // build header
+    blk_size = build_hdr(filename, &file_hdr);
+
+    // write header
+    if (write(archive, &file_hdr, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
+        perror("write");
+        exit(EXIT_FAILURE);
+    }
+
+    buf = (char *) malloc(blk_size * sizeof(char));
+    // read chars from filename into a buffer
+    while((b_read = read(fd, buf, blk_size)) != 0 && b_read != EOF) {
+        if(b_read == -1) {
+            free(buf);
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        // write chars from a buffer to the archive
+        if((write(archive, buf, b_read)) == -1) {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    free(buf);
+    // close filename
+    close(fd);
 }
 
 int open_archive(const char *archive) {
@@ -142,8 +188,6 @@ void quick_append(const char *archive, const char *files[], int num_files) {
      *
      * */
     int fd;
-    const char *cur_file;
-    struct ar_hdr file_hdr;
 
     if ((fd = open(archive, O_WRONLY | O_APPEND)) == -1) {
         perror("open");
@@ -151,11 +195,7 @@ void quick_append(const char *archive, const char *files[], int num_files) {
     }
 
     for (int i = 0; i < num_files; i++) {
-        //printf("Appending: %s\n", files[i]);
-        cur_file = files[i];
-        build_hdr(cur_file, &file_hdr);
-        print_hdr(&file_hdr);
-        //write_file(fd, cur_file, &file_hdr);
+        append_file(fd, files[i]);
     }
 
     close_archive(fd);
