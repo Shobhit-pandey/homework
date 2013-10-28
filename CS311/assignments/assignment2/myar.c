@@ -52,14 +52,14 @@ void print_hdr(struct ar_hdr *hdr) {
     printf("%.60s", (char *)hdr);
 }
 
-void build_hdr(const char *file, struct ar_hdr* hdr) {
+long build_hdr(const char *file, struct ar_hdr* hdr) {
     /*
      * Build Header
      *
      * Constructs the ar header for a file.
      *
      * Takes the file metadata from stat and puts it into an ar_hdr
-     *   struct.
+     *   struct. Returns the preferred blksize for writing the file.
      */
     struct stat st;
 
@@ -76,6 +76,8 @@ void build_hdr(const char *file, struct ar_hdr* hdr) {
     sprintf(hdr->ar_mode, "%-8lo", (unsigned long) st.st_mode);
     sprintf(hdr->ar_size, "%-10lld", (long long) st.st_size);
     memcpy(hdr->ar_fmag, ARFMAG, 2);
+
+    return ((long) st.st_blksize);
 }
 
 int open_archive(const char *archive) {
