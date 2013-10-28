@@ -43,6 +43,41 @@ int verbose = FALSE;
  *
  */
 
+void print_hdr(struct ar_hdr *hdr) {
+    /*
+     * Print Header
+     *
+     * Prints an ar_hdr to stdout.
+     */
+    printf("%.60s", (char *)hdr);
+}
+
+void build_hdr(const char *file, struct ar_hdr* hdr) {
+    /*
+     * Build Header
+     *
+     * Constructs the ar header for a file.
+     *
+     * Takes the file metadata from stat and puts it into an ar_hdr
+     *   struct.
+     */
+    struct stat st;
+
+    if (stat(file, &st) == -1) {
+        perror("stat");
+        exit(EXIT_FAILURE);
+    }
+
+    // Might require '/' at end of name
+    sprintf(hdr->ar_name, "%-16s", file);
+    sprintf(hdr->ar_date, "%-12ld", (long) st.st_mtime);
+    sprintf(hdr->ar_uid, "%-6ld", (long) st.st_uid);
+    sprintf(hdr->ar_gid, "%-6ld", (long) st.st_gid);
+    sprintf(hdr->ar_mode, "%-8lo", (unsigned long) st.st_mode);
+    sprintf(hdr->ar_size, "%-10lld", (long long) st.st_size);
+    memcpy(hdr->ar_fmag, ARFMAG, 2);
+}
+
 int open_archive(const char *archive) {
     /*
      * given a ar filename, return a fd for the ar.
@@ -92,17 +127,37 @@ void close_archive(int fd) {
  *
  */
 
-/* Quick Append
- *
- * open archive
- * for each filename
- *   open file
- *   write ar header for file to archive
- *   write file to archive
- *   close file
- * close archive
- *
- * */
+void quick_append(const char *archive, const char *files[], int num_files) {
+    /* Quick Append
+     *
+     * open archive
+     * for each filename
+     *   open file
+     *   write ar header for file to archive
+     *   write file to archive
+     *   close file
+     * close archive
+     *
+     * */
+    int fd;
+    const char *cur_file;
+    struct ar_hdr file_hdr;
+
+    if ((fd = open(archive, O_WRONLY | O_APPEND)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < num_files; i++) {
+        //printf("Appending: %s\n", files[i]);
+        cur_file = files[i];
+        build_hdr(cur_file, &file_hdr);
+        print_hdr(&file_hdr);
+        //write_file(fd, cur_file, &file_hdr);
+    }
+
+    close_archive(fd);
+}
 
 void table(const char *archive) {
 /* Table
@@ -137,7 +192,7 @@ void table(const char *archive) {
             exit(EXIT_FAILURE);
         }
 
-        printf("%.*s", 60, (char *)&file_header);
+        print_hdr(&file_header);
 
         if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) < 1)
         {
@@ -206,7 +261,7 @@ int main(int argc, char *argv[])
     int opt;
     short flags = 0;
     const char *archive;
-    char *files[argc];
+    const char *files[argc];
 
     while ((opt = getopt(argc, argv, "Adqtvw:x")) != -1) {
         switch (opt) {
@@ -274,7 +329,7 @@ int main(int argc, char *argv[])
         if (optind < 4) {
             fprintf(stderr, "At least one file required for appending.\n");
         }
-        //quick_append(archive, files, i);
+        quick_append(archive, files, i);
     } else {
         fprintf(stderr, "Option not supported yet.\n");
         exit(EXIT_FAILURE);
