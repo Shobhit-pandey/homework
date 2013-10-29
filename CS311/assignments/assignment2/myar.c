@@ -237,16 +237,22 @@ void table(const char *archive) {
  *
  */
     int fd;
-    int size = 0;
+    int size;
     ssize_t buf;
     struct ar_hdr file_header;
 
     fd = open_archive(archive);
 
     while((buf = read(fd, &file_header, AR_STRUCT_SIZE)) == AR_STRUCT_SIZE) {
+        size = 0;
 
         if (buf == -1) {
             perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        if (memcmp(file_header.ar_fmag, ARFMAG, 2) != 0) {
+            fprintf(stderr, "Bad read.\n");
             exit(EXIT_FAILURE);
         }
 
@@ -267,7 +273,12 @@ void table(const char *archive) {
             exit(EXIT_FAILURE);
         }
 
-        if (lseek(fd, size+1, SEEK_CUR) == -1) {
+        // Compensate for '\n' when the file length is even
+        if ((size % 2) == 1) {
+            size++;
+        }
+
+        if (lseek(fd, size, SEEK_CUR) == -1) {
             perror("lseek");
             exit(EXIT_FAILURE);
         }
