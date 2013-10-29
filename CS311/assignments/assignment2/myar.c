@@ -48,6 +48,20 @@ void print_hdr(struct ar_hdr *hdr) {
     printf("%.60s", (char *)hdr);
 }
 
+void fmt_filename(const char *file, char *filename) {
+    /*
+     * Format Filename
+     *
+     * Given a commandline filename, format it to the ar specs.
+     */
+    int i = 0;
+    while(i < strlen(file)) {
+        filename[i] = file[i];
+        i++;
+    }
+    filename[i] = '/';
+}
+
 long build_hdr(const char *file, struct ar_hdr* hdr) {
     /*
      * Build Header
