@@ -62,7 +62,7 @@ void fmt_filename(const char *file, char *filename) {
     filename[i] = '/';
 }
 
-long build_hdr(const char *file, struct ar_hdr* hdr) {
+long build_hdr(const char *file, struct ar_hdr *hdr) {
     /*
      * Build Header
      *
@@ -72,14 +72,16 @@ long build_hdr(const char *file, struct ar_hdr* hdr) {
      *   struct. Returns the preferred blksize for writing the file.
      */
     struct stat st;
+    char filename[AR_FILELEN];
+
+    fmt_filename(file, filename);
 
     if (stat(file, &st) == -1) {
         perror("stat");
         exit(EXIT_FAILURE);
     }
 
-    // Might require '/' at end of name
-    sprintf(hdr->ar_name, "%-16s", file);
+    sprintf(hdr->ar_name, "%-16s", filename);
     sprintf(hdr->ar_date, "%-12ld", (long) st.st_mtime);
     sprintf(hdr->ar_uid, "%-6ld", (long) st.st_uid);
     sprintf(hdr->ar_gid, "%-6ld", (long) st.st_gid);
