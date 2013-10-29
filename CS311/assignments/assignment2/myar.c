@@ -6,6 +6,7 @@
  */
 #include <ar.h>
 
+#include <limits.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdarg.h>
@@ -17,6 +18,7 @@
 #include <unistd.h>
 
 #define AR_STRUCT_SIZE 60
+#define AR_FILELEN 16
 
 #define F_TABLE   0x01
 #define F_QUICK   0x02
@@ -104,7 +106,6 @@ void append_file(int archive, const char *filename) {
     ssize_t b_read;
     long blk_size;
     struct ar_hdr file_hdr;
-    char *buf;
 
     // open filename
     if((fd = open(filename, O_RDONLY)) == -1) {
@@ -114,6 +115,7 @@ void append_file(int archive, const char *filename) {
 
     // build header
     blk_size = build_hdr(filename, &file_hdr);
+    char* buf[blk_size];
 
     // write header
     if (write(archive, &file_hdr, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
@@ -121,11 +123,9 @@ void append_file(int archive, const char *filename) {
         exit(EXIT_FAILURE);
     }
 
-    buf = (char *) malloc(blk_size * sizeof(char));
     // read chars from filename into a buffer
-    while((b_read = read(fd, buf, blk_size)) != 0 && b_read != EOF) {
+    while((b_read = read(fd, buf, blk_size)) != 0) {
         if(b_read == -1) {
-            free(buf);
             perror("read");
             exit(EXIT_FAILURE);
         }
@@ -137,7 +137,12 @@ void append_file(int archive, const char *filename) {
         }
     }
 
-    free(buf);
+    // Add a newline
+    if((write(archive, "\n", 1)) == -1) {
+        perror("write");
+        exit(EXIT_FAILURE);
+    }
+
     // close filename
     close(fd);
 }
@@ -159,12 +164,12 @@ int open_archive(const char *archive) {
         exit(EXIT_FAILURE);
     }
 
-    if (read(fd, armag, SARMAG) != SARMAG) {
+    if (read(fd, armag, SARMAG) == -1) {
         perror("read");
         exit(EXIT_FAILURE);
     }
 
-    if (memcmp(armag, ARMAG, SARMAG) != 0) {
+    if (memcmp(armag, ARMAG, SARMAG) == -1) {
         fprintf(stderr, "Aborting: Not a valid archive file.\n");
         exit(EXIT_FAILURE);
     }
@@ -232,33 +237,37 @@ void table(const char *archive) {
  *
  */
     int fd;
-    int ar_pos = SARMAG+1;
     int size = 0;
+    ssize_t buf;
     struct ar_hdr file_header;
-    struct stat ar_stat;
 
     fd = open_archive(archive);
 
-    if (fstat(fd, &ar_stat) == -1) {
-        perror("fstat");
-        exit(EXIT_FAILURE);
-    }
+    while((buf = read(fd, &file_header, AR_STRUCT_SIZE)) == AR_STRUCT_SIZE) {
 
-    while(ar_pos < ar_stat.st_size) {
-        if(read(fd, &file_header, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
+        if (buf == -1) {
             perror("read");
             exit(EXIT_FAILURE);
         }
 
-        print_hdr(&file_header);
+        if(verbose == TRUE) {
+            print_hdr(&file_header);
+        } else {
+            int i = 0;
+            while(file_header.ar_name[i] != '/') {
+                ++i;
+            }
+            printf("%.*s\n", i, file_header.ar_name);
+        }
 
-        if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) < 1)
+        if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) == LONG_MIN
+                || size == LONG_MAX)
         {
             perror("strtol");
             exit(EXIT_FAILURE);
         }
 
-        if ((ar_pos = lseek(fd, (size+1), SEEK_CUR)) == -1) {
+        if (lseek(fd, size+1, SEEK_CUR) == -1) {
             perror("lseek");
             exit(EXIT_FAILURE);
         }
