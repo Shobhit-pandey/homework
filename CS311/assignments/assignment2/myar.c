@@ -4,7 +4,7 @@
  * Author: Trevor Bramwell
  * Class: CS311
  */
-#include <ar.h>
+#define _BSD_SOURCE
 
 #include <limits.h>
 #include <fcntl.h>
@@ -15,7 +15,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
+
+#include <ar.h>
+
+#include "myar.h"
 
 #define AR_STRUCT_SIZE 60
 #define AR_FILELEN 16
@@ -30,6 +35,8 @@
 #define TRUE 0
 #define FALSE 1
 
+#define STR_SIZE sizeof("rwxrwxrwx")
+
 int verbose = FALSE;
 
 /* Utility Functions
@@ -41,13 +48,62 @@ int verbose = FALSE;
  *   byte (start) and (end+1); if file not in archive: return -1.
  */
 
+/* file_perm_string used from the file_stat.c example on the class website. */
+char *
+file_perm_string(mode_t perm)
+{
+    // Return ls(1)-style string for file permissions mask
+    static char str[STR_SIZE];
+    snprintf(str, STR_SIZE, "%c%c%c%c%c%c%c%c%c",
+             (perm & S_IRUSR) ? 'r' : '-',
+             (perm & S_IWUSR) ? 'w' : '-',
+             (perm & S_IXUSR) ? 'x' : '-',
+             (perm & S_IRGRP) ? 'r' : '-',
+             (perm & S_IWGRP) ? 'w' : '-',
+             (perm & S_IXGRP) ? 'x' : '-',
+             (perm & S_IROTH) ? 'r' : '-',
+             (perm & S_IWOTH) ? 'w' : '-',
+             (perm & S_IXOTH) ? 'x' : '-');
+    return str;
+}
+
 void print_hdr(struct ar_hdr *hdr) {
     /*
      * Print Header
      *
      * Prints an ar_hdr to stdout.
      */
-    printf("%.60s", (char *)hdr);
+    mode_t perms;
+    mode_t *ps = &perms;
+    time_t date;
+    char name[17];
+    long uid;
+    long gid;
+    long size;
+
+    char date_str[20];
+
+    sscanf(hdr->ar_mode, "%lo", (long *) ps);
+    sscanf(hdr->ar_uid, "%ld", &uid);
+    sscanf(hdr->ar_gid, "%ld", &gid);
+    sscanf(hdr->ar_date, "%ld", &date);
+    sscanf(hdr->ar_name, "%16s", name);
+    sscanf(hdr->ar_size, "%ld", &size);
+
+    // Remove slash from filename
+    char* slash = &name[16];
+    while(*slash != '/') slash--;
+    *slash = 0;
+
+    strftime(date_str, 20, "%b %d %H:%M %Y", localtime(&date));
+
+    printf("%8s %ld/%ld %6ld %10s %-15s\n",
+            file_perm_string(perms),
+            uid,
+            gid,
+            size,
+            date_str,
+            name);
 }
 
 void fmt_filename(const char *file, char *filename) {
@@ -389,11 +445,6 @@ int main(int argc, char *argv[])
     if (flags == 0) {
         fprintf(stderr, "At least one non-verbose option required.\n");
         exit(EXIT_FAILURE);
-    }
-
-    if (verbose == TRUE) {
-        printf("argc: %ld, optind: %ld, flags: 0X%03o\n", (long)argc,
-                (long)optind, flags);
     }
 
     archive = argv[optind++];
