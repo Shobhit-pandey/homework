@@ -6,6 +6,7 @@
  */
 #define _BSD_SOURCE
 
+#include <dirent.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -37,6 +38,7 @@
 
 int verbose = FALSE;
 
+void quick_append(const char *archive, const char *files[], int num_files);
 /* Utility Functions
  *
  * Note: archive here means the path to the archive file.
@@ -249,14 +251,41 @@ void close_archive(int fd) {
         exit(EXIT_FAILURE);
     }
 }
-/* Append all regular files 
- * 
- * get list of regular files in current directory (except archive
- *   itself)
- *  - uses stat and checks file type
- * pass list to 'quick append' function
- *
- */
+
+void append_all(const char *archive) {
+    /* Append all regular files 
+     * 
+     * get list of regular files in current directory (except archive
+     *   itself)
+     *  - uses stat and checks file type
+     * pass list to 'quick append' function
+     *
+     */
+    char **files;
+    DIR *dir;
+    struct dirent *ed;
+    int nfiles = 0;
+
+    char *dirname = ".";
+
+    if ((dir = opendir(dirname)) == NULL) {
+        perror("opendir");
+        exit(EXIT_FAILURE);
+    }
+
+    files = (char **) malloc( sizeof(char *) * 50);
+
+    while ((ed = readdir(dir)) != NULL) {
+        if(ed->d_type == DT_REG && strcmp(ed->d_name, archive) != 0) {
+            files[nfiles++] = ed->d_name;
+        }
+    }
+
+    closedir(dir);
+    
+    quick_append(archive, (const char **)files, nfiles);
+    free(files);
+}
 
 void quick_append(const char *archive, const char *files[], int num_files) {
     /* Quick Append
@@ -465,7 +494,9 @@ int main(int argc, char *argv[])
             fprintf(stderr, "At least one file required for appending.\n");
         }
         quick_append(archive, files, i);
-    } else {
+    } else if ((flags ^ F_APPEND) == 0) {
+        append_all(archive);
+    }else {
         fprintf(stderr, "Option not supported yet.\n");
         exit(EXIT_FAILURE);
     }
