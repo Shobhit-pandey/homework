@@ -20,8 +20,6 @@
 
 #include <ar.h>
 
-#include "myar.h"
-
 #define AR_STRUCT_SIZE 60
 #define AR_FILELEN 16
 
@@ -91,8 +89,8 @@ void print_hdr(struct ar_hdr *hdr) {
     sscanf(hdr->ar_size, "%ld", &size);
 
     // Remove slash from filename
-    char* slash = &name[16];
-    while(*slash != '/') slash--;
+    char* slash = name;
+    while(*slash != '/') slash++;
     *slash = 0;
 
     strftime(date_str, 20, "%b %d %H:%M %Y", localtime(&date));
@@ -117,7 +115,10 @@ void fmt_filename(const char *file, char *filename) {
         filename[i] = file[i];
         i++;
     }
-    filename[i] = '/';
+    filename[i++] = '/';
+    while(i < AR_FILELEN) {
+        filename[i++] = ' ';
+    }
 }
 
 long build_hdr(const char *file, struct ar_hdr *hdr) {
@@ -161,6 +162,7 @@ void append_file(int archive, const char *filename) {
     int fd;
     ssize_t b_read;
     long blk_size;
+    long file_size;
     struct ar_hdr file_hdr;
 
     // open filename
@@ -193,10 +195,14 @@ void append_file(int archive, const char *filename) {
         }
     }
 
-    // Add a newline
-    if((write(archive, "\n", 1)) == -1) {
-        perror("write");
-        exit(EXIT_FAILURE);
+    sscanf(file_hdr.ar_size, "%ld", &file_size);
+    
+    // Add a newline if odd length file.
+    if((file_size % 2) == 1) {
+        if((write(archive, "\n", 1)) == -1) {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
     }
 
     // close filename
