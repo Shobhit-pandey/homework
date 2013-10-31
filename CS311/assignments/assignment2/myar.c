@@ -174,9 +174,10 @@ void write_hdr(int ar, struct ar_hdr *hdr) {
     }
 }
 
-void write_file(int ar, int fd, blksize_t blk_size, long file_size) {
+void write_file(int ar, int fd, struct stat *st) {
     ssize_t b_read;
-    //long blk_size;
+    long blk_size = (long) st->st_blksize;
+    long file_size = (long) st->st_size;
     char* buf[blk_size];
 
     // read chars from filename into a buffer
@@ -223,21 +224,15 @@ void append_file(int archive, const char *filename) {
     *
     */
     int fd;
-    long file_size;
     struct stat st;
     struct ar_hdr file_hdr;
 
-    stat_file(filename, &st);
-
     fd = open_file(filename);
 
-
+    stat_file(filename, &st);
     build_hdr(filename, &st, &file_hdr);
-    sscanf(file_hdr.ar_size, "%ld", &file_size);
-
     write_hdr(archive, &file_hdr);
-
-    write_file(archive, fd, file_size, st.st_size);
+    write_file(archive, fd, &st);
 
     close(fd);
 }
