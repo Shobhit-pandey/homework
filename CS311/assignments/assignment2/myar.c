@@ -4,6 +4,7 @@
  * Author: Trevor Bramwell
  * Class: CS311
  */
+#define _XOPEN_SOURCE 500
 #define _BSD_SOURCE
 
 #include <dirent.h>
@@ -106,12 +107,28 @@ void print_hdr(struct ar_hdr *hdr) {
             name);
 }
 
+int open_file(const char * filename) {
+    /*
+     * Open filename and return a file descriptor
+     */
+    int fd;
+    if((fd = open(filename, O_RDONLY)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
+
 void fmt_filename(const char *file, char *filename) {
     /*
      * Format Filename
      *
      * Given a commandline filename, format it to the ar specs.
      */
+    // look into strcat
+    // s1 = sprintf "%s" file
+    // s2 = "/"
+    // return strcat, format in another function
     int i = 0;
     while(i < strlen(file)) {
         filename[i] = file[i];
@@ -123,7 +140,7 @@ void fmt_filename(const char *file, char *filename) {
     }
 }
 
-long build_hdr(const char *file, struct ar_hdr *hdr) {
+void build_hdr(const char *file, const struct stat *st, struct ar_hdr *hdr) {
     /*
      * Build Header
      *
@@ -132,25 +149,69 @@ long build_hdr(const char *file, struct ar_hdr *hdr) {
      * Takes the file metadata from stat and puts it into an ar_hdr
      *   struct. Returns the preferred blksize for writing the file.
      */
-    struct stat st;
     char filename[AR_FILELEN];
 
     fmt_filename(file, filename);
 
-    if (stat(file, &st) == -1) {
+    sprintf(hdr->ar_name, "%-16s", filename);
+    sprintf(hdr->ar_date, "%-12ld", (long) st->st_mtime);
+    sprintf(hdr->ar_uid, "%-6ld", (long) st->st_uid);
+    sprintf(hdr->ar_gid, "%-6ld", (long) st->st_gid);
+    sprintf(hdr->ar_mode, "%-8lo", (unsigned long) st->st_mode);
+    sprintf(hdr->ar_size, "%-10lld", (long long) st->st_size);
+    memcpy(hdr->ar_fmag, ARFMAG, 2);
+}
+
+void write_hdr(int ar, struct ar_hdr *hdr) {
+    /*
+     * Write Header
+     *
+     * Writes a ar_hdr to the file descriptor
+     */
+    if (write(ar, hdr, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
+        perror("write");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void write_file(int ar, int fd, blksize_t blk_size, long file_size) {
+    ssize_t b_read;
+    //long blk_size;
+    char* buf[blk_size];
+
+    // read chars from filename into a buffer
+    while((b_read = read(fd, buf, blk_size)) != 0) {
+        if(b_read == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        // write chars from a buffer to the archive
+        if((write(ar, buf, b_read)) == -1) {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Add a newline if odd length file.
+    if((file_size % 2) == 1) {
+        if((write(ar, "\n", 1)) == -1) {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+void stat_file(const char *filename, struct stat *st) {
+    /*
+     * Stat File
+     *
+     * Store the file stat in st
+     */
+    if (stat(filename, st) == -1) {
         perror("stat");
         exit(EXIT_FAILURE);
     }
-
-    sprintf(hdr->ar_name, "%-16s", filename);
-    sprintf(hdr->ar_date, "%-12ld", (long) st.st_mtime);
-    sprintf(hdr->ar_uid, "%-6ld", (long) st.st_uid);
-    sprintf(hdr->ar_gid, "%-6ld", (long) st.st_gid);
-    sprintf(hdr->ar_mode, "%-8lo", (unsigned long) st.st_mode);
-    sprintf(hdr->ar_size, "%-10lld", (long long) st.st_size);
-    memcpy(hdr->ar_fmag, ARFMAG, 2);
-
-    return ((long) st.st_blksize);
 }
 
 void append_file(int archive, const char *filename) {
@@ -162,52 +223,22 @@ void append_file(int archive, const char *filename) {
     *
     */
     int fd;
-    ssize_t b_read;
-    long blk_size;
     long file_size;
+    struct stat st;
     struct ar_hdr file_hdr;
 
-    // open filename
-    if((fd = open(filename, O_RDONLY)) == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
+    stat_file(filename, &st);
 
-    // build header
-    blk_size = build_hdr(filename, &file_hdr);
-    char* buf[blk_size];
+    fd = open_file(filename);
 
-    // write header
-    if (write(archive, &file_hdr, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
-        perror("write");
-        exit(EXIT_FAILURE);
-    }
 
-    // read chars from filename into a buffer
-    while((b_read = read(fd, buf, blk_size)) != 0) {
-        if(b_read == -1) {
-            perror("read");
-            exit(EXIT_FAILURE);
-        }
-
-        // write chars from a buffer to the archive
-        if((write(archive, buf, b_read)) == -1) {
-            perror("write");
-            exit(EXIT_FAILURE);
-        }
-    }
-
+    build_hdr(filename, &st, &file_hdr);
     sscanf(file_hdr.ar_size, "%ld", &file_size);
-    
-    // Add a newline if odd length file.
-    if((file_size % 2) == 1) {
-        if((write(archive, "\n", 1)) == -1) {
-            perror("write");
-            exit(EXIT_FAILURE);
-        }
-    }
 
-    // close filename
+    write_hdr(archive, &file_hdr);
+
+    write_file(archive, fd, file_size, st.st_size);
+
     close(fd);
 }
 
