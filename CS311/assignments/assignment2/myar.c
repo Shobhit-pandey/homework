@@ -394,13 +394,13 @@ void quick_append(const char *archive, const char *files[], int num_files)
  *
  * Prints the ar_name of a ar_hdr.
  */
-void print_hdr_name(struct ar_hdr *file_header)
+int hdr_name_size(struct ar_hdr *file_header)
 {
     int i = 0;
     while(file_header->ar_name[i] != '/') {
         ++i;
     }
-    printf("%.*s\n", i, file_header->ar_name);
+    return i;
 }
 
 /*
@@ -419,6 +419,7 @@ void print_hdr_name(struct ar_hdr *file_header)
  */
 void table(const char *archive)
 {
+    int name_size;
     int fd;
     int size;
     ssize_t buf;
@@ -442,7 +443,8 @@ void table(const char *archive)
         if(verbose == TRUE) {
             print_hdr(&file_header);
         } else {
-            print_hdr_name(&file_header);
+            name_size = hdr_name_size(&file_header);
+            printf("%.*s\n", name_size, file_header->ar_name);
         }
 
         if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) == LONG_MIN
