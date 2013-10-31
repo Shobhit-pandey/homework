@@ -232,6 +232,8 @@ void append_file(int archive, const char *filename)
     write_hdr(archive, &file_hdr);
     write_file(archive, fd, &st);
 
+    if (verbose == TRUE) printf("a - %s\n", filename);
+
     close(fd);
 }
 
