@@ -9,6 +9,7 @@
 
 #include <dirent.h>
 #include <limits.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdarg.h>
@@ -238,6 +239,28 @@ void append_file(int archive, const char *filename)
 }
 
 /*
+ * Open Archive or Create
+ *
+ * Opens an archive for writing, or creates one if it doesn't already
+ * exist.
+ */
+int open_archive_or_create(const char *archive)
+{
+    int fd;
+
+    if ((fd = open(archive, O_WRONLY | O_EXCL | O_CREAT | O_APPEND, S_IRWRWRW)) == EEXIST) {
+        fd = open(archive, O_WRONLY | O_APPEND);
+    }
+
+    if (fd == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    return fd;
+}
+
+/*
  * given a ar filename, return a fd for the ar.
  *   Check to ensure fd is valid, and use perror to output failure. Also
  *   contains an optional argument to create the archive if it doesn't
@@ -331,10 +354,7 @@ void quick_append(const char *archive, const char *files[], int num_files)
 {
     int fd;
 
-    if ((fd = open(archive, O_WRONLY | O_APPEND)) == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
+    fd = open_archive_or_create(archive);
 
     for (int i = 0; i < num_files; i++) {
         append_file(fd, files[i]);

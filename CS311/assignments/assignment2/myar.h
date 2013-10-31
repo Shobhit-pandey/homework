@@ -18,6 +18,7 @@
 #define FALSE 1
 
 #define STR_SIZE sizeof("rwxrwxrwx")
+#define S_IRWRWRW S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 
 void quick_append(const char *archive, const char *files[], int num_files);
 char *file_perm_string(mode_t perm);
