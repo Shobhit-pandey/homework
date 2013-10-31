@@ -36,3 +36,6 @@ void append_all(const char *archive);
 void quick_append(const char *archive, const char *files[], int num_files);
 void print_hdr_name(struct ar_hdr *file_header);
 void table(const char *archive);
+void write_armag(int fd);
+void read_armag(int fd);
+int open_archive_or_create(const char *archive);

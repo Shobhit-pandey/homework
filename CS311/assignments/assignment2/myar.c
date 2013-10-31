@@ -248,16 +248,51 @@ int open_archive_or_create(const char *archive)
 {
     int fd;
 
-    if ((fd = open(archive, O_WRONLY | O_EXCL | O_CREAT | O_APPEND, S_IRWRWRW)) == EEXIST) {
-        fd = open(archive, O_WRONLY | O_APPEND);
-    }
-
-    if (fd == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
+    if ((fd = open(archive, O_WRONLY | O_EXCL | O_CREAT | O_APPEND, S_IRWRWRW)) == -1) {
+        if ((fd = open(archive, O_WRONLY | O_APPEND)) == -1) {
+            perror("open");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        write_armag(fd);
     }
 
     return fd;
+}
+
+/*
+ * Write ARMAG
+ *
+ * Writes the header of an archive to a file.
+ * This makes the file into a valid archive format.
+ */
+void write_armag(int fd)
+{
+    if (write(fd, ARMAG, SARMAG) == -1) {
+        perror("write");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Read ARMAG
+ *
+ * Read in the ARMAG from an archive.
+ *
+ * Used to ensure a file is actually an archive.
+ */
+void read_armag(int fd)
+{
+    char armag[SARMAG];
+    if (read(fd, armag, SARMAG) == -1) {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+
+    if (memcmp(armag, ARMAG, SARMAG) == -1) {
+        fprintf(stderr, "Aborting: Not a valid archive file.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*
@@ -271,22 +306,13 @@ int open_archive_or_create(const char *archive)
 int open_archive(const char *archive)
 {
     int fd;
-    char armag[SARMAG];
 
     if ((fd = open(archive, O_RDONLY)) == -1) {
         perror("open");
         exit(EXIT_FAILURE);
     }
 
-    if (read(fd, armag, SARMAG) == -1) {
-        perror("read");
-        exit(EXIT_FAILURE);
-    }
-
-    if (memcmp(armag, ARMAG, SARMAG) == -1) {
-        fprintf(stderr, "Aborting: Not a valid archive file.\n");
-        exit(EXIT_FAILURE);
-    }
+    read_armag(fd);
 
     return fd;
 }
