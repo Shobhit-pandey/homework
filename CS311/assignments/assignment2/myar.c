@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <utime.h>
 
 #include <ar.h>
 #include "myar.h"
@@ -444,7 +445,7 @@ void table(const char *archive)
             print_hdr(&file_header);
         } else {
             name_size = hdr_name_size(&file_header);
-            printf("%.*s\n", name_size, file_header->ar_name);
+            printf("%.*s\n", name_size, file_header.ar_name);
         }
 
         if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) == LONG_MIN
@@ -484,9 +485,11 @@ void table(const char *archive)
  *
  * prints 'd - Filename' in verbose mode 
  */
+/*
 void delete(const char *archive, const char* files[], int num_files) {
     ;
 }
+*/
 
 /* Extract
  * 
@@ -507,8 +510,120 @@ void delete(const char *archive, const char* files[], int num_files) {
  *
  * prints 'x - Filename' in verbose mode
  */
-void extract(const char *archive, const char* files[], int num_files) {
-    ;
+/*
+void extract(const char *archive, const char* files[], int num_files)
+{
+    int fd;
+    ssize_t buf;
+    struct ar_hdr file_header;
+    const char *file;
+    int size;
+
+    fd = open_archive(archive);
+
+    while((buf = read(fd, &file_header, AR_STRUCT_SIZE)) == AR_STRUCT_SIZE) {
+        if (buf == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        if (memcmp(file_header.ar_fmag, ARFMAG, 2) != 0) {
+            //printf("%60s", (char *)&file_header);
+            fprintf(stderr, "Bad read.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        for(int i = 0; i < num_files; i++) {
+            file = files[i];
+            int hdr_size = hdr_name_size(&file_header);
+            //printf("%s\n", file);
+            //printf("%.*s %s %ld\n", hdr_size, file_header.ar_name, file, (long) hdr_size);
+            if(memcmp(file_header.ar_name, file, (size_t) hdr_size) == 0) {
+                //printf("FOUND\n");
+                create_file(fd, (int) hdr_size, &file_header);
+            } else {
+                if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) == LONG_MIN
+                        || size == LONG_MAX)
+                {
+                    perror("strtol");
+                    exit(EXIT_FAILURE);
+                }
+                //printf("NOTFOUND: %ld\n", (long) size);
+
+                if ((size % 2) == 1) {
+                    size++;
+                }
+
+                if (lseek(fd, size, SEEK_CUR) == -1) {
+                    perror("lseek");
+                    exit(EXIT_FAILURE);
+                }
+            }
+        }
+    }
+
+    close_archive(fd);
+}
+*/
+
+/*
+ * Create File
+ *
+ * Create a new file with the properties from file_header
+ *
+ */
+/*
+void create_file(int fd, int name_size, struct ar_hdr *file_hdr)
+{
+    //int new_file;
+    char filename[name_size];
+    long size;
+    struct utimbuf utime_bufs = { 
+        .actime = (time_t) file_hdr->ar_date,
+        .modtime = (time_t) file_hdr->ar_date
+    };
+
+    snprintf(file_hdr->ar_name, name_size, "%s", filename);
+    //printf("%s", filename);
+
+    if((new_file = open(file_hdr->ar_name, O_WRONLY | O_APPEND | O_CREAT,
+                       file_hdr->ar_mode)) == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    sscanf(file_hdr->ar_size, "%ld", &size);
+
+    copy_file(fd, new_file, BLKSIZE, size);
+    utime(file_hdr->ar_name, &utime_bufs);
+}
+*/
+
+
+/*
+ * Copy File
+ *
+ * Copy at most bytes from one file to another in blk_size chunks.
+ *
+ */
+void copy_file(int fd1, int fd2, size_t blk_size, long size)
+{
+    int i = 0;
+    char* buf[blk_size];
+    ssize_t b_read;
+
+    while ((i < size) && (b_read = read(fd1, buf, blk_size)) != 0) {
+        if (b_read == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+
+        if ((write(fd2, buf, b_read)) == -1) {
+            perror("write");
+            exit(EXIT_FAILURE);
+        }
+        i += b_read;
+    }
 }
 
 /*
@@ -591,8 +706,6 @@ int main(int argc, char *argv[])
 
         if ((flags ^ F_QUICK) == 0) {
             quick_append(archive, files, i);
-        } else if ((flags ^ F_XTRACT) == 0) {
-            extract(archive, files, i);
         } else {
             fprintf(stderr, "Option not supported yet.\n");
             exit(EXIT_FAILURE);

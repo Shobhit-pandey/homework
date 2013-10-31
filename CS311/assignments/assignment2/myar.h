@@ -20,6 +20,8 @@
 #define STR_SIZE sizeof("rwxrwxrwx")
 #define S_IRWRWRW S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 
+#define BLKSIZE 1024
+
 void quick_append(const char *archive, const char *files[], int num_files);
 char *file_perm_string(mode_t perm);
 void print_hdr(struct ar_hdr *hdr);
@@ -39,3 +41,5 @@ void table(const char *archive);
 void write_armag(int fd);
 void read_armag(int fd);
 int open_archive_or_create(const char *archive);
+void create_file(int fd, int name_size, struct ar_hdr *file_hdr);
+void copy_file(int fd1, int fd2, size_t blk_size, long size);
