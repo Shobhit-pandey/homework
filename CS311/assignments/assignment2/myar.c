@@ -21,25 +21,10 @@
 #include <unistd.h>
 
 #include <ar.h>
-
-#define AR_STRUCT_SIZE 60
-#define AR_FILELEN 16
-
-#define F_TABLE   0x01
-#define F_QUICK   0x02
-#define F_APPEND  0x04
-#define F_XTRACT  0x08
-#define F_DELETE  0x10
-#define F_WAIT    0x20
-
-#define TRUE 0
-#define FALSE 1
-
-#define STR_SIZE sizeof("rwxrwxrwx")
+#include "myar.h"
 
 int verbose = FALSE;
 
-void quick_append(const char *archive, const char *files[], int num_files);
 /* Utility Functions
  *
  * Note: archive here means the path to the archive file.
@@ -50,10 +35,9 @@ void quick_append(const char *archive, const char *files[], int num_files);
  */
 
 /* file_perm_string used from the file_stat.c example on the class website. */
-char *
-file_perm_string(mode_t perm)
+char *file_perm_string(mode_t perm)
 {
-    // Return ls(1)-style string for file permissions mask
+    /* Return ls(1)-style string for file permissions mask */
     static char str[STR_SIZE];
     snprintf(str, STR_SIZE, "%c%c%c%c%c%c%c%c%c",
              (perm & S_IRUSR) ? 'r' : '-',
@@ -68,12 +52,13 @@ file_perm_string(mode_t perm)
     return str;
 }
 
-void print_hdr(struct ar_hdr *hdr) {
-    /*
-     * Print Header
-     *
-     * Prints an ar_hdr to stdout.
-     */
+/*
+ * Print Header
+ *
+ * Prints an ar_hdr to stdout.
+ */
+void print_hdr(struct ar_hdr *hdr)
+{
     mode_t perms;
     mode_t *ps = &perms;
     time_t date;
@@ -107,10 +92,11 @@ void print_hdr(struct ar_hdr *hdr) {
             name);
 }
 
-int open_file(const char * filename) {
-    /*
-     * Open filename and return a file descriptor
-     */
+/*
+ * Open filename and return a file descriptor
+ */
+int open_file(const char * filename)
+{
     int fd;
     if((fd = open(filename, O_RDONLY)) == -1) {
         perror("open");
@@ -119,12 +105,13 @@ int open_file(const char * filename) {
     return fd;
 }
 
-void fmt_filename(const char *file, char *filename) {
-    /*
-     * Format Filename
-     *
-     * Given a commandline filename, format it to the ar specs.
-     */
+/*
+ * Format Filename
+ *
+ * Given a commandline filename, format it to the ar specs.
+ */
+void fmt_filename(const char *file, char *filename)
+{
     // look into strcat
     // s1 = sprintf "%s" file
     // s2 = "/"
@@ -140,15 +127,16 @@ void fmt_filename(const char *file, char *filename) {
     }
 }
 
-void build_hdr(const char *file, const struct stat *st, struct ar_hdr *hdr) {
-    /*
-     * Build Header
-     *
-     * Constructs the ar header for a file.
-     *
-     * Takes the file metadata from stat and puts it into an ar_hdr
-     *   struct. Returns the preferred blksize for writing the file.
-     */
+/*
+ * Build Header
+ *
+ * Constructs the ar header for a file.
+ *
+ * Takes the file metadata from stat and puts it into an ar_hdr
+ *   struct. Returns the preferred blksize for writing the file.
+ */
+void build_hdr(const char *file, const struct stat *st, struct ar_hdr *hdr)
+{
     char filename[AR_FILELEN];
 
     fmt_filename(file, filename);
@@ -162,39 +150,46 @@ void build_hdr(const char *file, const struct stat *st, struct ar_hdr *hdr) {
     memcpy(hdr->ar_fmag, ARFMAG, 2);
 }
 
-void write_hdr(int ar, struct ar_hdr *hdr) {
-    /*
-     * Write Header
-     *
-     * Writes a ar_hdr to the file descriptor
-     */
+/*
+ * Write Header
+ *
+ * Writes a ar_hdr to the file descriptor
+ */
+void write_hdr(int ar, struct ar_hdr *hdr)
+{
     if (write(ar, hdr, AR_STRUCT_SIZE) != AR_STRUCT_SIZE) {
         perror("write");
         exit(EXIT_FAILURE);
     }
 }
 
-void write_file(int ar, int fd, struct stat *st) {
+/*
+ * Write File
+ *
+ * Write a file to another while keeping even offsets.
+ */
+void write_file(int ar, int fd, struct stat *st)
+{
     ssize_t b_read;
     long blk_size = (long) st->st_blksize;
     long file_size = (long) st->st_size;
     char* buf[blk_size];
 
-    // read chars from filename into a buffer
+    /* read chars from filename into a buffer */
     while((b_read = read(fd, buf, blk_size)) != 0) {
         if(b_read == -1) {
             perror("read");
             exit(EXIT_FAILURE);
         }
 
-        // write chars from a buffer to the archive
+        /* write chars from a buffer to the archive */
         if((write(ar, buf, b_read)) == -1) {
             perror("write");
             exit(EXIT_FAILURE);
         }
     }
 
-    // Add a newline if odd length file.
+    /* Add a newline if odd length file. */
     if((file_size % 2) == 1) {
         if((write(ar, "\n", 1)) == -1) {
             perror("write");
@@ -203,26 +198,29 @@ void write_file(int ar, int fd, struct stat *st) {
     }
 }
 
-void stat_file(const char *filename, struct stat *st) {
-    /*
-     * Stat File
-     *
-     * Store the file stat in st
-     */
+/*
+ * Stat File
+ *
+ * Stats a file and checks that it completed successfully.
+ *
+ */
+void stat_file(const char *filename, struct stat *st)
+{
     if (stat(filename, st) == -1) {
         perror("stat");
         exit(EXIT_FAILURE);
     }
 }
 
-void append_file(int archive, const char *filename) {
-    /*
-    * Append File
-    *
-    * Given an already open archive file, and a file to append,
-    * build a ar_hdr, and append it, along with the file to the archive.
-    *
-    */
+/*
+ * Append File
+ *
+ * Given an already open archive file, and a file to append,
+ * build a ar_hdr, and append it, along with the file to the archive.
+ *
+ */
+void append_file(int archive, const char *filename)
+{
     int fd;
     struct stat st;
     struct ar_hdr file_hdr;
@@ -237,15 +235,16 @@ void append_file(int archive, const char *filename) {
     close(fd);
 }
 
-int open_archive(const char *archive) {
-    /*
-     * given a ar filename, return a fd for the ar.
-     *   Check to ensure fd is valid, and use perror to output failure. Also
-     *   contains an optional argument to create the archive if it doesn't
-     *   exist.
-     *   - This may return a struct containing the file and stat of file...
-     *     operation will most likely need the size...
-    */
+/*
+ * given a ar filename, return a fd for the ar.
+ *   Check to ensure fd is valid, and use perror to output failure. Also
+ *   contains an optional argument to create the archive if it doesn't
+ *   exist.
+ *   - This may return a struct containing the file and stat of file...
+ *     operation will most likely need the size...
+ */
+int open_archive(const char *archive)
+{
     int fd;
     char armag[SARMAG];
 
@@ -267,26 +266,28 @@ int open_archive(const char *archive) {
     return fd;
 }
 
-void close_archive(int fd) {
-    /*
-     * close_archive(fd) - closes the archive at the given fd, checks result
-     *   to make sure no errors given. If errors, perror and fail
-     */
+/*
+ * close_archive(fd) - closes the archive at the given fd, checks result
+ *   to make sure no errors given. If errors, perror and fail
+ */
+void close_archive(int fd)
+{
     if(close(fd) == -1) {
         perror("close");
         exit(EXIT_FAILURE);
     }
 }
 
-void append_all(const char *archive) {
-    /* Append all regular files 
-     * 
-     * get list of regular files in current directory (except archive
-     *   itself)
-     *  - uses stat and checks file type
-     * pass list to 'quick append' function
-     *
-     */
+/* Append all regular files 
+ * 
+ * get list of regular files in current directory (except archive
+ *   itself)
+ *  - uses stat and checks file type
+ * pass list to 'quick append' function
+ *
+ */
+void append_all(const char *archive)
+{
     char **files;
     DIR *dir;
     struct dirent *ed;
@@ -313,18 +314,19 @@ void append_all(const char *archive) {
     free(files);
 }
 
-void quick_append(const char *archive, const char *files[], int num_files) {
-    /* Quick Append
-     *
-     * open archive
-     * for each filename
-     *   open file
-     *   write ar header for file to archive
-     *   write file to archive
-     *   close file
-     * close archive
-     *
-     * */
+/* Quick Append
+ *
+ * open archive
+ * for each filename
+ *   open file
+ *   write ar header for file to archive
+ *   write file to archive
+ *   close file
+ * close archive
+ *
+ */
+void quick_append(const char *archive, const char *files[], int num_files)
+{
     int fd;
 
     if ((fd = open(archive, O_WRONLY | O_APPEND)) == -1) {
@@ -339,7 +341,13 @@ void quick_append(const char *archive, const char *files[], int num_files) {
     close_archive(fd);
 }
 
-void print_hdr_name(struct ar_hdr *file_header) {
+/*
+ * Print Header Name
+ *
+ * Prints the ar_name of a ar_hdr.
+ */
+void print_hdr_name(struct ar_hdr *file_header)
+{
     int i = 0;
     while(file_header->ar_name[i] != '/') {
         ++i;
@@ -347,9 +355,8 @@ void print_hdr_name(struct ar_hdr *file_header) {
     printf("%.*s\n", i, file_header->ar_name);
 }
 
-
-void table(const char *archive) {
-/* Table
+/*
+ * Table
  *
  * Open archive file
  * byte = size of ar header +1
@@ -362,6 +369,8 @@ void table(const char *archive) {
  * close archive
  *
  */
+void table(const char *archive)
+{
     int fd;
     int size;
     ssize_t buf;
@@ -395,7 +404,7 @@ void table(const char *archive) {
             exit(EXIT_FAILURE);
         }
 
-        // Compensate for '\n' when the file length is even
+        /* Compensate for '\n' when the file length is even */
         if ((size % 2) == 1) {
             size++;
         }
@@ -423,6 +432,7 @@ void table(const char *archive) {
  * unlink original archive
  * close archive
  *
+ * prints 'd - Filename' in verbose mode 
  */
 
 /* Extract
@@ -441,14 +451,8 @@ void table(const char *archive) {
  *   if length of filenames handled not same as filenames requested continue,
  *   else close archive and fail, since we did find any files
  * close archive
- * */
-
-/* Verbose
  *
- * Interact with ar binary to see what information is given
- * Know for sure 'table' will basically print stat of file as well (well
- *   the info it has at least, only saves mtime? so atime and ctime will
- *   be the same)
+ * prints 'x - Filename' in verbose mode
  */
 
 /*
@@ -501,7 +505,6 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
     }
-
 
     if (optind >= argc) {
         fprintf(stderr, "Expected argument after options\n");
