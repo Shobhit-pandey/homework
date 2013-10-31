@@ -339,6 +339,15 @@ void quick_append(const char *archive, const char *files[], int num_files) {
     close_archive(fd);
 }
 
+void print_hdr_name(struct ar_hdr *file_header) {
+    int i = 0;
+    while(file_header->ar_name[i] != '/') {
+        ++i;
+    }
+    printf("%.*s\n", i, file_header->ar_name);
+}
+
+
 void table(const char *archive) {
 /* Table
  *
@@ -376,11 +385,7 @@ void table(const char *archive) {
         if(verbose == TRUE) {
             print_hdr(&file_header);
         } else {
-            int i = 0;
-            while(file_header.ar_name[i] != '/') {
-                ++i;
-            }
-            printf("%.*s\n", i, file_header.ar_name);
+            print_hdr_name(&file_header);
         }
 
         if ((size = strtol(file_header.ar_size, (char **)NULL, 10)) == LONG_MIN
