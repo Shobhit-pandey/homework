@@ -434,6 +434,9 @@ void table(const char *archive)
  *
  * prints 'd - Filename' in verbose mode 
  */
+void delete(const char *archive, const char* files[], int num_files) {
+    ;
+}
 
 /* Extract
  * 
@@ -454,6 +457,9 @@ void table(const char *archive)
  *
  * prints 'x - Filename' in verbose mode
  */
+void extract(const char *archive, const char* files[], int num_files) {
+    ;
+}
 
 /*
  * myar is an simple implementation of the UNIX archive (ar) program.
@@ -519,21 +525,28 @@ int main(int argc, char *argv[])
     archive = argv[optind++];
     if ((flags ^ F_TABLE) == 0) {
         table(archive);
-    } else if ((flags ^ F_QUICK) == 0) {
+    } else if ((flags ^ F_APPEND) == 0) {
+        append_all(archive);
+    } else {
         int i = 0;
         while (optind < argc) {
             files[i++] = argv[optind++];
         }
-        if (optind < 4) {
-            fprintf(stderr, "At least one file required for appending.\n");
-        }
-        quick_append(archive, files, i);
-    } else if ((flags ^ F_APPEND) == 0) {
-        append_all(archive);
-    }else {
-        fprintf(stderr, "Option not supported yet.\n");
-        exit(EXIT_FAILURE);
-    }
 
+        if (optind < 4) {
+            fprintf(stderr, "At least one file required for appending, "
+                            "extracting or deleting.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if ((flags ^ F_QUICK) == 0) {
+            quick_append(archive, files, i);
+        } else if ((flags ^ F_XTRACT) == 0) {
+            extract(archive, files, i);
+        } else {
+            fprintf(stderr, "Option not supported yet.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
     exit(EXIT_SUCCESS);
 }
