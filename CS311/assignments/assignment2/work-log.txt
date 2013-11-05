@@ -1,0 +1,371 @@
+commit 1968c2b30b261ae1b1d4d2d635cc2cecfe85a54d
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 23:36:28 2013 -0700
+
+    CS311: Remove 'test' directory
+
+commit 16b6a4ad00850de4f2e0bd4a677ea6f63dd0050f
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 23:34:19 2013 -0700
+
+    CS311: Work on extract. Incomplete.
+
+commit 82d5fa68207e31d63c1c258ad3b01c1a17eb155d
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 22:27:40 2013 -0700
+
+    CS311: Refactor header name printing
+    
+    Return the size of the string up till '/' instead.
+
+commit 367526f3ac0d68e56543fd6606060d343dc7d43b
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 22:07:37 2013 -0700
+
+    CS311: Fix bug in creating archive.
+    
+    Refactored reading and writing armag to own functions.
+
+commit df54d39c12c5a56ef3be238569b496264ddec03f
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 21:08:39 2013 -0700
+
+    CS311: Update append to create archive
+    
+    This will currently only copy over the files, not write out the archive
+    header.
+
+commit b80f6f6647e28f38bc399d7dc68add1c2275eb89
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 20:50:05 2013 -0700
+
+    CS311: Add verbose output for append.
+
+commit e367fc89e3700448be46dd5916db225f8e998a2d
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 20:43:52 2013 -0700
+
+    CS311: Rework function delegation from flags.
+    
+    delete and extract are both stubbed out, with extract currently enabled.
+
+commit 76b948ad1ffeb4b522030d93e8dcacebfb268c17
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 20:17:10 2013 -0700
+
+    CS311: Fix style guide formatting issues.
+    
+    Also created a header file to hold function headers.
+
+commit 130640abae4541c06a09c41b05011292ce67c475
+Merge: 7c53d84 ea77376
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 19:47:52 2013 -0700
+
+    Merge branch 'master' of github.com:bramwelt/homework
+
+commit 7c53d8409cb08031bd484ae7427558982c883b8a
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 19:28:34 2013 -0700
+
+    CS311: Update write_file to take fewer arguments.
+    
+    Only need to pass in struct stat to get the info it needs.
+
+commit fb532c531464421e934188f92ff99ffc4111dbfa
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 19:16:08 2013 -0700
+
+    CS311: Refactor append_file method.
+    
+    Seperates concerns for a lot of functions.
+
+commit ea77376cd2e70815d3baca7112bed2ee896c1104
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 10:52:05 2013 -0700
+
+    CS311: Refactor printing a header name.
+
+commit f2df3256dd034f87a0984820be5c206a1bbaaeef
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 01:07:07 2013 -0700
+
+    CS311: Add append_all functionality and enable flag
+    
+    Through process found bug in file name output for '-t'.
+
+commit 4fbfdb1cd0e48546ffa4944704affeb4b1f17004
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 30 00:12:13 2013 -0700
+
+    CS311: Fix bugs in print_hdr, fmt_filename, append
+    
+    Append was not taking into account odd size padding.
+
+commit 05f2d4ada92c959d104aa81b1e15026d21c58f01
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 29 23:09:36 2013 -0700
+
+    CS311: Implement the verbose table option.
+    
+    Uses file_perm_string from class website, strftime, and sscanf.
+
+commit 9eb6bff03913dbe5aa2b4cbbcc23eec85cfa45a6
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 23:31:18 2013 -0700
+
+    CS311: Fix bug in printing table.
+    
+    * I can math good.
+    * I was moding by 3, not 2 to check even/odd. D'OH\!
+
+commit 1dcbabd333db36cb3d159b715537193d42b72bf8
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 23:00:22 2013 -0700
+
+    CS311: Add test archives of even/odd files.
+
+commit 502b22e252ef0cff0c1a42dea26d4b596222d34f
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 22:55:51 2013 -0700
+
+    CS311: Remove 'test_archive'
+
+commit a20f76a620fec61459d4bffcf179176858d59469
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 22:54:33 2013 -0700
+
+    CS311: Move test-ar to subdir, add symlink to myar
+
+commit 16ca85d143701d86bb152c89652e1780e33e8e84
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 22:49:15 2013 -0700
+
+    CS311: Fix issues with '-t', and '-q'
+    
+    append file:
+    * No longer malloc a char buffer, but statically allocate one with
+      blk_size from the file stat.
+    * Always add a newline after a file. This fixes some stability with ar,
+      but may be only working because the file are of odd length.
+    
+    open_archive:
+    * Fix read and memcpy return checks
+    
+    table:
+    * Walks the file in a much saner way. Checks correct return values from
+      strtol.
+
+commit 3905cf1198b4302cc56c7770b7c2a2dd797a47e2
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 22:44:54 2013 -0700
+
+    CS311: Use fmt_filename in build_hdr.
+
+commit 79c612cac4d27c5787527a6d3d58bab25237a0d9
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 22:41:25 2013 -0700
+
+    CS311: Add fmt_filename function.
+    
+    Formats filenames to the ar spec of 16 character limit, with the 16th
+    being '/'.
+
+commit 6c21e55bba2df6a05897ceefd9ab7ba063b06dfe
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 11:39:32 2013 -0700
+
+    CS311: Add append_file method.
+    
+    Allows appending a file to an archive.
+     - Builds the header
+     - Appends the header
+     - Appends the file
+
+commit f4be90b510aee44452b8d9c970df59dbac5ce5c4
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 11:36:55 2013 -0700
+
+    CS311: Update build_hdr to return the blk_size.
+
+commit f853c98e92a1a70cadbcf78679eaf37709061ed2
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 28 07:23:06 2013 -0700
+
+    CS311: Rename print_header and add build_hdr.
+    
+    Quick append now available, but not fully functioning.
+
+commit c84a47302a9d5ebe740b46408267e4271c560ae0
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sun Oct 27 13:53:38 2013 -0700
+
+    CS311: Add variable to hold archive and file names
+
+commit 1fba86fba9ce88ff866545b52df0bdd2cecf9c1e
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Oct 26 17:20:23 2013 -0700
+
+    CS311: Don't declare unneccissary strtol var.
+
+commit b068d06f044fda9e6757b77e95c69a2e2c65bec7
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Oct 26 15:13:56 2013 -0700
+
+    CS311: Move flags, only allow '-t' for now.
+    
+     * Verbose is now it's own variable.
+     * Output some flag debugging if verbose is set.
+     * Fail if no flags are set.
+
+commit 8588c7faabd85ac5a676bf1a3f56468e38f9f04a
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Oct 26 14:15:28 2013 -0700
+
+    CS311: Define flags and set them given options.
+
+commit 3e595a2867fc842aafd1305b7a09bcc14ded6ab0
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Oct 26 13:34:27 2013 -0700
+
+    CS311: Create open_archive and close_archive funcs
+
+commit ec98ea97ea54948736c9739f6b0e026d306e6311
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Oct 26 13:11:32 2013 -0700
+
+    CS311: Implement table as default behavior.
+
+commit fc142a9c0ce05af80c77c289002b08a57ed1f1ad
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Oct 23 00:24:43 2013 -0700
+
+    CS311: Add comment for Append all
+
+commit 2f4a63a23d46aafc261cd7cd8b684ed07d060e5a
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 23:44:41 2013 -0700
+
+    CS311: Comment ALL the things!
+    
+    Add comments/psudocode for every operation.
+    Begin figuring out shared similar functions.
+
+commit bec6c05d5589b875dbc0e484748cb05119384f42
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 22:56:07 2013 -0700
+
+    CS311: ignore pyc files.
+
+commit 75d5fdd914870859975cc9b5e4ec029d406b0b45
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 22:55:16 2013 -0700
+
+    CS311: Add tests for '-t' flag.
+    
+    Includes dummy ar files for testing.
+
+commit 90b87a602c92057d0db534b7b0cb9761b2cb5819
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 22:00:07 2013 -0700
+
+    Add TESTS macro to Makefile to point to test binary.
+    
+    Initial commit of test-ar.py. Description in file comments.
+
+commit 3b1d29915ac0d73e128414ef60fd7236bda1b624
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:51:05 2013 -0700
+
+    CS311: Update Makefile to default build myar
+
+commit 0d0a6306a5500428d5ff67baf4ac7df5a47b59a0
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:47:52 2013 -0700
+
+    CS311: Compiled initial writeup.
+
+commit bc00277e2d188b41f6eda1ac43278caeeb3da568
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:47:45 2013 -0700
+
+    Ignore object files and latex output files.
+
+commit 6ad2ade11e7a7f7eb50424dd67bc0d71957fef28
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:46:38 2013 -0700
+
+    CS311: Itemize version list in writeup.
+    
+    Also fixes compilation errors.
+
+commit 2f1f768a7518e15e3c8dddbfffcafc3cc8fc10f6
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:40:41 2013 -0700
+
+    CS311: Move Makefile and myar back up a directory.
+
+commit 6699244d9d19993f2f45062190cf113ba8322987
+Merge: 5803e73 78034aa
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:40:00 2013 -0700
+
+    Merge branch 'master' of github.com:bramwelt/homework
+    
+    Conflicts:
+    	CS311/assignments/assignment2/write-up.tex
+
+commit 5803e73e24b7682e4dc669557f8b1f303371b50d
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Oct 22 21:38:07 2013 -0700
+
+    CS311: Writeup design section
+    
+    Walk through design process, and provide intial answers to the first two
+    questions.
+
+commit b4945a6977a41ffb3db794c772d12643146953a4
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 21 20:40:16 2013 -0700
+
+    CS311: Let us begin with getopt.
+    
+    Supports all options, and prints all arguments.
+
+commit 82003b2548a0f37e0c08e7036580939f6f8578dc
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 21 20:08:08 2013 -0700
+
+    CS311: Change Makefile to not link anything.
+    
+    Also defaults to print the help text.
+
+commit dfd8d466f814043568128324344f3cc18005dccd
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 21 19:55:27 2013 -0700
+
+    CS311: Initial Writeup Outline.
+
+commit b4a46f62bbcb8c86e19d99def7cf6c701e9bb579
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Oct 21 19:54:47 2013 -0700
+
+    CS311: Remove extraneous html from instructions.html
+
+commit 30ae134104cd27c8403f666e753f05435696e6fc
+Author: Trevor Bramwell <tehriddler@gmail.com>
+Date:   Sat Oct 19 17:29:28 2013 -0700
+
+    CS311: Assignment 2 - Makefile & initial writeup
+
+commit f83e2edd7cdaf2a7bee443cc8439936d9403f258
+Author: Trevor Bramwell <tehriddler@gmail.com>
+Date:   Fri Oct 18 09:53:09 2013 -0700
+
+    CS311: Move instructions under subdir.
+
+commit e518292bcd1c1219810f72565ca5eb28c225edc1
+Author: Trevor Bramwell <tehriddler@gmail.com>
+Date:   Wed Oct 16 19:30:07 2013 -0700
+
+    CS311: Instructions for assignment 2.

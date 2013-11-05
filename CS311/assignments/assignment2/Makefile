@@ -1,6 +1,6 @@
 TARGET  = write-up
 SRC     = myar
-CC      = gcc
+CC      = icc
 TESTS   = test-ar.py
 LDFLAGS =
 CFLAGS  = -std=c99 -Wall
