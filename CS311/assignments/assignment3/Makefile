@@ -25,4 +25,4 @@ pdf: ${TEX}.tex
 	ps2pdf ${TEX}.ps
 
 uniqify: 
-	$(CC) $(CFLAGS) $(SRC).c -o $(SRC).o
+	$(CC) $(CFLAGS) $(SRC).c -o $(SRC)
