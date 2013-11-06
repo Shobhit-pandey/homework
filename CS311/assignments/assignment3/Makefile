@@ -7,7 +7,7 @@ default: help
 
 .PHONY: help clean all default
 
-all: pdf myar
+all: pdf uniqify
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -24,5 +24,5 @@ pdf: ${TEX}.tex
 	dvips -R -Poutline -t letter ${TEX}.dvi -o ${TEX}.ps
 	ps2pdf ${TEX}.ps
 
-uniqify: 
+uniqify: uniqify.c
 	$(CC) $(CFLAGS) $(SRC).c -o $(SRC)
