@@ -3,7 +3,7 @@ SRC     = uniqify
 CC      = gcc
 CFLAGS  = -std=c99 -Wall
 
-default: help
+default: uniqify
 
 .PHONY: help clean all default
 

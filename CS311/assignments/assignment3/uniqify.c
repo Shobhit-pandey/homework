@@ -19,10 +19,15 @@ extern int optind;
 extern int opterr;
 extern int optopt;
 
-const char *usage = "Usage: %s [-i input] [-o output] [-n processes]\n"
-                    "\t-n\tThe number of sorting processes. [1]\n"
-                    "\t-i\tThe input file to sort. [stdin]\n"
-                    "\t-o\tThe output file to store the sorted values "
+extern FILE *stdin;
+extern FILE *stdout;
+extern FILE *stderr;
+
+const char *usage = "Usage: %s [-o output] [-n processes] file\n\n"
+                    "Uniqify takes a input file, or stdin, and "
+                    "sorts the words.\n\n"
+                    "  -n\tThe number of sorting processes. [1]\n"
+                    "  -o\tThe output file to store the sorted values "
                     "in. [stdout]\n";
 
 /*
@@ -33,8 +38,8 @@ int main(int argc, char *argv[])
 {
     long procs = 1;
     int opt;
-    FILE *input = stdin;
-    FILE *output = stdout;
+    FILE *input = NULL;
+    FILE *output = NULL;
 
     while ((opt = getopt(argc, argv, "n:o:h")) != -1) {
         switch (opt) {
@@ -53,8 +58,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (optind == argc) {
+    if (optind < argc) {
         input = fopen(argv[optind], "r");
+        if (input == NULL) {
+            perror("fopen");
+            exit(EXIT_FAILURE);
+        }
     }
 
     parser(input, output, procs);
@@ -68,11 +77,18 @@ int main(int argc, char *argv[])
  */
 void parser(FILE *input, FILE *output, long procs)
 {
+    char fchar;
 
-    printf("procs: %ld\n", procs);
+    if (input == NULL) {
+        input = stdin;
+    }
 
-    //fputc(fgetc(input),output);
-    /*
+    if (output == NULL) {
+        output = stdout;
+    }
+
+    printf("%ld\n", procs);
+
     while((fchar = fgetc(input)) != EOF) {
         if(fchar == -1) {
             perror("fgetc");
@@ -84,5 +100,4 @@ void parser(FILE *input, FILE *output, long procs)
             exit(EXIT_FAILURE);
         }
     }
-    */
 }
