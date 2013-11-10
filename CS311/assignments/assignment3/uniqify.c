@@ -6,11 +6,21 @@
 
 #define _POSIX_SOURCE
 
+#ifndef INPUT
+#define INPUT 0
+#endif
+
+#ifndef OUTPUT
+#define OUTPUT 1
+#endif
+
 #include <errno.h>
 #include <getopt.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "uniqify.h"
 
@@ -77,7 +87,19 @@ int main(int argc, char *argv[])
  */
 void parser(FILE *input, FILE *output, long procs)
 {
-    char fchar;
+    pid_t cpid;
+    /* Create 2N Pipes of 2 ints */
+    int pipe_arr[2][procs][2];
+
+    // init_pipes(pipe_arr, 2, procs);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < procs; ++j) {
+            if (pipe(pipe_arr[i][j]) == -1) {
+                perror("pipe");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 
     if (input == NULL) {
         input = stdin;
@@ -87,16 +109,35 @@ void parser(FILE *input, FILE *output, long procs)
         output = stdout;
     }
 
-    printf("%ld\n", procs);
-
-    while((fchar = fgetc(input)) != EOF) {
-        if(fchar == -1) {
-            perror("fgetc");
+    /* Fork n process */
+    for(int i = 0; i < procs; ++i) {
+        switch(cpid = fork()) {
+        case -1:
+            perror("fork");
             exit(EXIT_FAILURE);
+        case 0:
+            /* Close (2N)-4 Pipe Ends */
+            // close_pipes(i, pipe_ar[INPUT]);
+            // close_pipes(i, pipe_ar[OUTPUT]);
+            /* Envoke sort for each child */
+            printf("Hello, from Child %d\n", i);
+            _exit(EXIT_SUCCESS);
+            break;
+        default:
+            break; /* Continue to next child */
         }
+    }
 
-        if(fputc(fchar, output) != fchar) {
-            perror("fputc");
+    /* Round robin distribute words
+     *
+     * For each word in input, parse, and write round robin to pipe.
+     */
+
+    /* Wait on N process
+     *   or SIGCHLD all */
+    for(int i = 0; i < procs; ++i) {
+        if (wait(NULL) == -1) {
+            perror("wait");
             exit(EXIT_FAILURE);
         }
     }
