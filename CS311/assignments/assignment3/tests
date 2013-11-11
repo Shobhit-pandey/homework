@@ -1,0 +1,14 @@
+Test 1:
+    N   = 2
+    IN  = STDIN: beta alpha
+    OUT = STOUT: alpha beta
+
+Test 2:
+    N   = 2
+    IN  = FILE: words
+    OUT = STDOUT
+
+Test 3:
+    N   = 2
+    IN  = STDIN
+    OUT = FILE: words-output
