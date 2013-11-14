@@ -76,24 +76,21 @@ int main(int argc, char *argv[])
  * Allocate space for 4N pipes
  */
 void init_pipes(int ***arr, int procs) {
-    for (int i = 0; i < PIPE_SIZE; ++i) {
-        for (int j = 0; j < procs; ++j) {
-            if (pipe(arr[i][j]) == -1)
-                errExit("pipe");
-        }
+    for (int i = 0; i < procs; ++i) {
+        if (pipe(arr[i]) == -1) errExit("pipe");
     }
 }
 
 /*
- * Close all open pipes in the array, except the onces a child needs
+ * Close both ends of all pipes but only one 'end' for the 'proc' pipe.
  */
-void close_pipes(int ***arr, int procs, int proc) {
-    for (int i = 0; i < PIPE_SIZE; ++i) {
-        for (int j = 0; j < procs; ++j) {
-            if (j != proc) {
-                close(arr[i][j][READ]);
-                close(arr[i][j][WRITE]);
-            }
+void close_pipes(int ***arr, int procs, int proc, int end) {
+    for (int i = 0; i < procs; ++i) {
+        if (i == proc) {
+            close(arr[i][end]);
+        } else {
+            close(arr[i][READ]);
+            close(arr[i][WRITE]);
         }
     }
 }
@@ -104,8 +101,8 @@ void close_pipes(int ***arr, int procs, int proc) {
 void parser(FILE *input, FILE *output, long procs)
 {
     pid_t cpid;
-    int pipe_in[2][procs][2];
-    int pipe_out[2][procs][2];
+    int pipe_in[procs][2];
+    int pipe_out[procs][2];
 
     char buf[512];
     FILE *write_stream;
@@ -131,12 +128,10 @@ void parser(FILE *input, FILE *output, long procs)
     switch(cpid = fork()) {
     case -1: errExit("fork");
     case 0:
-        if (close(pipe_in[READ]) == -1) errExit("close");
+        close_pipes(pipe_in, procs, i, READ);
         close_pipes(pipe_out, procs, ALL);
-        if (close(pipe_out[WRITE]) == -1) errExit("close");
-        if (close(pipe_out[READ]) == -1) errExit("close");
 
-        if ((write_stream = fdopen(pipe_in[WRITE], "a")) == NULL) errExit("fdopen");
+        if ((write_stream = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
 
         while ((fscanf(stdin, "%s", buf) != EOF)) {
             if(fputs(buf, write_stream) == EOF) errExit("fputs");
@@ -155,30 +150,32 @@ void parser(FILE *input, FILE *output, long procs)
     /*
      * Sorter
      */
-    switch(cpid = fork()) {
-    case -1: errExit("fork");
-    case 0:
-        close(pipe_in[WRITE]);
-        close(pipe_out[READ]);
+    for (int i = 0; i < procs; ++i) {
+        switch(cpid = fork()) {
+        case -1: errExit("fork");
+        case 0:
+            close_pipes(pipe_in, procs, i, WRITE);
+            close_pipes(pipe_out, procs, i, READ);
 
-        /* Reassign sort input FD */
-        if (pipe_in[READ] != STDIN_FILENO) {
-            if (dup2(pipe_in[READ], STDIN_FILENO) == -1) errExit("dup2");
-            if (close(pipe_in[READ]) == -1) errExit("close");
+            /* Reassign sort input FD */
+            if (pipe_in[i][READ] != STDIN_FILENO) {
+                if (dup2(pipe_in[i][READ], STDIN_FILENO) == -1) errExit("dup2");
+                if (close(pipe_in[i][READ]) == -1) errExit("close");
+            }
+
+            /* Reassign sort output FD */
+            if (pipe_out[i][WRITE] != STDOUT_FILENO) {
+                if (dup2(pipe_out[i][WRITE], STDOUT_FILENO) == -1) errExit("dup2");
+                if (close(pipe_out[i][WRITE]) == -1) errExit("close");
+            }
+
+            /* Envoke sort for each child */
+            if ((execlp("sort", "sort", (char *) NULL)) == -1) errExit("execve");
+
+            _exit(EXIT_SUCCESS);
+        default:
+            break;
         }
-
-        /* Reassign sort output FD */
-        if (pipe_out[WRITE] != STDOUT_FILENO) {
-            if (dup2(pipe_out[WRITE], STDOUT_FILENO) == -1) errExit("dup2");
-            if (close(pipe_out[WRITE]) == -1) errExit("close");
-        }
-
-        /* Envoke sort for each child */
-        if ((execlp("sort", "sort", (char *) NULL)) == -1) errExit("execve");
-
-        _exit(EXIT_SUCCESS);
-    default:
-        break;
     }
 
 
@@ -193,12 +190,11 @@ void parser(FILE *input, FILE *output, long procs)
          *
          * For each word in input, parse, and write round robin to pipe.
          */
-        if (close(pipe_out[WRITE]) == -1) errExit("close");
-        if (close(pipe_in[WRITE]) == -1) errExit("close");
-        if (close(pipe_in[READ]) == -1) errExit("close");
+        close_pipes(pipe_out, procs, i, WRITE);
+        close_pipes(pipe_in, procs, ALL);
 
         /* Read from pipe from sort, to output:(stdout|FILE) */
-        if ((read_stream = fdopen(pipe_out[READ], "r")) == NULL) errExit("fdopen");
+        if ((read_stream = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
         while ((fgets(buf, 512, read_stream) != NULL)) {
             if(fprintf(stdout, "%s", buf) == EOF) errExit("fputs");
         }
@@ -209,14 +205,12 @@ void parser(FILE *input, FILE *output, long procs)
         break;
     }
     
-    if (close(pipe_in[WRITE]) == -1) errExit("close");
-    if (close(pipe_in[READ]) == -1) errExit("close");
-    if (close(pipe_out[WRITE]) == -1) errExit("close");
-    if (close(pipe_out[READ]) == -1) errExit("close");
-
+    close_pipes(pipe_in, procs, ALL);
+    close_pipes(pipe_out, procs, ALL);
+    
     /* Wait on N process
      *   or SIGCHLD all */
-    for(int i = 0; i < 3; ++i) {
+    for(int i = 0; i < (procs+2); ++i) {
         if (wait(NULL) == -1) errExit("wait");
     }
 }
