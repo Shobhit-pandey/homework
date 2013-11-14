@@ -18,9 +18,9 @@
 #define ALL -1
 
 int main(int argc, char *argv[]);
-void parser(FILE *input, FILE *output, long procs);
-void close_pipes(int ***arr, int procs, int proc);
-void init_pipes(int ***arr, int procs);
+void parser(FILE *input, FILE *output, int procs);
+void close_pipes(int arr[][2], int procs, int proc, int end);
+void init_pipes(int arr[][2], int procs);
 
 void errExit(const char *func) {
     perror(func);

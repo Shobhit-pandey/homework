@@ -39,7 +39,7 @@ const char *usage = "Usage: %s [-o output] [-n processes] file\n\n"
  */
 int main(int argc, char *argv[])
 {
-    long procs = 1;
+    int procs = 1;
     int opt;
     FILE *input = NULL;
     FILE *output = NULL;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
             output = fopen(optarg, "w");
             break;
         case 'n':
-            sscanf(optarg, "%ld", &procs);
+            sscanf(optarg, "%d", &procs);
             break;
         case 'h':
             printf(usage, argv[0]);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 /*
  * Allocate space for 4N pipes
  */
-void init_pipes(int ***arr, int procs) {
+void init_pipes(int arr[][2], int procs) {
     for (int i = 0; i < procs; ++i) {
         if (pipe(arr[i]) == -1) errExit("pipe");
     }
@@ -84,9 +84,11 @@ void init_pipes(int ***arr, int procs) {
 /*
  * Close both ends of all pipes but only one 'end' for the 'proc' pipe.
  */
-void close_pipes(int ***arr, int procs, int proc, int end) {
+void close_pipes(int arr[][2], int procs, int proc, int end) {
     for (int i = 0; i < procs; ++i) {
         if (i == proc) {
+            close(arr[i][end]);
+        } else if (end != ALL) {
             close(arr[i][end]);
         } else {
             close(arr[i][READ]);
@@ -98,15 +100,15 @@ void close_pipes(int ***arr, int procs, int proc, int end) {
 /*
  * Parser
  */
-void parser(FILE *input, FILE *output, long procs)
+void parser(FILE *input, FILE *output, int procs)
 {
     pid_t cpid;
     int pipe_in[procs][2];
     int pipe_out[procs][2];
 
     char buf[512];
-    FILE *write_stream;
-    FILE *read_stream;
+    FILE *write_stream[procs];
+    FILE *read_stream[procs];
 
     /* Initialize Pipes */
     init_pipes(pipe_in, procs);
@@ -125,20 +127,27 @@ void parser(FILE *input, FILE *output, long procs)
     /*
      * Parser
      */
-    switch(cpid = fork()) {
+    switch (cpid = fork()) {
     case -1: errExit("fork");
     case 0:
-        close_pipes(pipe_in, procs, i, READ);
-        close_pipes(pipe_out, procs, ALL);
+        close_pipes(pipe_in, procs, ALL, READ);
+        close_pipes(pipe_out, procs, ALL, ALL);
 
-        if ((write_stream = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
-
-        while ((fscanf(stdin, "%s", buf) != EOF)) {
-            if(fputs(buf, write_stream) == EOF) errExit("fputs");
-            if(fputs("\n", write_stream) == EOF) errExit("fputs");
+        for (int i = 0; i < procs; ++i) {
+            if ((write_stream[i] = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
         }
 
-        if (fclose(write_stream) == EOF) errExit("fclose");
+        long j = 0;
+        while ((fscanf(stdin, "%s", buf) != EOF)) {
+            int s_idx = (int)(j % procs);
+            if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
+            if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
+            ++j;
+        }
+
+        for (int i = 0; i < procs; ++i) {
+            if (fclose(write_stream[i]) == EOF) errExit("fclose");
+        }
         
         /* First pipes are now all closed. sort should have recieved it's
          * final input */
@@ -151,7 +160,7 @@ void parser(FILE *input, FILE *output, long procs)
      * Sorter
      */
     for (int i = 0; i < procs; ++i) {
-        switch(cpid = fork()) {
+        switch (cpid = fork()) {
         case -1: errExit("fork");
         case 0:
             close_pipes(pipe_in, procs, i, WRITE);
@@ -190,23 +199,33 @@ void parser(FILE *input, FILE *output, long procs)
          *
          * For each word in input, parse, and write round robin to pipe.
          */
-        close_pipes(pipe_out, procs, i, WRITE);
-        close_pipes(pipe_in, procs, ALL);
+        close_pipes(pipe_out, procs, ALL, WRITE);
+        close_pipes(pipe_in, procs, ALL, ALL);
 
         /* Read from pipe from sort, to output:(stdout|FILE) */
-        if ((read_stream = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
-        while ((fgets(buf, 512, read_stream) != NULL)) {
-            if(fprintf(stdout, "%s", buf) == EOF) errExit("fputs");
+        for (int i = 0; i < procs; ++i) {
+            if ((read_stream[i] = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
         }
-        if (fclose(read_stream) == EOF) errExit("fclose");
+
+        long j = 0;
+        int s_idx = 0;
+        while ((fgets(buf, 512, read_stream[s_idx]) != NULL)) {
+            s_idx = (int)(j % procs);
+            if(fprintf(stdout, "%s", buf) == EOF) errExit("fputs");
+            ++j;
+        }
+
+        for (int i = 0; i < procs; ++i) {
+            if (fclose(read_stream[i]) == EOF) errExit("fclose");
+        }
 
         _exit(EXIT_SUCCESS);
     default:
         break;
     }
     
-    close_pipes(pipe_in, procs, ALL);
-    close_pipes(pipe_out, procs, ALL);
+    close_pipes(pipe_in, procs, ALL, ALL);
+    close_pipes(pipe_out, procs, ALL, ALL);
     
     /* Wait on N process
      *   or SIGCHLD all */
