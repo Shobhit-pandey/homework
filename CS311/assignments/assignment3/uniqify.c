@@ -6,18 +6,6 @@
 
 #define _POSIX_SOURCE
 
-#ifndef READ
-#define READ 0
-#endif
-
-#ifndef WRITE
-#define WRITE 1
-#endif
-
-#ifndef IN_OUT
-#define IN_OUT 2
-#endif
-
 #include <assert.h>
 #include <errno.h>
 #include <getopt.h>
@@ -88,14 +76,8 @@ int main(int argc, char *argv[])
  * Allocate space for 4N pipes
  */
 void init_pipes(int ***arr, int procs) {
-    arr = (int ***)malloc(IN_OUT * sizeof(int**));
-    assert(arr != 0);
-    for (int i = 0; i < IN_OUT; ++i) {
-        arr[i] = (int **)malloc(procs * sizeof(int*));
-        assert(arr[i] != 0);
+    for (int i = 0; i < PIPE_SIZE; ++i) {
         for (int j = 0; j < procs; ++j) {
-            arr[i][j] = (int *)malloc(IN_OUT * sizeof(int));
-            assert(arr[i][j] != 0);
             if (pipe(arr[i][j]) == -1)
                 errExit("pipe");
         }
@@ -103,31 +85,14 @@ void init_pipes(int ***arr, int procs) {
 }
 
 /*
- * Free up the pipes that were created.
- */
-void free_pipes(int ***arr, int procs) {
-    for (int i = 0; i < IN_OUT; ++i) {
-        for (int j = 0; j < procs; ++j) {
-            free(arr[i][j]);
-        }
-        free(arr[i]);
-    }
-    free(arr);
-}
-
-/*
  * Close all open pipes in the array, except the onces a child needs
  */
-void close_pipes(int proc, int ***arr, int procs, int dir) {
-    for (int i = 0; i < IN_OUT; ++i) {
+void close_pipes(int ***arr, int procs, int proc) {
+    for (int i = 0; i < PIPE_SIZE; ++i) {
         for (int j = 0; j < procs; ++j) {
             if (j != proc) {
-                close(arr[i][j][WRITE]);
                 close(arr[i][j][READ]);
-            } else if (dir == WRITE) {
                 close(arr[i][j][WRITE]);
-            } else if (dir == READ) {
-                close(arr[i][j][READ]);
             }
         }
     }
@@ -139,15 +104,16 @@ void close_pipes(int proc, int ***arr, int procs, int dir) {
 void parser(FILE *input, FILE *output, long procs)
 {
     pid_t cpid;
-    int pipe_in[2];
-    int pipe_out[2];
+    int pipe_in[2][procs][2];
+    int pipe_out[2][procs][2];
 
     char buf[512];
     FILE *write_stream;
     FILE *read_stream;
 
     /* Initialize Pipes */
-    if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) errExit("pipe");
+    init_pipes(pipe_in, procs);
+    init_pipes(pipe_out, procs);
 
     /*
     if (input == NULL) {
@@ -159,9 +125,6 @@ void parser(FILE *input, FILE *output, long procs)
     }
     */
 
-    /* Don't worry about procs for time being */
-    procs = 1;
-    
     /*
      * Parser
      */
@@ -169,6 +132,7 @@ void parser(FILE *input, FILE *output, long procs)
     case -1: errExit("fork");
     case 0:
         if (close(pipe_in[READ]) == -1) errExit("close");
+        close_pipes(pipe_out, procs, ALL);
         if (close(pipe_out[WRITE]) == -1) errExit("close");
         if (close(pipe_out[READ]) == -1) errExit("close");
 
