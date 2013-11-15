@@ -129,6 +129,11 @@ void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[]
 
 /* 
  * Suppressor
+ *
+ *  In this assignment words are all alphabetic and case insensitive, with
+ *  the parser converting all alphabetic characters to lower case. Any
+ *  non-alphabetic characters delimit words and are discarded.
+ *
  */
 void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stream[], FILE *output)  {
     /*
@@ -187,6 +192,11 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
 
 /*
  * Supervisor
+ *
+ * All processes should terminate cleanly on INTR, QUIT, and HANGUP
+ * signals. This requires the installation of a signal handler for each of
+ * these three signals. Ensure you do this via sigaction, rather than
+ * signal. Also, ensure you issue QUIT signals to all children, as well.*
  */
 void supervisor(FILE *input, FILE *output, int procs)
 {
