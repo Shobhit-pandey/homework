@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
             errExit("fopen");
     }
 
-    parser(input, output, procs);
+    supervisor(input, output, procs);
 
     exit(EXIT_SUCCESS);
 }
@@ -96,11 +96,41 @@ void close_pipes(int arr[][2], int procs, int proc, int end) {
         }
     }
 }
+        
 
 /*
  * Parser
  */
-void parser(FILE *input, FILE *output, int procs)
+void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[], FILE *input)  {
+    char buf[512];
+    close_pipes(pipe_in, procs, ALL, READ);
+    close_pipes(pipe_out, procs, ALL, ALL);
+
+    for (int i = 0; i < procs; ++i) {
+        if ((write_stream[i] = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
+    }
+
+    long j = 0;
+    while ((fscanf(input, "%s", buf) != EOF)) {
+        int s_idx = (int)(j % procs);
+        if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
+        if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
+        ++j;
+    }
+
+    for (int i = 0; i < procs; ++i) {
+        if (fclose(write_stream[i]) == EOF) errExit("fclose");
+    }
+    
+    /* First pipes are now all closed. sort should have recieved it's
+     * final input */
+    _exit(EXIT_SUCCESS);
+}
+
+/*
+ * Supervisor
+ */
+void supervisor(FILE *input, FILE *output, int procs)
 {
     pid_t cpid;
     int pipe_in[procs][2];
@@ -128,28 +158,7 @@ void parser(FILE *input, FILE *output, int procs)
     switch (cpid = fork()) {
     case -1: errExit("fork");
     case 0:
-        close_pipes(pipe_in, procs, ALL, READ);
-        close_pipes(pipe_out, procs, ALL, ALL);
-
-        for (int i = 0; i < procs; ++i) {
-            if ((write_stream[i] = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
-        }
-
-        long j = 0;
-        while ((fscanf(input, "%s", buf) != EOF)) {
-            int s_idx = (int)(j % procs);
-            if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
-            if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
-            ++j;
-        }
-
-        for (int i = 0; i < procs; ++i) {
-            if (fclose(write_stream[i]) == EOF) errExit("fclose");
-        }
-        
-        /* First pipes are now all closed. sort should have recieved it's
-         * final input */
-        _exit(EXIT_SUCCESS);
+        parser(pipe_in, pipe_out, procs, write_stream, input);
     default:
         break;
     }

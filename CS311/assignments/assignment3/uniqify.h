@@ -18,7 +18,8 @@
 #define ALL -1
 
 int main(int argc, char *argv[]);
-void parser(FILE *input, FILE *output, int procs);
+void supervisor(FILE *input, FILE *output, int procs);
+void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[], FILE *input);
 void close_pipes(int arr[][2], int procs, int proc, int end);
 void init_pipes(int arr[][2], int procs);
 
