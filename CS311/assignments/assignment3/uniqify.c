@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -25,6 +26,8 @@ extern int optopt;
 extern FILE *stdin;
 extern FILE *stdout;
 extern FILE *stderr;
+
+static volatile int numLiveChildren = 0;
 
 const char *usage = "Usage: %s [-o output] [-n processes] file\n\n"
                     "Uniqify takes a input file, or stdin, and "
@@ -96,7 +99,6 @@ void close_pipes(int arr[][2], int procs, int proc, int end) {
         }
     }
 }
-        
 
 /*
  * Parser
@@ -190,6 +192,28 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
     _exit(EXIT_SUCCESS);
 }
 
+
+/*
+ * SIGCHLD Handler
+ *
+ * Used & modified from TLPI pg.557 (Listing 26-5).
+ */
+static void sigchldHandler(int sig)
+{
+    int savedErrno = errno;
+    pid_t childPid;
+
+    while ((childPid = waitpid(-1, NULL, WNOHANG)) > 0) {
+        numLiveChildren--;
+    }
+    if (childPid == -1 && errno != ECHILD) {
+        perror("waitpid");
+        _exit(EXIT_FAILURE);
+    }
+
+    errno = savedErrno;
+}
+
 /*
  * Supervisor
  *
@@ -197,6 +221,8 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
  * signals. This requires the installation of a signal handler for each of
  * these three signals. Ensure you do this via sigaction, rather than
  * signal. Also, ensure you issue QUIT signals to all children, as well.*
+ *
+ * Catch SIGCHLD and wait
  */
 void supervisor(FILE *input, FILE *output, int procs)
 {
@@ -213,6 +239,29 @@ void supervisor(FILE *input, FILE *output, int procs)
 
     if (input == NULL) input = stdin;
     if (output == NULL) output = stdout;
+
+    /* Take from TLPI */
+    int sigCnt = 0;
+    numLiveChildren = (procs-1+2);
+
+    sigset_t blockMask;
+    sigset_t emptyMask;
+    struct sigaction sa = {
+        .sa_flags = 0,
+        .sa_handler = sigchldHandler
+    };
+
+    sigemptyset(&sa.sa_mask);
+
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) errExit("sigaction");
+    /* Block SIGCHLD to prevent its delivery if a child terminates
+     * before the parent commences the sigsuspend() loop below */
+
+    sigemptyset(&blockMask);
+    sigaddset(&blockMask, SIGCHLD);
+
+    if (sigprocmask(SIG_SETMASK, &blockMask, NULL) == -1) errExit("sigprocmask");
+    /* End reference */
 
     /* Parser */
     switch (cpid = fork()) {
@@ -242,6 +291,12 @@ void supervisor(FILE *input, FILE *output, int procs)
     
     /* Wait on N process
      *   or SIGCHLD all */
+    sigemptyset(&emptyMask);
+    while (numLiveChildren > 0) {
+        if (sigsuspend(&emptyMask) == -1 && errno != EINTR) errExit("sigsuspend");
+        sigCnt++;
+    }
+
     for(int i = 0; i < (procs+2); ++i) {
         if (wait(NULL) == -1) errExit("wait");
     }
