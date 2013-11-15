@@ -114,7 +114,6 @@ void parser(FILE *input, FILE *output, int procs)
     init_pipes(pipe_in, procs);
     init_pipes(pipe_out, procs);
 
-    /*
     if (input == NULL) {
         input = stdin;
     }
@@ -122,7 +121,6 @@ void parser(FILE *input, FILE *output, int procs)
     if (output == NULL) {
         output = stdout;
     }
-    */
 
     /*
      * Parser
@@ -138,7 +136,7 @@ void parser(FILE *input, FILE *output, int procs)
         }
 
         long j = 0;
-        while ((fscanf(stdin, "%s", buf) != EOF)) {
+        while ((fscanf(input, "%s", buf) != EOF)) {
             int s_idx = (int)(j % procs);
             if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
             if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
@@ -211,7 +209,7 @@ void parser(FILE *input, FILE *output, int procs)
         int s_idx = 0;
         while ((fgets(buf, 512, read_stream[s_idx]) != NULL)) {
             s_idx = (int)(j % procs);
-            if(fprintf(stdout, "%s", buf) == EOF) errExit("fputs");
+            if(fprintf(output, "%s", buf) == EOF) errExit("fputs");
             ++j;
         }
 
