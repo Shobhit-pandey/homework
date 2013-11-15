@@ -127,6 +127,39 @@ void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[]
     _exit(EXIT_SUCCESS);
 }
 
+/* 
+ * Suppressor
+ */
+void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stream[], FILE *output)  {
+    /*
+     * Round robin distribute words
+     *
+     * For each word in input, parse, and write round robin to pipe.
+     */
+    char buf[512];
+    close_pipes(pipe_out, procs, ALL, WRITE);
+    close_pipes(pipe_in, procs, ALL, ALL);
+
+    /* Read from pipe from sort, to output:(stdout|FILE) */
+    for (int i = 0; i < procs; ++i) {
+        if ((read_stream[i] = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
+    }
+
+    long j = 0;
+    int s_idx = 0;
+    while ((fgets(buf, 512, read_stream[s_idx]) != NULL)) {
+        s_idx = (int)(j % procs);
+        if(fprintf(output, "%s", buf) == EOF) errExit("fputs");
+        ++j;
+    }
+
+    for (int i = 0; i < procs; ++i) {
+        if (fclose(read_stream[i]) == EOF) errExit("fclose");
+    }
+
+    _exit(EXIT_SUCCESS);
+}
+
 /*
  * Supervisor
  */
@@ -136,7 +169,6 @@ void supervisor(FILE *input, FILE *output, int procs)
     int pipe_in[procs][2];
     int pipe_out[procs][2];
 
-    char buf[512];
     FILE *write_stream[procs];
     FILE *read_stream[procs];
 
@@ -201,32 +233,7 @@ void supervisor(FILE *input, FILE *output, int procs)
     switch(cpid = fork()) {
     case -1: errExit("fork");
     case 0:
-        /*
-         * Round robin distribute words
-         *
-         * For each word in input, parse, and write round robin to pipe.
-         */
-        close_pipes(pipe_out, procs, ALL, WRITE);
-        close_pipes(pipe_in, procs, ALL, ALL);
-
-        /* Read from pipe from sort, to output:(stdout|FILE) */
-        for (int i = 0; i < procs; ++i) {
-            if ((read_stream[i] = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
-        }
-
-        long j = 0;
-        int s_idx = 0;
-        while ((fgets(buf, 512, read_stream[s_idx]) != NULL)) {
-            s_idx = (int)(j % procs);
-            if(fprintf(output, "%s", buf) == EOF) errExit("fputs");
-            ++j;
-        }
-
-        for (int i = 0; i < procs; ++i) {
-            if (fclose(read_stream[i]) == EOF) errExit("fclose");
-        }
-
-        _exit(EXIT_SUCCESS);
+        suppressor(pipe_in, pipe_out, procs, read_stream, output);
     default:
         break;
     }
