@@ -201,48 +201,30 @@ void supervisor(FILE *input, FILE *output, int procs)
     init_pipes(pipe_in, procs);
     init_pipes(pipe_out, procs);
 
-    if (input == NULL) {
-        input = stdin;
-    }
+    if (input == NULL) input = stdin;
+    if (output == NULL) output = stdout;
 
-    if (output == NULL) {
-        output = stdout;
-    }
-
-    /*
-     * Parser
-     */
+    /* Parser */
     switch (cpid = fork()) {
     case -1: errExit("fork");
-    case 0:
-        parser(pipe_in, pipe_out, procs, write_stream, input);
-    default:
-        break;
+    case 0: parser(pipe_in, pipe_out, procs, write_stream, input);
+    default: break;
     }
 
-    /*
-     * Sorter
-     */
+    /* Sorter */
     for (int i = 0; i < procs; ++i) {
         switch (cpid = fork()) {
         case -1: errExit("fork");
-        case 0:
-            sorter(pipe_in, pipe_out, procs, i);
-        default:
-            break;
+        case 0: sorter(pipe_in, pipe_out, procs, i);
+        default: break;
         }
     }
 
-
-    /*
-     * Suppressor
-     */
+    /* Suppressor */
     switch(cpid = fork()) {
     case -1: errExit("fork");
-    case 0:
-        suppressor(pipe_in, pipe_out, procs, read_stream, output);
-    default:
-        break;
+    case 0: suppressor(pipe_in, pipe_out, procs, read_stream, output);
+    default: break;
     }
     
     close_pipes(pipe_in, procs, ALL, ALL);
