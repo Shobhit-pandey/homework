@@ -102,7 +102,7 @@ void close_pipes(int arr[][2], int procs, int proc, int end) {
  * Parser
  */
 void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[], FILE *input)  {
-    char buf[512];
+    char buf[64];
     close_pipes(pipe_in, procs, ALL, READ);
     close_pipes(pipe_out, procs, ALL, ALL);
 
@@ -136,7 +136,7 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
      *
      * For each word in input, parse, and write round robin to pipe.
      */
-    char buf[512];
+    char buf[64];
     close_pipes(pipe_out, procs, ALL, WRITE);
     close_pipes(pipe_in, procs, ALL, ALL);
 
@@ -147,7 +147,7 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
 
     long j = 0;
     int s_idx = 0;
-    while ((fgets(buf, 512, read_stream[s_idx]) != NULL)) {
+    while ((fgets(buf, 64, read_stream[s_idx]) != NULL)) {
         s_idx = (int)(j % procs);
         if(fprintf(output, "%s", buf) == EOF) errExit("fputs");
         ++j;
