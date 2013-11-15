@@ -20,6 +20,7 @@
 int main(int argc, char *argv[]);
 void supervisor(FILE *input, FILE *output, int procs);
 void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[], FILE *input);
+void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i);
 void suppressor(int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stream[], FILE *output);
 void close_pipes(int arr[][2], int procs, int proc, int end);
 void init_pipes(int arr[][2], int procs);

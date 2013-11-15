@@ -161,6 +161,31 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
 }
 
 /*
+ * Sorter
+ */
+void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
+    close_pipes(pipe_in, procs, i, WRITE);
+    close_pipes(pipe_out, procs, i, READ);
+
+    /* Reassign sort input FD */
+    if (pipe_in[i][READ] != STDIN_FILENO) {
+        if (dup2(pipe_in[i][READ], STDIN_FILENO) == -1) errExit("dup2");
+        if (close(pipe_in[i][READ]) == -1) errExit("close");
+    }
+
+    /* Reassign sort output FD */
+    if (pipe_out[i][WRITE] != STDOUT_FILENO) {
+        if (dup2(pipe_out[i][WRITE], STDOUT_FILENO) == -1) errExit("dup2");
+        if (close(pipe_out[i][WRITE]) == -1) errExit("close");
+    }
+
+    /* Envoke sort for each child */
+    if ((execlp("sort", "sort", (char *) NULL)) == -1) errExit("execve");
+
+    _exit(EXIT_SUCCESS);
+}
+
+/*
  * Supervisor
  */
 void supervisor(FILE *input, FILE *output, int procs)
@@ -202,25 +227,7 @@ void supervisor(FILE *input, FILE *output, int procs)
         switch (cpid = fork()) {
         case -1: errExit("fork");
         case 0:
-            close_pipes(pipe_in, procs, i, WRITE);
-            close_pipes(pipe_out, procs, i, READ);
-
-            /* Reassign sort input FD */
-            if (pipe_in[i][READ] != STDIN_FILENO) {
-                if (dup2(pipe_in[i][READ], STDIN_FILENO) == -1) errExit("dup2");
-                if (close(pipe_in[i][READ]) == -1) errExit("close");
-            }
-
-            /* Reassign sort output FD */
-            if (pipe_out[i][WRITE] != STDOUT_FILENO) {
-                if (dup2(pipe_out[i][WRITE], STDOUT_FILENO) == -1) errExit("dup2");
-                if (close(pipe_out[i][WRITE]) == -1) errExit("close");
-            }
-
-            /* Envoke sort for each child */
-            if ((execlp("sort", "sort", (char *) NULL)) == -1) errExit("execve");
-
-            _exit(EXIT_SUCCESS);
+            sorter(pipe_in, pipe_out, procs, i);
         default:
             break;
         }
