@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -168,6 +169,65 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
 }
 
 /*
+ * Suppress Loop
+ */
+void suppress_loop(FILE *read_stream[], FILE *output, int procs) {
+    char buf[procs][64];
+
+    int j = 0;
+    int s_idx = 0;
+    int finished_pipes = 0;
+    int pipes_checked = 0;
+    char *min_str;
+
+    /* Initially fill the tmp_buf with proc words. */
+    for (int i = 0; i < procs; ++i) {
+        if (fgets(buf[i], 64, read_stream[i]) == NULL) {
+            buf[i][0] = '\0';
+            ++finished_pipes;
+        }
+    }
+
+    /* Begin suppression */
+    /* Continue reading words until all pipes are empty */
+    while (finished_pipes < procs) {
+        /* Find pipe with smallest word and output, but only if we are
+         * done with the previous word. */
+        if (pipes_checked == 0) {
+            pipes_checked = procs;
+            min_str = buf[0];
+            for (int i = 0; i < procs; ++i) {
+                if (strcmp(buf[i], min_str) < 0) {
+                    min_str = buf[i];
+                }
+                ++i;
+            }
+            /* Remember word, output. */
+            if(fprintf(output, "%s", min_str) == EOF) errExit("fputs");
+        }
+
+        /* Get next word in pipe, if same, throw away, else, next pipe */
+        int cmp = 0;
+        while (pipes_checked > 0) {
+            s_idx = (int)(j % procs);
+            cmp = strcmp(min_str, buf[s_idx]);
+            if (cmp == 0) {
+                if (fgets(buf[s_idx], 64, read_stream[s_idx]) == NULL) {
+                    ++finished_pipes;
+                    ++j;
+                }
+            } else if (cmp > 0) {
+                --pipes_checked;
+                ++j;
+            } else {
+                fprintf(stderr, "Oops! Looks like we didn't find the minimum "
+                                "string correctly.\n");
+            }
+        }
+    }
+}
+
+/*
  * Sorter
  */
 void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
@@ -191,7 +251,6 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
 
     _exit(EXIT_SUCCESS);
 }
-
 
 /*
  * SIGCHLD Handler
