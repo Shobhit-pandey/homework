@@ -144,7 +144,6 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
      *
      * For each word in input, parse, and write round robin to pipe.
      */
-    char buf[64];
     close_pipes(pipe_out, procs, ALL, WRITE);
     close_pipes(pipe_in, procs, ALL, ALL);
 
@@ -153,13 +152,7 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
         if ((read_stream[i] = fdopen(pipe_out[i][READ], "r")) == NULL) errExit("fdopen");
     }
 
-    long j = 0;
-    int s_idx = 0;
-    while ((fgets(buf, 64, read_stream[s_idx]) != NULL)) {
-        s_idx = (int)(j % procs);
-        if(fprintf(output, "%s", buf) == EOF) errExit("fputs");
-        ++j;
-    }
+    suppress_loop(read_stream, output, procs);
 
     for (int i = 0; i < procs; ++i) {
         if (fclose(read_stream[i]) == EOF) errExit("fclose");
@@ -176,54 +169,43 @@ void suppress_loop(FILE *read_stream[], FILE *output, int procs) {
 
     int j = 0;
     int s_idx = 0;
-    int finished_pipes = 0;
+    //int min_idx = -1;
     int pipes_checked = 0;
-    char *min_str;
+    //char min_str[64] = "";
 
-    /* Initially fill the tmp_buf with proc words. */
-    for (int i = 0; i < procs; ++i) {
-        if (fgets(buf[i], 64, read_stream[i]) == NULL) {
-            buf[i][0] = '\0';
-            ++finished_pipes;
-        }
-    }
-
-    /* Begin suppression */
     /* Continue reading words until all pipes are empty */
-    while (finished_pipes < procs) {
-        /* Find pipe with smallest word and output, but only if we are
-         * done with the previous word. */
-        if (pipes_checked == 0) {
-            pipes_checked = procs;
-            min_str = buf[0];
-            for (int i = 0; i < procs; ++i) {
-                if (strcmp(buf[i], min_str) < 0) {
-                    min_str = buf[i];
-                }
-                ++i;
-            }
-            /* Remember word, output. */
-            if(fprintf(output, "%s", min_str) == EOF) errExit("fputs");
+    while (pipes_checked < procs) {
+        s_idx = (int)(j % procs);
+
+        if (fgets(buf[s_idx], 64, read_stream[s_idx]) == NULL) {
+            ++pipes_checked;
+        } else {
+            fprintf(output, "%s", buf[s_idx]);
         }
 
-        /* Get next word in pipe, if same, throw away, else, next pipe */
-        int cmp = 0;
-        while (pipes_checked > 0) {
-            s_idx = (int)(j % procs);
-            cmp = strcmp(min_str, buf[s_idx]);
-            if (cmp == 0) {
-                if (fgets(buf[s_idx], 64, read_stream[s_idx]) == NULL) {
-                    ++finished_pipes;
-                    ++j;
-                }
-            } else if (cmp > 0) {
-                --pipes_checked;
-                ++j;
-            } else {
-                fprintf(stderr, "Oops! Looks like we didn't find the minimum "
-                                "string correctly.\n");
-            }
+        /*
+        if (min_idx == -1) {
+            strncpy(min_str, buf[s_idx], 64);
+            min_idx = s_idx;
         }
+
+        if (strncmp(buf[s_idx], min_str, 64) < 0) {
+            min_idx = s_idx;
+        } else {
+            ++pipes_checked;
+        }
+
+        if (pipes_checked == procs) {
+            strncpy(min_str, buf[min_idx], 64);
+            if (fprintf(output, "%s", min_str) == EOF) errExit("fprintf");
+            if (fgets(buf[min_idx], 64, read_stream[min_idx]) == NULL) {
+                min_idx = -1;
+            }
+            pipes_checked = 0;
+        }
+        */
+
+        ++j;
     }
 }
 
