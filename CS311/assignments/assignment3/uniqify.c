@@ -124,13 +124,13 @@ void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[]
     for (int i = 0; i < procs; ++i) {
         if (fclose(write_stream[i]) == EOF) errExit("fclose");
     }
-    
+
     /* First pipes are now all closed. sort should have recieved it's
      * final input */
     _exit(EXIT_SUCCESS);
 }
 
-/* 
+/*
  * Suppressor
  *
  *  In this assignment words are all alphabetic and case insensitive, with
@@ -163,49 +163,63 @@ void suppressor (int pipe_in[][2], int pipe_out[][2], int procs, FILE *read_stre
 
 /*
  * Suppress Loop
+ *
+ * While there is still input from each pipe
+ *   Find the smallest word.
+ *   Output the word and read in another in it's place
+ *   For each pipe, remove all duplicates of the word.
+ *   Repeat.
  */
 void suppress_loop(FILE *read_stream[], FILE *output, int procs) {
     char buf[procs][64];
 
-    int j = 0;
-    int s_idx = 0;
-    //int min_idx = -1;
-    int pipes_checked = 0;
-    //char min_str[64] = "";
+    int min_idx = -1;
+    int pipes_finished = 0;
+    char min_str[64] = "";
+    char closed_pipes[procs];
+
+    /* Fill all the buffers and initialize closed_pipes arr */
+    for (int i = 0; i < procs; ++i) {
+        closed_pipes[i] = 0;
+        if (fgets(buf[i], 64, read_stream[i]) == NULL) {
+            closed_pipes[i] = 1;
+            ++pipes_finished;
+        }
+
+    }
 
     /* Continue reading words until all pipes are empty */
-    while (pipes_checked < procs) {
-        s_idx = (int)(j % procs);
-
-        if (fgets(buf[s_idx], 64, read_stream[s_idx]) == NULL) {
-            ++pipes_checked;
-        } else {
-            fprintf(output, "%s", buf[s_idx]);
-        }
-
-        /*
-        if (min_idx == -1) {
-            strncpy(min_str, buf[s_idx], 64);
-            min_idx = s_idx;
-        }
-
-        if (strncmp(buf[s_idx], min_str, 64) < 0) {
-            min_idx = s_idx;
-        } else {
-            ++pipes_checked;
-        }
-
-        if (pipes_checked == procs) {
-            strncpy(min_str, buf[min_idx], 64);
-            if (fprintf(output, "%s", min_str) == EOF) errExit("fprintf");
-            if (fgets(buf[min_idx], 64, read_stream[min_idx]) == NULL) {
-                min_idx = -1;
+    while (pipes_finished < procs) {
+        /* Find smallest word in pipes */
+        for (int i = 0; i < procs; ++i) {
+            // Skip closed pipes
+            if (closed_pipes[i] == 1) continue;
+            if (min_idx == -1) min_idx = i;
+            if (strncmp(buf[i], buf[min_idx], 64) < 0) {
+                min_idx = i;
             }
-            pipes_checked = 0;
         }
-        */
 
-        ++j;
+        strncpy(min_str, buf[min_idx], 64);
+        fprintf(output, "%s", min_str);
+
+        // If that was the last word in the pipe...
+        if (fgets(buf[min_idx], 64, read_stream[min_idx]) == NULL) {
+            closed_pipes[min_idx] = 1;
+            ++pipes_finished;
+        }
+
+        // Remove duplicates from every pipe
+        for (int i = 0; i < procs; ++i) {
+            if (closed_pipes[i] == 1) continue;
+            while (strncmp(buf[i], min_str, 64) == 0) {
+                if (fgets(buf[i], 64, read_stream[i]) == NULL) {
+                    closed_pipes[i] = 1;
+                    ++pipes_finished;
+                    break;
+                }
+            }
+        }
     }
 }
 
