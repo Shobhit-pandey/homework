@@ -1,6 +1,6 @@
 TEX     = write-up
 SRC     = uniqify
-CC      = gcc
+CC      = icc
 CFLAGS  = -std=c99 -Wall
 
 default: uniqify
