@@ -256,7 +256,6 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
  *
  * Used & modified from TLPI pg.557 (Listing 26-5).
  */
-/*
 static void sigchldHandler(int sig)
 {
     int savedErrno = errno;
@@ -272,7 +271,6 @@ static void sigchldHandler(int sig)
 
     errno = savedErrno;
 }
-*/
 
 /*
  * Supervisor
@@ -301,26 +299,26 @@ void supervisor(FILE *input, FILE *output, int procs)
     if (output == NULL) output = stdout;
 
     /* Take from TLPI */
-    //int sigCnt = 0;
+    int sigCnt = 0;
     numLiveChildren = (procs-1+2);
 
-    //sigset_t blockMask;
-    //sigset_t emptyMask;
-    //struct sigaction sa = {
-    //    .sa_flags = 0,
-    //    .sa_handler = sigchldHandler
-    //};
+    sigset_t blockMask;
+    sigset_t emptyMask;
+    struct sigaction sa = {
+        .sa_flags = 0,
+        .sa_handler = sigchldHandler
+    };
 
-    //sigemptyset(&sa.sa_mask);
+    sigemptyset(&sa.sa_mask);
 
-    //if (sigaction(SIGCHLD, &sa, NULL) == -1) errExit("sigaction");
-    ///* Block SIGCHLD to prevent its delivery if a child terminates
-    // * before the parent commences the sigsuspend() loop below */
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) errExit("sigaction");
+    /* Block SIGCHLD to prevent its delivery if a child terminates
+     * before the parent commences the sigsuspend() loop below */
 
-    //sigemptyset(&blockMask);
-    //sigaddset(&blockMask, SIGCHLD);
+    sigemptyset(&blockMask);
+    sigaddset(&blockMask, SIGCHLD);
 
-    //if (sigprocmask(SIG_SETMASK, &blockMask, NULL) == -1) errExit("sigprocmask");
+    if (sigprocmask(SIG_SETMASK, &blockMask, NULL) == -1) errExit("sigprocmask");
     /* End reference */
 
     /* Parser */
@@ -351,11 +349,11 @@ void supervisor(FILE *input, FILE *output, int procs)
     
     /* Wait on N process
      *   or SIGCHLD all */
-    //sigemptyset(&emptyMask);
-    //while (numLiveChildren > 0) {
-    //    if (sigsuspend(&emptyMask) == -1 && errno != EINTR) errExit("sigsuspend");
-    //    sigCnt++;
-    //}
+    sigemptyset(&emptyMask);
+    while (numLiveChildren > 0) {
+        if (sigsuspend(&emptyMask) == -1 && errno != EINTR) errExit("sigsuspend");
+        sigCnt++;
+    }
 
     for(int i = 0; i < (procs+2); ++i) {
         if (wait(NULL) == -1) errExit("wait");
