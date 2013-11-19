@@ -113,11 +113,14 @@ void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[]
         if ((write_stream[i] = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
     }
 
+    /* http://stackoverflow.com/questions/15865002/
+     * removing-special-characters-from-fscanf-string-in-c */
     long j = 0;
-    while ((fscanf(input, "%s", buf) != EOF)) {
+    while ((fscanf(input, "%[a-zA-Z]", buf) != EOF)) {
         int s_idx = (int)(j % procs);
         if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
         if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
+        fscanf(input, "%[^a-zA-Z]", buf);
         ++j;
     }
 
