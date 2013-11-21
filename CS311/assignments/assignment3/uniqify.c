@@ -113,11 +113,14 @@ void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[]
         if ((write_stream[i] = fdopen(pipe_in[i][WRITE], "a")) == NULL) errExit("fdopen");
     }
 
+    /* http://stackoverflow.com/questions/15865002/
+     * removing-special-characters-from-fscanf-string-in-c */
     long j = 0;
-    while ((fscanf(input, "%s", buf) != EOF)) {
+    while ((fscanf(input, "%[a-zA-Z]", buf) != EOF)) {
         int s_idx = (int)(j % procs);
         if(fputs(buf, write_stream[s_idx]) == EOF) errExit("fputs");
         if(fputs("\n", write_stream[s_idx]) == EOF) errExit("fputs");
+        fscanf(input, "%[^a-zA-Z]", buf);
         ++j;
     }
 
@@ -249,24 +252,15 @@ void sorter(int pipe_in[][2], int pipe_out[][2], int procs, int i) {
 }
 
 /*
- * SIGCHLD Handler
+ * SIG Handler
  *
  * Used & modified from TLPI pg.557 (Listing 26-5).
  */
-static void sigchldHandler(int sig)
+static void sigHandler(int sig)
 {
-    int savedErrno = errno;
-    pid_t childPid;
-
-    while ((childPid = waitpid(-1, NULL, WNOHANG)) > 0) {
-        numLiveChildren--;
-    }
-    if (childPid == -1 && errno != ECHILD) {
-        perror("waitpid");
-        _exit(EXIT_FAILURE);
-    }
-
-    errno = savedErrno;
+    /* Just propogate signal to children */
+    kill(0, SIGHUP);
+    exit(EXIT_FAILURE);
 }
 
 /*
@@ -276,8 +270,6 @@ static void sigchldHandler(int sig)
  * signals. This requires the installation of a signal handler for each of
  * these three signals. Ensure you do this via sigaction, rather than
  * signal. Also, ensure you issue QUIT signals to all children, as well.*
- *
- * Catch SIGCHLD and wait
  */
 void supervisor(FILE *input, FILE *output, int procs)
 {
@@ -295,28 +287,15 @@ void supervisor(FILE *input, FILE *output, int procs)
     if (input == NULL) input = stdin;
     if (output == NULL) output = stdout;
 
-    /* Take from TLPI */
-    int sigCnt = 0;
-    numLiveChildren = (procs-1+2);
-
-    sigset_t blockMask;
-    sigset_t emptyMask;
     struct sigaction sa = {
         .sa_flags = 0,
-        .sa_handler = sigchldHandler
+        .sa_handler = sigHandler
     };
-
     sigemptyset(&sa.sa_mask);
 
-    if (sigaction(SIGCHLD, &sa, NULL) == -1) errExit("sigaction");
-    /* Block SIGCHLD to prevent its delivery if a child terminates
-     * before the parent commences the sigsuspend() loop below */
-
-    sigemptyset(&blockMask);
-    sigaddset(&blockMask, SIGCHLD);
-
-    if (sigprocmask(SIG_SETMASK, &blockMask, NULL) == -1) errExit("sigprocmask");
-    /* End reference */
+    if (sigaction(SIGQUIT, &sa, NULL) == -1) errExit("sigaction");
+    if (sigaction(SIGINT, &sa, NULL) == -1) errExit("sigaction");
+    if (sigaction(SIGHUP, &sa, NULL) == -1) errExit("sigaction");
 
     /* Parser */
     switch (cpid = fork()) {
@@ -344,14 +323,7 @@ void supervisor(FILE *input, FILE *output, int procs)
     close_pipes(pipe_in, procs, ALL, ALL);
     close_pipes(pipe_out, procs, ALL, ALL);
     
-    /* Wait on N process
-     *   or SIGCHLD all */
-    sigemptyset(&emptyMask);
-    while (numLiveChildren > 0) {
-        if (sigsuspend(&emptyMask) == -1 && errno != EINTR) errExit("sigsuspend");
-        sigCnt++;
-    }
-
+    /* Wait on N+2 process */
     for(int i = 0; i < (procs+2); ++i) {
         if (wait(NULL) == -1) errExit("wait");
     }

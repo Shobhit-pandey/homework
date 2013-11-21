@@ -17,6 +17,8 @@
 
 #define ALL -1
 
+void psignal(int sig, const char *s);
+
 int main(int argc, char *argv[]);
 void supervisor(FILE *input, FILE *output, int procs);
 void parser(int pipe_in[][2], int pipe_out[][2], int procs, FILE *write_stream[], FILE *input);

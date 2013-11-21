@@ -1,13 +1,13 @@
 TEX     = write-up
-SRC     = uniqify
-CC      = icc
+CC      = gcc
+LDFLAGS = -lpthread
 CFLAGS  = -std=c99 -Wall
 
-default: uniqify
+default: happy
 
 .PHONY: help clean all default
 
-all: pdf uniqify
+all: pdf happy
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -24,5 +24,11 @@ pdf: ${TEX}.tex
 	dvips -R -Poutline -t letter ${TEX}.dvi -o ${TEX}.ps
 	ps2pdf ${TEX}.ps
 
-uniqify: uniqify.c
-	$(CC) $(CFLAGS) $(SRC).c -o $(SRC)
+happy: threaded.o shared.o main.c main.h
+	$(CC) $(CFLAGS) $(LDFLAGS) main.c -o bin/happy
+
+threaded.o: threaded.c threaded.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -c threaded.c
+
+shared.o: shared.c shared.h
+	$(CC) $(CFLAGS) -c shared.c
