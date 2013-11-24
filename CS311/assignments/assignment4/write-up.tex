@@ -58,7 +58,7 @@ number of threads or process, the bitmap will be copied, and they will
 be allowed to continue onto computing happiness. This synchronization is
 needed due to happy numbers using the same bitmap.
 
-\subsection{Signals \& Implicit Sharing}
+\subsection{Threads \& Implicit Sharing}
 Because a bitmap backed is a single number, it would be extremely wasteful to
 lock the number. Instead, I will setup \emph{MAX\_INT (or MAX\_LONG)/num
 threads} , partitions across the number. Two locked partions will be
