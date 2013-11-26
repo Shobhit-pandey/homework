@@ -7,12 +7,9 @@
 
 #include "bitmap.h"
 
-//#define MAX (UINT_MAX)
-//#define MAX 100
-
 static long MAX;
 static uint8_t *bitarray;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t *mutexes;
 
 void *sieve(void *k)
 {
@@ -21,16 +18,15 @@ void *sieve(void *k)
     for (long i = 2; i < ceil(sqrt(MAX)); ++i) {
         // Mark all multiples of the number
         if (!BITTEST(bitarray, i)) {
-            ret = pthread_mutex_lock(&mutex);
-            if (ret != 0) errExit("pthread_mutex_lock"); 
-
             for(long j = i + i; 0 < j && j < MAX; j += i) {
-                //bitarray[BITSLOT(j)]
-                BITSET(bitarray, j);
-            }
+                ret = pthread_mutex_lock(&mutexes[BITSLOT(j)]);
+                if (ret != 0) errExit("pthread_mutex_lock"); 
 
-            ret = pthread_mutex_unlock(&mutex);
-            if (ret != 0) errExit("pthread_mutex_lock"); 
+                BITSET(bitarray, j);
+
+                ret = pthread_mutex_unlock(&mutexes[BITSLOT(j)]);
+                if (ret != 0) errExit("pthread_mutex_lock"); 
+            }
         }
     }
 
@@ -48,12 +44,20 @@ int main(int argc, char **argv)
     pthread_t *threads = (pthread_t *) malloc(NUM_THREADS * sizeof(pthread_t));
     if (threads == 0) errExit("malloc threads");
 
+    mutexes = (pthread_mutex_t *) malloc( BITNSLOTS(MAX) * sizeof(pthread_mutex_t));
+    if (mutexes == 0) errExit("malloc mutexes");
+
     fprintf(stderr, "BITNSLOTS = %ld\n", (long) BITNSLOTS(MAX));
 
     bitarray = (uint8_t *) malloc( BITNSLOTS(MAX) * sizeof(uint8_t));
     if (bitarray == 0) errExit("malloc bitarray");
 
     memset(bitarray, 0, BITNSLOTS(MAX));
+
+    for (i = 0; i < BITNSLOTS(MAX); ++i) {
+        ret = pthread_mutex_init(&mutexes[i], NULL);
+        if (ret != 0) errExit("pthread_mutex_init");
+    }
 
     for (i = 0; i < NUM_THREADS; ++i) {
         ret = pthread_create(&threads[i],
@@ -68,6 +72,11 @@ int main(int argc, char **argv)
         if (ret != 0) errExit("pthread_join");
     }
 
+    for (i = 0; i < BITNSLOTS(MAX); ++i) {
+        ret = pthread_mutex_destroy(&mutexes[i]);
+        if (ret != 0) errExit("pthread_mutex_destroy");
+    }
+
     FILE *file = fopen("output.txt", "w");
     for (i = 2; i < MAX; ++i) {
         if(!BITTEST(bitarray, i)) {
@@ -76,6 +85,7 @@ int main(int argc, char **argv)
     }
 
     free(threads);
+    free(mutexes);
     free(bitarray);
 
     return 0;
