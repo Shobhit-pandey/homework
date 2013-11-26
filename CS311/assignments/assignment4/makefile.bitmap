@@ -1,0 +1,2 @@
+default:
+	gcc -Wall -std=c99 -g bitmap.c -o bitthread -lpthread -lm
