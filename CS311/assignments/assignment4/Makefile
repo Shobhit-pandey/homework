@@ -1,7 +1,11 @@
 TEX     = write-up
 CC      = gcc
-LDFLAGS = -lpthread
-CFLAGS  = -std=c99 -Wall
+LDFLAGS = -lpthread -lm -lrt
+CFLAGS  = -std=c99 -Wall -g
+TARGET  = sieve
+INCLUDE = shared.h threaded.h main.h
+OBJECTS = shared.o threaded.o
+SOURCE  = shared.c threaded.c main.c
 
 default: happy
 
@@ -24,11 +28,11 @@ pdf: ${TEX}.tex
 	dvips -R -Poutline -t letter ${TEX}.dvi -o ${TEX}.ps
 	ps2pdf ${TEX}.ps
 
-happy: threaded.o shared.o main.c main.h
-	$(CC) $(CFLAGS) $(LDFLAGS) main.c -o bin/happy
+happy: $(OBJECTS) $(INCLUDES)
+	$(CC) $(CFLAGS) $(SOURCE) -o $(TARGET) $(LDFLAGS)
 
-threaded.o: threaded.c threaded.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -c threaded.c
+threaded.o: threaded.h
+	$(CC) $(CFLAGS) $(SOURCE) -c threaded.c $(LDFLAGS)
 
 shared.o: shared.c shared.h
-	$(CC) $(CFLAGS) -c shared.c
+	$(CC) $(CFLAGS) $(SOURCE) -c shared.c $(LDFLAGS)

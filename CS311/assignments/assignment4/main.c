@@ -15,17 +15,23 @@
 #include "threaded.h"
 #include "shared.h"
 
+void errExit(const char *func) {
+    perror(func);
+    exit(EXIT_FAILURE);
+}
+
 extern char *optarg;
 extern int optind;
 extern int opterr;
 extern int optopt;
 
-const char *usage = "Usage: %s [-o output] [-n processes] file\n\n"
-                    "Uniqify takes a input file, or stdin, and "
-                    "sorts the words.\n\n"
-                    "  -n\tThe number of sorting processes. [1]\n"
-                    "  -o\tThe output file to store the sorted values "
-                    "in. [stdout]\n";
+const char *usage = "Usage: %s  [-s|-p] [-o output] [-n procs/threads] N\n\n"
+                    "Find all primes up to N using threads, or "
+                    "shared memory.\n\n"
+                    "  -n\tThe number of processes or threads. [1]\n"
+                    "  -o\tThe output file to store primes in. [stdout]\n"
+                    "  -s\tUse shared memory and processesto find primes\n"
+                    "  -p\tUse posix threads find primes\n";
 
 /*
  * Main
@@ -34,12 +40,21 @@ const char *usage = "Usage: %s [-o output] [-n processes] file\n\n"
 int main(int argc, char *argv[])
 {
     int procs = 1;
+    int flags = 0;
+    long max_prime = 10;
+    FILE *output = NULL;
     int opt;
 
-    while ((opt = getopt(argc, argv, "n:o:h")) != -1) {
+    while ((opt = getopt(argc, argv, "n:o:hsp")) != -1) {
         switch (opt) {
+        case 's':
+            flags |= F_SHARED;
+            break;
+        case 'p':
+            flags |= F_THREADED;
+            break;
         case 'o':
-            //output = fopen(optarg, "w");
+            output = fopen(optarg, "w");
             break;
         case 'n':
             sscanf(optarg, "%d", &procs);
@@ -54,14 +69,20 @@ int main(int argc, char *argv[])
     }
 
     if (optind < argc) {
-        //input = fopen(argv[optind], "r");
-        //if (input == NULL)
-        errExit("fopen");
+        sscanf(argv[optind], "%ld", &max_prime);
+    }
+
+    if ((flags & F_THREADED) && (flags & F_SHARED)) {
+        fprintf(stderr, usage, argv[0]);
+        exit(EXIT_FAILURE);   
     }
 
     /* Threaded or Shared */
-    run_threaded();
-    run_shared();
+    if (flags & F_THREADED) {
+        run_threaded();
+    } else if (flags & F_SHARED) {
+        run_shared();
+    }
 
     exit(EXIT_SUCCESS);
 }

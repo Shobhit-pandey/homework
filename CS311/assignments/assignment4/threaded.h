@@ -1,12 +1,19 @@
 /*
- * CS311: Project 3 - Happy Primes
- *
- * Author: Trevor Bramwell
+ * http://c-faq.com/misc/bitsets.html
  */
 
-#ifndef THREADED
-#define THREADED
+#ifndef _THREADED_H
+#define _THREADED_H
 
-void run_threads(void);
+#include <limits.h>     /* for CHAR_BIT */
+
+#define BITMASK(b) (1 << ((b) % CHAR_BIT)) /* Index of b in byte */
+#define BITSLOT(b) ((b) / CHAR_BIT) /* Index of byte containing b in bitmap */
+#define BITSET(a, b) ((a)[BITSLOT(b)] |= BITMASK(b))
+#define BITCLEAR(a, b) ((a)[BITSLOT(b)] &= ~BITMASK(b))
+#define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
+#define BITNSLOTS(nb) ((nb) / CHAR_BIT)
+
+void run_threaded(void);
 
 #endif
