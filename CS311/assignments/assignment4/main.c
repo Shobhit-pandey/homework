@@ -31,7 +31,7 @@ const char *usage = "Usage: %s  [-s|-p] [-o output] [-n procs/threads] N\n\n"
                     "  -n\tThe number of processes or threads. [1]\n"
                     "  -o\tThe output file to store primes in. [stdout]\n"
                     "  -s\tUse shared memory and processesto find primes\n"
-                    "  -p\tUse posix threads find primes\n";
+                    "  -p\tUse posix threads find primes [10]\n";
 
 /*
  * Main
