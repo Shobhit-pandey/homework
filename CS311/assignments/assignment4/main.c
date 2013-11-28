@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     if (flags & F_THREADED) {
         threaded_main(max, procs, output);
     } else if (flags & F_SHARED) {
-        run_shared();
+        shared_main(max, procs, output);
     }
 
     exit(EXIT_SUCCESS);

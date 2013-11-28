@@ -45,13 +45,13 @@ void *sieve(void *k)
     return NULL;
 }
 
-int threaded_main(long max_prime, long procs, FILE* output)
+int threaded_main(long max, long procs, FILE* output)
 {
     int ret;
     long i = 0;
 
     NUM_THREADS = procs;
-    MAX = max_prime;
+    MAX = max;
 
     if (output == NULL) {
         output = stdout;

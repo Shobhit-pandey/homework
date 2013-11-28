@@ -14,7 +14,7 @@
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb) / CHAR_BIT)
 
-int threaded_main(long max_prime, long procs, FILE* output);
+int threaded_main(long max, long procs, FILE* output);
 void *sieve(void *k);
 
 #endif
