@@ -25,13 +25,15 @@ extern int optind;
 extern int opterr;
 extern int optopt;
 
-const char *usage = "Usage: %s  [-s|-p] [-o output] [-n procs/threads] N\n\n"
+const char *usage = "Usage: %s -s [-o output] [-n procs/threads] N\n"
+                    "       %s -p [-o output] [-n procs/threads] N\n\n"
                     "Find all primes up to N using threads, or "
                     "shared memory.\n\n"
                     "  -n\tThe number of processes or threads. [1]\n"
                     "  -o\tThe output file to store primes in. [stdout]\n"
-                    "  -s\tUse shared memory and processesto find primes\n"
-                    "  -p\tUse posix threads find primes [10]\n";
+                    "  -s\tUse shared memory and processes to find primes\n"
+                    "  -p\tUse posix threads and implicit sharing to "
+                    "find primes\n";
 
 /*
  * Main
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
 {
     long procs = 1;
     int flags = 0;
-    long max = 10;
+    long max = 0;
     FILE *output = NULL;
     int opt;
 
@@ -60,10 +62,10 @@ int main(int argc, char *argv[])
             sscanf(optarg, "%ld", &procs);
             break;
         case 'h':
-            printf(usage, argv[0]);
+            printf(usage, argv[0], argv[0]);
             exit(EXIT_SUCCESS);
         default: /* '?' */
-            fprintf(stderr, usage, argv[0]);
+            fprintf(stderr, usage, argv[0], argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -71,13 +73,16 @@ int main(int argc, char *argv[])
     if (optind < argc) {
         sscanf(argv[optind], "%ld", &max);
     } else {
-        fprintf(stderr, usage, argv[0]);
+        fprintf(stderr, usage, argv[0], argv[0]);
         exit(EXIT_FAILURE);
     }
 
     if ((flags & F_THREADED) && (flags & F_SHARED)) {
-        fprintf(stderr, usage, argv[0]);
+        fprintf(stderr, usage, argv[0], argv[0]);
         exit(EXIT_FAILURE);   
+    } else if ((flags & F_THREADED) == 0 && (flags & F_SHARED) == 0) {
+        fprintf(stderr, "Either -p or -s required.\n");
+        exit(EXIT_FAILURE);
     }
 
     /* Threaded or Shared */
