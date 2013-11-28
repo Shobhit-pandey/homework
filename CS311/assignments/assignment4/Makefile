@@ -32,7 +32,7 @@ happy: $(OBJECTS) $(INCLUDES)
 	$(CC) $(CFLAGS) $(SOURCE) -o $(TARGET) $(LDFLAGS)
 
 threaded.o: threaded.h
-	$(CC) $(CFLAGS) threaded.c -c threaded.o $(LDFLAGS)
+	$(CC) $(CFLAGS) threaded.c -c threaded.o
 
 shared.o: shared.h
-	$(CC) $(CFLAGS) shared.c -c shared.o $(LDFLAGS)
+	$(CC) $(CFLAGS) shared.c -c shared.o
