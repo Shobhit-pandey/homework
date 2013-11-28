@@ -14,6 +14,6 @@
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb) / CHAR_BIT)
 
-void run_threaded(void);
+int threaded_main(long max_prime, long procs, FILE* output);
 
 #endif

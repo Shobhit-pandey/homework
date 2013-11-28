@@ -39,7 +39,7 @@ const char *usage = "Usage: %s  [-s|-p] [-o output] [-n procs/threads] N\n\n"
  */
 int main(int argc, char *argv[])
 {
-    int procs = 1;
+    long procs = 1;
     int flags = 0;
     long max_prime = 10;
     FILE *output = NULL;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
             output = fopen(optarg, "w");
             break;
         case 'n':
-            sscanf(optarg, "%d", &procs);
+            sscanf(optarg, "%ld", &procs);
             break;
         case 'h':
             printf(usage, argv[0]);
@@ -70,6 +70,9 @@ int main(int argc, char *argv[])
 
     if (optind < argc) {
         sscanf(argv[optind], "%ld", &max_prime);
+    } else {
+        fprintf(stderr, usage, argv[0]);
+        exit(EXIT_FAILURE);
     }
 
     if ((flags & F_THREADED) && (flags & F_SHARED)) {
@@ -79,7 +82,7 @@ int main(int argc, char *argv[])
 
     /* Threaded or Shared */
     if (flags & F_THREADED) {
-        run_threaded();
+        threaded_main(max_prime, procs, output);
     } else if (flags & F_SHARED) {
         run_shared();
     }

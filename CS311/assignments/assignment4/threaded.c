@@ -9,14 +9,10 @@
 #include "threaded.h"
 
 static long MAX;
-static int NUM_THREADS;
+static long NUM_THREADS;
 static uint8_t *bitarray;
 static long* working;
 pthread_mutex_t *mutexes;
-
-void run_threaded(void) {
-    printf("Hello, Threads!\n");
-}
 
 void *sieve(void *k)
 {
@@ -49,13 +45,17 @@ void *sieve(void *k)
     return NULL;
 }
 
-int threads_main(int argc, char **argv)
+int threaded_main(long max_prime, long procs, FILE* output)
 {
     int ret;
     long i = 0;
 
-    NUM_THREADS = atoi(argv[1]);
-    MAX = atoi(argv[2]);
+    NUM_THREADS = procs;
+    MAX = max_prime;
+
+    if (output == NULL) {
+        output = stdout;
+    }
 
     pthread_t *threads = (pthread_t *) malloc(NUM_THREADS * sizeof(pthread_t));
     if (threads == 0) errExit("malloc threads");
@@ -70,7 +70,7 @@ int threads_main(int argc, char **argv)
     mutexes = (pthread_mutex_t *) malloc((BITNSLOTS(MAX)+1) * sizeof(pthread_mutex_t));
     if (mutexes == 0) errExit("malloc mutexes");
 
-    fprintf(stderr, "BITNSLOTS = %ld\n", (long) BITNSLOTS(MAX));
+    //fprintf(stderr, "BITNSLOTS = %ld\n", (long) BITNSLOTS(MAX));
 
     bitarray = (uint8_t *) malloc( BITNSLOTS(MAX) * sizeof(uint8_t));
     if (bitarray == 0) errExit("malloc bitarray");
@@ -100,10 +100,9 @@ int threads_main(int argc, char **argv)
         if (ret != 0) errExit("pthread_mutex_destroy");
     }
 
-    FILE *file = fopen("output.txt", "w");
     for (i = 2; i < MAX; ++i) {
         if(!BITTEST(bitarray, i)) {
-            fprintf(file, "%ld\n", i);
+            fprintf(output, "%ld\n", i);
         }
     }
 
