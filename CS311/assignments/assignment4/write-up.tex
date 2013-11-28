@@ -84,8 +84,27 @@ generation and happiness, a copy of the bitmap will be made and saved
 for later output.
 
 
-\subsection{Deviation}
+\section{Deviation}
+The first part of my design, converting my bitmap, was solved while
+looking for generic bitmap operations online. I came across not only a
+bitmap implementation, but also the sieve of eratosthenes using it at
+the same time. I have reused both pieces of code, though modified the
+sieve quite a bit to deal with mutexes, and to live in a thread.
 
+Because of time constraints, I was not able to get to computing 'happy
+numbers'. So there was no need to have integer for signaling the
+completion of all prime computation threads.
+
+\subsection{Threads}
+Originally I planned for one mutex per (max number/threads). Though I
+still feel this is the correct approach, each attempt resulted in more
+segfaults than progress. Thus I opted for byte level locking, which
+though uses more memory, worked for the majority of my inputs. Having a
+single lock was asinine, since it enabled only one thread to work at a
+time. This was bad because the nature of the sieve results in only a
+few thread collisions.
+
+\subsection{Shared Memory}
 
 \section{Questions}
 \begin{description}
@@ -93,13 +112,18 @@ for later output.
 
          The main point of this assignment is for us to gain experience
          with race conditions, use pthreads, shared memory, and
-         synchronization constructs. Basically have first hand
-         experience writing concurrent code.
+         synchronization constructs. Also to learn the trade offs
+         between memory, speed, and locking.
 
   \item  How did you ensure your solution was correct? Testing details, for
          instance. This section should be very thorough.
 
   \item  What did you learn?
+
+         Finding the right number of locks needed for absolute
+         concurrancy, and least memory usage is extremely hard. There
+         seems to not be a hard and fast rule besides ensuring all
+         threads can run at once.
 
 \end{description}
 
