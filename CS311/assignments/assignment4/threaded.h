@@ -1,5 +1,5 @@
 /*
- * http://c-faq.com/misc/bitsets.html
+ * Bitmap used from: http://c-faq.com/misc/bitsets.html
  */
 
 #ifndef _THREADED_H
