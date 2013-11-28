@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
     long procs = 1;
     int flags = 0;
-    long max_prime = 10;
+    long max = 10;
     FILE *output = NULL;
     int opt;
 
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     }
 
     if (optind < argc) {
-        sscanf(argv[optind], "%ld", &max_prime);
+        sscanf(argv[optind], "%ld", &max);
     } else {
         fprintf(stderr, usage, argv[0]);
         exit(EXIT_FAILURE);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
     /* Threaded or Shared */
     if (flags & F_THREADED) {
-        threaded_main(max_prime, procs, output);
+        threaded_main(max, procs, output);
     } else if (flags & F_SHARED) {
         run_shared();
     }
