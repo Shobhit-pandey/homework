@@ -1,0 +1,157 @@
+commit 7a9174ad9bbd03779cceec1549eee66750f871f8
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 23:34:28 2013 -0800
+
+    CS311: Add note on bitmap source.
+
+commit 1bdf976b901c55dd7576e376912df5c2f1b145df
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 23:30:36 2013 -0800
+
+    CS311: Add work for shared mem.
+
+commit 4b2f008f351b520bed70eb411b44beb0adb6aa2c
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:47:47 2013 -0800
+
+    CS311: Update references to max number.
+    
+    Add shared_main header and delaration.
+
+commit 95086675921385b3505f784bd9d22b87fce23b29
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:46:09 2013 -0800
+
+    CS311: Don't try to compile object files.
+
+commit f684b392669f31582b00c9d3c77aa62909ae0e8b
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:43:08 2013 -0800
+
+    CS311: Fix usage string and error outputing.
+
+commit c72ffcf0bbc9ffdbcbb2953f4d3a03c0147f6a18
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:36:31 2013 -0800
+
+    CS311: Add default help for threads.
+
+commit 96b1274b3c3044a15a6ab9a935d9bc0c38661884
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:34:24 2013 -0800
+
+    CS311: Remove linking from object compilation.
+
+commit df0111974226b9a16ce103dbecf6a58931aa25e3
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:33:35 2013 -0800
+
+    CS311: Add header for threaded sieve to header.
+
+commit 209dc4dc8c44732ef82ace6cb5abe4df8143d35a
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:33:12 2013 -0800
+
+    CS311: Rename 'max_prime' to 'max' in main.
+
+commit cbc87ee863986a0775869e6d31039be9fd2c49e4
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 22:28:28 2013 -0800
+
+    CS311: Add part of deviation section.
+
+commit 11dd480764db84201273f7c560e35aea1fbaa773
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 21:21:27 2013 -0800
+
+    CS311: Update main to pass args to threaded.
+
+commit 7c4a3079f72f8e8f4d760ad6596a6cef188ba7cf
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 27 09:23:41 2013 -0800
+
+    CS311: Rename bitmap, update Makefile, start on main
+
+commit b90c9f75ea1585723dacddd733f3f716f0c688f3
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Nov 26 22:34:14 2013 -0800
+
+    CS311: Don't do extra work.
+    
+    Keeps track of sieve elements, and checks to make sure there aren't any
+    multiples already being checked.
+
+commit 1cc6022e2b0570863d3d2a6b6a3793ecef390530
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Nov 26 02:15:58 2013 -0800
+
+    CS311: Do byte level locking.
+
+commit 7e9a44e96f8e6bec5e3fe0b8af90bb663eacb2dd
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Tue Nov 26 01:15:32 2013 -0800
+
+    CS311: Fix issue with integer overflow.
+    
+    Add mutex locking for whole unsigned int.
+
+commit 5bcf63cb35c684a34507a522f9c892a66147d385
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Nov 25 09:28:06 2013 -0800
+
+    CS311: Initial threaded version.
+    
+    Currently doesn't continue adding threads.
+
+commit 929fb742dfbc92fb59fc2a375c508046496bd247
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Mon Nov 25 09:10:02 2013 -0800
+
+    CS311: Add pthread and shmem examples.
+
+commit 2b2b972c2ed7993efb35a6b519107a0b0abc41b2
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sun Nov 24 18:08:46 2013 -0800
+
+    CS311: Add Sieve implementation w/bitmap from c-faq.
+
+commit e93a10d01b315be572b6cfc52fba72a376f92018
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sun Nov 24 00:34:41 2013 -0800
+
+    CS311: Typo in writeup.
+    
+    Should say 'Threads' not 'Signals'
+
+commit 23b4835ba646324d96b3a24e93c4fc5b3a6df9be
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Nov 23 22:56:12 2013 -0800
+
+    CS311: Explicitly ignore object, log, and aux files.
+
+commit 62ef527ff34d821e93971cab5a7ecb775f0513eb
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Nov 23 22:55:58 2013 -0800
+
+    CS311: Remove object files.
+
+commit abc501fdfaca67027bb88d47bbf761b4a516753f
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Sat Nov 23 22:55:12 2013 -0800
+
+    CS311: Add write design before starting project.
+    
+    * Included original sieve code
+
+commit b3cfc89a4147569dab5507eee9ff27c6c04c6867
+Merge: 5934c66 92055e3
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Thu Nov 21 00:04:50 2013 -0800
+
+    Merge branch 'master' of github.com:bramwelt/homework
+
+commit 92055e3882e664cf4b2e8ec85cb3157b32984853
+Author: Trevor Bramwell <trevor@bramwell.net>
+Date:   Wed Nov 20 08:40:44 2013 -0800
+
+    CS311: Initial Commit of Assignment 4.
