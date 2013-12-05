@@ -1,5 +1,41 @@
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
+#include <inttypes.h>
+
+/* Profile determines the number of operations that can be performed in
+ * a matter of 15 seconds */
+int profile(void)
+{
+    time_t start;
+    time_t end;
+    time_t diff;
+
+	int j = 12345;
+    float max = 100000.0;
+	volatile int k = 0;
+
+    do {
+        start = time(NULL);
+        for (int i = 1; i < max; ++i) {
+            k = j % i;
+        }
+        end = time(NULL);
+        diff = (time_t) (end - start);
+        if (diff <= 1) {
+            max *= 10;
+        } else if (diff < 15) {
+            max *= (float)(15/(float)diff);
+        } else if (diff == 16) {
+            max -= 100000;
+        } else if (diff > 15) {
+            max /= 2.0;
+        }
+    } while ((end - start) != 15);
+
+	return (int) max;
+}
+
 
 /* Computer the perfectality of a number.
  *
@@ -48,6 +84,9 @@ int main(int argc, char *argv[])
     for (int i = 0; i < nums; ++i) {
         printf("%d\n", perfect_numbers[i]);
     }
+
+    int prof = profile();
+    printf("%ju\n", (uintmax_t) prof);
 }
 
 
