@@ -3,7 +3,7 @@ CC      = gcc
 LDFLAGS = -lpthread -lm -lrt
 CFLAGS  = -std=c99 -Wall -g
 TARGET  = compute
-INCLUDE = compute.h
+INCLUDE = compute.h hw5.h
 SOURCE  = compute.c
 
 default: compute

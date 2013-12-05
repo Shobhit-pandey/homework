@@ -1,11 +1,20 @@
 #include <stdio.h>
+#include <strings.h>
 #include <limits.h>
 #include <time.h>
 #include <inttypes.h>
+#include <unistd.h>
+#include <pthread.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+
+#include "compute.h"
+#include "hw5.h"
 
 /* Profile determines the number of operations that can be performed in
  * a matter of 15 seconds */
-int profile(void)
+void* profile(void *perf)
 {
     time_t start;
     time_t end;
@@ -27,15 +36,16 @@ int profile(void)
         } else if (diff < 15) {
             max *= (float)(15/(float)diff);
         } else if (diff == 16) {
-            max -= 100000;
+            max -= (100000 + (int) k);
         } else if (diff > 15) {
             max /= 2.0;
         }
     } while ((end - start) != 15);
 
-	return (int) max;
-}
+    *((int *)perf) = (int) max;
 
+	return NULL;
+}
 
 /* Computer the perfectality of a number.
  *
@@ -73,20 +83,87 @@ int compute_perfect_numbers(const long max, int n[], const int n_size)
     return idx;
 }
 
+/* Open and connects to a socket, and returns the resulting file
+ * descriptor */
+int setup_socket(const char *ip_addr)
+{
+    int retval;
+	int sockfd;
+	struct sockaddr_in servaddr;
+
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd == -1) errExit("socket");
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(SERV_PORT);
+
+    // Convert IP address to binary form.
+	retval = inet_pton(AF_INET, ip_addr, &servaddr.sin_addr.s_addr);
+    if(retval <= 0) errExit("inet_pton: Bad IP");
+
+	retval = connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    if(retval == -1) errExit("connect");
+
+    return sockfd;
+}
+
 int main(int argc, char *argv[])
 {
+    int retval;
+    int performance = 1;
+    pthread_t perf_pt;
+
+    retval = pthread_create(&perf_pt,
+                            NULL,
+                            profile,
+                            (void *) &performance);
+    if(retval != 0) errExit("pthread_create");
+
+
+    //int sockfd = setup_socket(argv[1]);
+
+    /*
+	char sendline[MAXLINE];
+	char recvline[MAXLINE];
+
+	while(fgets(sendline, MAXLINE, stdin) != NULL ){
+
+		bzero(recvline, MAXLINE);
+
+		write(sockfd, sendline, strlen(sendline));
+
+		if(read(sockfd, recvline, MAXLINE) == 0) {
+			perror("Something broke");
+			exit(-1);
+		}
+
+		fputs(recvline, stdout);
+
+	}
+    */
+
+    // Open AF_INET socket to server
+    //   Makes sure server available
+    // [T] Find performance metric
+    //   Sends metric to server
+    // [T] Read messages from server thread/process
+    //   If message is terminate, send sigterm to self
+    //   If message is range of nums, compute and send back result
     const int size = 4;
     const long max = 9000;
     int perfect_numbers[size];
 
     int nums = compute_perfect_numbers(max, perfect_numbers, size);
-        
+
     for (int i = 0; i < nums; ++i) {
         printf("%d\n", perfect_numbers[i]);
     }
 
-    int prof = profile();
-    printf("%ju\n", (uintmax_t) prof);
+    pthread_join(perf_pt, NULL);
+    printf("%ju\n", (uintmax_t) performance);
+
+    //close(sockfd);
 }
 
 
