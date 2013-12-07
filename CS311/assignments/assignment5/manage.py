@@ -6,12 +6,19 @@ Manage
 Server to manage compute processes that find perfect numbers.
 """
 
-from select import select
+from signal import signal, SIGINT
+from select import select, error as SelectError
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
-from Queue import Queue, Empty
 
-"""
-"""
+from Queue import Queue, Empty
+from itertools import chain
+
+
+def handler(signum, frame):
+    """
+    Signal handler for controlling manage
+    """
+    m.signal()
 
 
 class Connection(object):
@@ -35,6 +42,10 @@ class Manage(object):
     mq = {}
 
     def init(self, HOST, PORT, BACKLOG):
+        """
+        Setup an non-blocking IPv4 stream socket. Reusing the socket if
+        available, and listening for BACKLOG number of connections.
+        """
         s = socket(AF_INET, SOCK_STREAM)
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         s.setblocking(0)
@@ -47,9 +58,14 @@ class Manage(object):
 
     def run(self):
         while self.inputs:
-            readable, writeable, exceptions = select(self.inputs,
-                                                     self.outputs,
-                                                     self.inputs)
+            try:
+                readable, writeable, exceptions = select(self.inputs,
+                                                         self.outputs,
+                                                         self.inputs)
+            except SelectError:
+                self.server.close()
+                break
+
             # Readable
             for s in readable:
                 if s is self.server:
@@ -123,10 +139,21 @@ class Manage(object):
         self.inputs.remove(s)
         del self.mq[s.fileno()]
         s.close()
+
+    def signal(self):
+        """
+        Signal handling for Manage object
+        """
+        print("Manage interrupted. Closing connections.")
+
+        for s in chain(self.inputs, self.outputs):
+            s.close()
+            
+# Create a manage global object
+m = Manage()
             
 if __name__ == "__main__":
-    m = Manage()
-    m.init('', 50000, 5)
+    signal(SIGINT, handler)
 
+    m.init('', 50000, 5)
     m.run()
-    m.close()
