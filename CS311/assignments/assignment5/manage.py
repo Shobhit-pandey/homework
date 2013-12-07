@@ -9,9 +9,23 @@ Server to manage compute processes that find perfect numbers.
 from signal import signal, SIGINT
 from select import select, error as SelectError
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
+from os import kill, getpid
 
-from Queue import Queue, Empty
-from itertools import chain
+import logging
+import logging.handlers
+from Queue import Queue, Empty as QueueEmpty
+
+
+LOG_FILE = "manage.log"
+
+logger = logging.getLogger('manage')
+logger.setLevel(logging.DEBUG)
+
+log_handler = logging.handlers.RotatingFileHandler(LOG_FILE, mode='w')
+log_formatter = logging.Formatter('[%(asctime)s] %(message)s')
+
+log_handler.setFormatter(log_formatter)
+logger.addHandler(log_handler)
 
 
 def handler(signum, frame):
@@ -29,6 +43,15 @@ class Connection(object):
         self.conn = conn
         self.addr = addr
 
+    def preformance(self, perf):
+        """
+        Sets the performance data of the connection
+        """
+        self.perf = perf
+
+    def __repr__(self):
+        return str(self.addr)
+
 
 class Manage(object):
     """
@@ -36,10 +59,15 @@ class Manage(object):
 
     Initial design used from: http://pymotw.com/2/select/
     """
-    seqNum = 1
-    inputs = []
-    outputs = []
-    mq = {}
+    log = logger.debug
+
+    def __init__(self):
+        self.seqNum = 1
+        self.conns = {}
+        self.inputs = []
+        self.outputs = []
+        self.curWorker = None
+        self.mq = {}
 
     def init(self, HOST, PORT, BACKLOG):
         """
@@ -54,7 +82,8 @@ class Manage(object):
         # Add socket to list of available inputs
         self.server = s
         self.inputs.append(s)
-        print("Bound socket to port {0}".format(PORT))
+        self.log("Bound socket to port: %s", PORT)
+        self.log("Sequence initialized to: %s", self.seqNum)
 
     def run(self):
         while self.inputs:
@@ -62,8 +91,8 @@ class Manage(object):
                 readable, writeable, exceptions = select(self.inputs,
                                                          self.outputs,
                                                          self.inputs)
-            except SelectError:
-                self.server.close()
+            except (SelectError) as err:
+                self.log("Select died: %s", err)
                 break
 
             # Readable
@@ -86,22 +115,41 @@ class Manage(object):
         """
         Recieve and handle input for socket s
         """
-        fn = s.fileno()
-
         data = s.recv(1024)
         if data:
-            # Socket with available data
-            num = data[:-2]
-            if num.isdigit():
-                self.mq[fn].put(str(self.seqNum) + '\n')
-                self.seqNum += int(num)
-            if s not in self.outputs:
-                self.outputs.append(s)
+            # Socket with available data, remove newline, and any
+            # trailing whitespace
+            data = data.rstrip()
+            self.parse(data, s)
         else:
             # Socket without data, client is done or dead
-            #print("Closing connection from:"
-            #      "{0}".format(addr))
             self.remove(s)
+
+    def parse(self, data, s):
+        """
+        Parse incoming data for socket s
+        """
+        fn = s.fileno()
+
+        if data.isdigit():
+            self.log("Recieved range: %s", data)
+            self.mq[fn].put(str(self.seqNum) + '\n')
+            self.seqNum += int(data)
+            self.curWorker = str(self.conns[s])
+            self.log("Sequence now: %s", self.seqNum)
+        elif data == "quit":
+            self.log("Server shutting down.")
+            self.remove(s)
+            # Goto self.signal
+            kill(getpid(), SIGINT)
+        elif data == "current":
+            worker = self.curWorker
+            if not worker:
+                worker = "None"
+            self.mq[fn].put(str(worker) + '\n')
+
+        if s not in self.outputs:
+            self.outputs.append(s)
 
     def accept(self, s):
         """
@@ -110,8 +158,9 @@ class Manage(object):
         conn, addr = s.accept()
         conn.setblocking(0)
 
+        self.conns[conn] = Connection(conn, addr)
         self.inputs.append(conn)
-        print("New connection from: {0}".format(addr))
+        self.log("New connection from: %s", addr)
         self.mq[conn.fileno()] = Queue()
 
     def send(self, s):
@@ -120,7 +169,7 @@ class Manage(object):
         """
         try:
             next_msg = self.mq[s.fileno()].get_nowait()
-        except Empty:
+        except QueueEmpty:
             #print >>sys.stderr, 'output queue for', s.getpeername(), 'is empty'
             # No messages waiting so stop checking for writability.
             self.outputs.remove(s)
@@ -137,17 +186,50 @@ class Manage(object):
         if s in self.outputs:
             self.outputs.remove(s)
         self.inputs.remove(s)
-        del self.mq[s.fileno()]
         s.close()
+
+    def flush(self, s):
+        """
+        Flush a sockets output queue
+        """
+        self.log("Flushing: %s", self.conns[s])
+
+        while not self.mq[s.fileno()].empty():
+            self.send(s)
+
+    def flushall(self):
+        """
+        Flush all connected sockets output queues
+        """
+        for s in self.conns:
+            self.flush(s)
 
     def signal(self):
         """
         Signal handling for Manage object
-        """
-        print("Manage interrupted. Closing connections.")
 
-        for s in chain(self.inputs, self.outputs):
-            s.close()
+        Reads in rest of data from clients, sends 'kill' message to all
+        clients and exits
+        """
+        self.log("Closing connections.")
+
+        # Flush all output buffer
+        self.flushall()
+
+        # There should be no more outputs
+        if self.outputs:
+            self.log("Error: outputs not all flushed")
+
+        # Clear input buffer and tell client to die
+        for s in self.inputs:
+            if s is not self.server:
+                self.mq[s.fileno()].put_nowait("die\n")
+                if s not in self.outputs:
+                    self.outputs.append(s)
+                self.inputs.remove(s)
+
+        self.flushall()
+        exit(0)
             
 # Create a manage global object
 m = Manage()
