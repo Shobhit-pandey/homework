@@ -43,6 +43,72 @@
 
 \section{Design}
 
+This project is designed around three interdepended applications:
+compute, report, and manage. All use internet sockets to communicate,
+with the end goal of finding perfect numbers. Distributed.
+
+Manage manages compute processes, and hands out ranges of numbers
+relative to the amount of work each compute process is capable of.
+Report requests data from manage, and also is used to stop manage,
+which in turn stops all compute clients.
+
+For the managing of ranges needing to be computed, and distribution, I
+borrow heavily from The Linux Programming Interface, section 59.11
+(Stream Sockets). This section shows how to handling passing ranges from
+a server to clients, and update a local reference to the next range to
+compute.
+
+\subsection{XML Protocol}
+Because this assignment requires that we parse XML by hand, I have
+created a 'perfect' protocol for communication between the compute
+processes and manage.
+
+After each compute process establishes a connection with manage, they
+send their performance data. In response, manage sends an initial point
+for compute to start at. This request and reponse is handled by the
+following XML protocol:
+
+NOTE: Each request and response begins with the string:
+\begin{verbatim}
+<?xml version="1.0" encoding="UTF-8"?>
+\end{verbatim}
+
+Request:
+\begin{verbatim}
+<perf>235234</perf>
+\end{verbatim}
+
+Reponse:
+\begin{verbatim}
+<range>1</range>
+\end{verbatim}
+
+A subsequent request to manage by any client will return 235235.
+
+The other protocol involved is between manage and report.
+
+Request:
+\begin{verbatim}
+<report>True</report>
+\end{verbatim}
+
+Response:
+\begin{verbatim}
+<perfect>
+  <number>1</number>
+  <number>6</number>
+  ...
+  <number>N</number>
+</perfect>
+<clients>
+  <client>
+    <ip>352.643.234.8</ip>
+    <port>723423</port>
+    <perf>235234</perf>
+  </client>
+</clients>
+\end{verbatim}
+
 \section{Deviation}
 
 \section{Questions}
