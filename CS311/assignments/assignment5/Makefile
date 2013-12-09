@@ -1,5 +1,5 @@
 TEX     = write-up
-CC      = gcc
+CC      = icc
 LDFLAGS = -lpthread -lm -lrt
 CFLAGS  = -std=c99 -Wall -g
 TARGET  = compute
