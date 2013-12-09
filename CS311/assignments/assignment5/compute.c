@@ -14,6 +14,10 @@
 #include "compute.h"
 #include "main.h"
 
+FILE *output;
+char sendline[MAXLINE];
+char recvline[MAXLINE];
+
 /* Profile determines the number of operations that can be performed in
  * a matter of 15 seconds */
 void* profile(void *perf)
@@ -44,7 +48,7 @@ void* profile(void *perf)
         }
     } while ((end - start) != 15);
 
-    *((int *)perf) = (int) max;
+    *((long *)perf) = (long) max;
 
 	return NULL;
 }
@@ -69,19 +73,23 @@ int is_perfect(long number)
     return 0;
 }
 
-/* Compute the prefect numbers up to n. Brute Force. */
-int compute_perfect_numbers(const long max, int n[], const int n_size)
+/* Compute perfect numbers from init to max.
+ * Store them in the array n, and return the number of perfect numbers,
+ * if any found. Returns -1 if no numbers found. */
+int compute_perfect_numbers(const long init, const long max, int n[])
 {
     int idx = 0;
-    long i = 0;
+    long i = init;
 
-    while(i < max && idx < n_size) {
+    while(i < max) {
         if(is_perfect(i)) {
             n[idx++] = i;
         }
         ++i;
     }
 
+    if (idx == 0)
+        return -1;
     return idx;
 }
 
@@ -116,6 +124,8 @@ int setup_socket(const char *ipaddr, int port)
         errExit("connect");
     }
 
+    fprintf(output, "Connected to %s:%ld\n", ipaddr, (long) port);
+
     return sockfd;
 }
 
@@ -126,57 +136,93 @@ int setup_socket(const char *ipaddr, int port)
 // [T] Read messages from server thread/process
 //   If message is terminate, send sigterm to self
 //   If message is range of nums, compute and send back result
-int compute(const char *ipaddr, int port, FILE* output)
+int compute(const char *ipaddr, int port, FILE* out_file)
 {
     int retval;
-    int performance = 1;
+    long performance = 1;
+    long init;
+    long max;
+    char tmpbuf[LONGSTRSIZE];
+    int nums;
+    int sockfd;
     pthread_t perf_pt;
 
-    if (output == NULL) {
+    if (out_file == NULL){
         output = stdout;
+    } else {
+        output = out_file;
     }
-
-    fprintf(output, "Connecting to %s:%ld\n", ipaddr, (long) port);
 
     retval = pthread_create(&perf_pt,
                             NULL,
                             profile,
                             (void *) &performance);
-    if(retval != 0) errExit("pthread_create");
+    if (retval != 0)
+        errExit("pthread_create");
 
+    sockfd = setup_socket(ipaddr, port);
 
-    int sockfd = setup_socket(ipaddr, port);
-
-	char sendline[MAXLINE];
-	char recvline[MAXLINE];
-
-	while(fgets(sendline, MAXLINE, stdin) != NULL ){
-
-		bzero(recvline, MAXLINE);
-
-		write(sockfd, sendline, strlen(sendline));
-
-		if(read(sockfd, recvline, MAXLINE) == 0) {
-			perror("Something broke");
-			exit(-1);
-		}
-
-		fputs(recvline, stdout);
-
-	}
-
-    const int size = 4;
-    const long max = 9000;
-    int perfect_numbers[size];
-
-    int nums = compute_perfect_numbers(max, perfect_numbers, size);
-
-    for (int i = 0; i < nums; ++i) {
-        printf("%d\n", perfect_numbers[i]);
-    }
-
+    // Wait for the thread to finish.
     pthread_join(perf_pt, NULL);
+    performance /= 2;
     printf("%ju\n", (uintmax_t) performance);
+
+    // Begin loop
+    for(;;) {
+        // Since performance won't change, we will send the same one every
+        // time.
+        int perfect_numbers[ARRSIZE];
+
+        // Send performance to server, get range back.
+        sprintf(sendline, "<xml><perf>%ld</perf></xml>", performance);
+        fprintf(output, "Sending: %s\n", sendline);
+
+        if (write(sockfd, sendline, strlen(sendline)) == 0)
+            errExit("write - socket");
+
+        bzero(recvline, MAXLINE);
+
+        /* Parse XML on recvline 
+         * Set :init to response
+         * Set :max to (response + performance)
+         */
+        if (read(sockfd, recvline, MAXLINE) == 0)
+            errExit("read - socket");
+
+        if (sscanf(recvline, "<xml><range>%ld</range></xml>", (long *)&init) != 1)
+            errExit("sscanf - wrong data");
+        fprintf(output, "Recieved: %ld\n", init);
+
+        // Calculate max of range to compute
+        max = init + performance;
+
+        fprintf(output, "Computing perfect numbers: %ld to %ld\n", (long) init, (long) max);
+        nums = compute_perfect_numbers(init, max, perfect_numbers);
+
+        // Clear sendline
+        bzero(sendline, MAXLINE);
+
+        if (nums > 0) {
+            fprintf(output, "Sending perfect numbers to server.\n");
+            // Send numbers found to server.
+            strcat(sendline, "<xml>");
+            for (int i = 0; i < nums; ++i) {
+                bzero(tmpbuf, LONGSTRSIZE);
+                sprintf(tmpbuf, "<number>%ld</number>", (long) perfect_numbers[i]);
+                strcat(sendline, tmpbuf);
+            }
+            strcat(sendline, "</xml>");
+
+            fprintf(output, "Sending: %s\n", sendline);
+
+            if (write(sockfd, sendline, strlen(sendline)) == 0)
+                errExit("write - socket");
+        } else {
+            fprintf(output, "Didn't find perfect numbers.\n");
+        }
+
+    // End loop (Next iteration will get another range)
+    }
 
     close(sockfd);
     return 0;
