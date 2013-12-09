@@ -58,11 +58,19 @@ borrow heavily from The Linux Programming Interface, section 59.11
 a server to clients, and update a local reference to the next range to
 compute.
 
+Since manage is also in python, I will be borrowing from the Python
+Module of the Week website's section on select.
+
+Report will be a simple python script that connects via sockets, and
+sends XML message for specific pieces of data. The '-k' will send an XML
+message that tells manage to kill itself.
+
 \subsection{XML Protocol}
 Because this assignment requires that we parse XML by hand, I have
 created a 'perfect' protocol for communication between the compute
 processes and manage.
 
+\subsubsection*{Compute}
 After each compute process establishes a connection with manage, they
 send their performance data. In response, manage sends an initial point
 for compute to start at. This request and reponse is handled by the
@@ -83,13 +91,29 @@ Reponse:
 <range>1</range>
 \end{verbatim}
 
-A subsequent request to manage by any client will return 235235.
+A subsequent request to manage by any client would return 235235, as
+that will be the next available range.
 
-The other protocol involved is between manage and report.
+When a client finds perfect numbers it will send them to the server, and
+the server will not send a response.
 
 Request:
 \begin{verbatim}
-<report>True</report>
+<perfect>
+  <number>1</number>
+  ...
+  <number>8286</number>
+</perfect>
+\end{verbatim}
+
+\subsubsection*{Report}
+The other protocol involved is between manage and report. There are only
+two requests report sends. One for the numbers, and one for shutting
+down the server.
+
+Request:
+\begin{verbatim}
+<report />
 \end{verbatim}
 
 Response:
@@ -106,26 +130,62 @@ Response:
     <port>723423</port>
     <perf>235234</perf>
   </client>
+  ...
 </clients>
 \end{verbatim}
 
+Request:
+\begin{verbatim}
+<quit />
+\end{verbatim}
+
 \section{Deviation}
+Since this protocol isn't actually XML compliant, I forwent the strict
+adhearence to the xml header, and just wrapped each request and response
+in:
+\begin{verbatim}
+<xml>
+...
+</xml>
+\end{verbatim}
 
 \section{Questions}
 \begin{description}
   \item  What do you think the main point of this assignment is?
 
+         The main point of this assignment was to get us to learn how to
+         use AF\_INET sockets, select, and message queues.
+
   \item  How did you ensure your solution was correct? Testing details, for
          instance. This section should be very thorough.
 
+         My testing was done primarily through trial and error. Almost
+         all of it was done on my local machine, using AF\_INET sockets.
+         This allowed me to iterrate quickly on issues and resolve bugs
+         when they cropped up.
+
   \item  What did you learn?
+
+         I learned about using sockets, perfect numbers, calculating
+         IOPS, and regular expression groups.
+
+         Calls to send and recv, are not guaranteed to send/recv the
+         full amount requested. These calls can also exit immediately if
+         the socket is set to non-blocking. This caused major issues for
+         me when trying to send 'kill' signals to all the compute
+         processes.
+
+         Also, it is very challenging to debug asynchronus network code. This
+         is evident from using select. Because a client or server can
+         die at any time, you have to think about the order of actions
+         when reading and writing to sockets.
 
 \end{description}
 
 \newpage
 
-%\section{Work Log}
+\section{Work Log}
 
-%\verbatiminput{work-log.txt}
+\verbatiminput{work-log.txt}
 
 \end{document}
