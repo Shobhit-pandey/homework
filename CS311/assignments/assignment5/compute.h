@@ -9,11 +9,9 @@
 
 #define SERV_PORT 9879
 
-
-int main(int argc, char *argv[]);
+int compute(const char *ipaddr, int port, FILE* output);
 int compute_perfect_numbers(const long max, int n[], const int n_size);
 int is_perfect(long number);
 void* profile(void *perf);
-int setup_socket(const char *ip_addr);
 
 #endif

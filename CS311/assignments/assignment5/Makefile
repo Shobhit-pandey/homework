@@ -3,14 +3,14 @@ CC      = gcc
 LDFLAGS = -lpthread -lm -lrt
 CFLAGS  = -std=c99 -Wall -g
 TARGET  = compute
-INCLUDE = compute.h hw5.h
-SOURCE  = compute.c
+INCLUDE = compute.h main.h
+SOURCE  = compute.c main.c
 
-default: compute
+default: main
 
 .PHONY: help clean all default
 
-all: pdf compute
+all: pdf main
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -27,5 +27,5 @@ pdf: ${TEX}.tex
 	dvips -R -Poutline -t letter ${TEX}.dvi -o ${TEX}.ps
 	ps2pdf ${TEX}.ps
 
-compute: $(SOURCE) $(INCLUDE)
+main: $(SOURCE) $(INCLUDE)
 	$(CC) $(CFLAGS) $(SOURCE) -o $(TARGET) $(LDFLAGS)
