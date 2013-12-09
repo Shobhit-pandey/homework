@@ -188,7 +188,7 @@ class Manage(object):
         if s in self.outputs:
             self.outputs.remove(s)
         self.inputs.remove(s)
-        self.conns.remove(s)
+        del self.conns[s]
         s.close()
 
     def signal(self):
