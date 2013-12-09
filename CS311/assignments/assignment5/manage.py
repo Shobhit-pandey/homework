@@ -8,13 +8,14 @@ Server to manage compute processes that find perfect numbers.
 
 from signal import signal, SIGINT
 from select import select
-from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
+from socket import (socket, AF_INET, SOCK_STREAM, SOL_SOCKET,
+                    SO_REUSEADDR, error as SocketError)
 from os import kill, getpid
 
 import logging
 import logging.handlers
 from Queue import Queue, Empty as QueueEmpty
-
+import re
 
 LOG_FILE = "manage.log"
 
@@ -67,6 +68,7 @@ class Manage(object):
         self.inputs = []
         self.outputs = []
         self.mq = {}
+        self.perfect_numbers = []
         self.curWorker = None
         self.accepting = True
 
@@ -129,17 +131,20 @@ class Manage(object):
         """
         fn = s.fileno()
 
+        perf = re.compile("<xml><perf>(\d+)</perf></xml>")
+        numbers = re.compile("<xml>(?:<number>(\d+)</number>)+</xml>")
+
         if not self.accepting:
             self.mq[fn].put_nowait("die\n")
             self.inputs.remove(s)
         else:
-            if data.isdigit():
-                self.log("Recieved range: %s", data)
-                self.mq[fn].put(str(self.seqNum) + '\n')
-                self.seqNum += int(data)
-                self.curWorker = str(self.conns[s])
-                self.log("Sequence now: %s", self.seqNum)
-            elif data == "quit":
+            self.log("Recieved %s from %s", repr(data),
+                    self.conns[s].addr)
+
+            has_perf = perf.match(data)
+            has_nums = numbers.match(data)
+
+            if data == "quit":
                 # Goto self.signal
                 kill(getpid(), SIGINT)
             elif data == "current":
@@ -147,8 +152,15 @@ class Manage(object):
                 if not worker:
                     worker = "None"
                 self.mq[fn].put(str(worker) + '\n')
-            else:
-                self.mq[fn].put(data)
+            elif has_perf:
+                self.mq[fn].put("<xml><range>"+str(self.seqNum)+"</range></xml>")
+                self.seqNum += int(has_perf.group(1))
+                self.curWorker = str(self.conns[s])
+                self.log("Sequence now: %s", self.seqNum)
+            elif has_nums:
+                self.perfect_numbers.append(list(has_nums.groups()))
+                self.log("Found perfect numbers: %s",
+                         str(list(has_nums.groups())))
 
         if s not in self.outputs:
             self.outputs.append(s)
@@ -175,9 +187,11 @@ class Manage(object):
             #print >>sys.stderr, 'output queue for', s.getpeername(), 'is empty'
             # No messages waiting so stop checking for writability.
             self.outputs.remove(s)
+        except SocketError:
+            self.remove(s)
         else:
-            #print >>sys.stderr, 'sending "%s" to %s' % (next_msg, s.getpeername())
-            s.sendall(next_msg)
+            self.log("Sending '%s' to %s", repr(next_msg), self.conns[s].addr)
+            s.send(next_msg)
 
     def remove(self, s):
         """
