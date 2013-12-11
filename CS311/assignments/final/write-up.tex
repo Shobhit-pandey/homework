@@ -52,6 +52,143 @@ deviation from the POSIX specification.
 
 \section{Sockets}
 
+The first API I will be comparing is Sockets. In Windows these are
+referred to as \emph{WinSock}. WinSock has the same commands for
+creating and accepting connections as POSIX sockets, with the addition
+of 'closesocket'.
+
+\subsection{socket}
+Windows:
+SOCKET WSAAPI socket(
+  \_In\_  int af,
+  \_In\_  int type,
+  \_In\_  int protocol
+);
+
+POSIX:
+int socket(int domain, int type, int protocol);
+
+\subsection{bind}
+Windows:
+int bind(
+  \_In\_  SOCKET s,
+  \_In\_  const struct sockaddr *name,
+  \_In\_  int namelen
+);
+
+POSIX:
+int bind(int socket, const struct sockaddr *address,
+       socklen\_t address\_len);
+
+\subsection{listen}
+Windows:
+int listen(
+  \_In\_  SOCKET s,
+  \_In\_  int backlog
+);
+
+POSIX:
+int listen(int socket, int backlog);
+
+\subsection{connect}
+Windows:
+int connect(
+  \_In\_  SOCKET s,
+  \_In\_  const struct sockaddr *name,
+  \_In\_  int namelen
+);
+
+POSIX:
+int connect(int socket, const struct sockaddr *address,
+       socklen\_t address\_len);
+
+\subsection{accept}
+Windows:
+SOCKET accept(
+  \_In\_     SOCKET s,
+  \_Out\_    struct sockaddr *addr,
+  \_Inout\_  int *addrlen
+);
+
+POSIX:
+int accept(int socket, struct sockaddr *restrict address,
+       socklen\_t *restrict address\_len);
+
+\subsection{shutdown}
+Windows:
+int shutdown(
+  \_In\_  SOCKET s,
+  \_In\_  int how
+);
+
+POSIX:
+int shutdown(int socket, int how);
+
+\subsection{close/closesocket}
+Widows:
+int closesocket(
+  \_In\_  SOCKET s
+);
+
+POSIX:
+int close(int fildes);
+
+\subsection{send}
+Windows:
+int send(
+  \_In\_  SOCKET s,
+  \_In\_  const char *buf,
+  \_In\_  int len,
+  \_In\_  int flags
+);
+
+POSIX:
+ssize\_t send(int socket, const void *buffer, size\_t length, int flags);
+
+\subsection{recv}
+Windows:
+int recv(
+  \_In\_   SOCKET s,
+  \_Out\_  char *buf,
+  \_In\_   int len,
+  \_In\_   int flags
+);
+
+POSIX:
+ssize\_t recv(int socket, void *buffer, size\_t length, int flags);
+
+\subsection{sendto}
+Windows:
+int sendto(
+  \_In\_  SOCKET s,
+  \_In\_  const char *buf,
+  \_In\_  int len,
+  \_In\_  int flags,
+  \_In\_  const struct sockaddr *to,
+  \_In\_  int tolen
+);
+
+POSIX:
+ssize\_t sendto(int socket, const void *message, size\_t length,
+       int flags, const struct sockaddr *dest\_addr,
+       socklen\_t dest\_len);
+
+\subsection{recvfrom}
+Windows:
+int recvfrom(
+  \_In\_         SOCKET s,
+  \_Out\_        char *buf,
+  \_In\_         int len,
+  \_In\_         int flags,
+  \_Out\_        struct sockaddr *from,
+  \_Inout\_opt\_  int *fromlen
+);
+
+POSIX:
+ssize\_t recvfrom(int socket, void *restrict buffer, size\_t length,
+       int flags, struct sockaddr *restrict address,
+       socklen\_t *restrict address\_len);
+
 \section{Pipes and Named Pipes}
 
 \section{Multiprocessing and Threads}
@@ -61,13 +198,17 @@ deviation from the POSIX specification.
 \section{References}
 
 \subsection{Sockets}
-    http://msdn.microsoft.com/en-us/library/windows/desktop/bb530741\%28v=vs.85%29.aspx
+\url{http://msdn.microsoft.com/en-us/library/windows/desktop/bb530741(v=vs.85).aspx}
+
+Windows API Reference: \url{msdn.microsoft.com/en-us/library/windows/desktop/ms741394(v=vs.85).aspx}
+POSIX References: \url{http://pubs.opengroup.org/onlinepubs/9699919799/toc.htm}
 
 \subsection{Pipes}
-    http://msdn.microsoft.com/en-us/library/windows/desktop/aa365780\%28v=vs.85%29.aspx
-    http://msdn.microsoft.com/en-us/library/windows/desktop/aa365590\%28v=vs.85%29.aspx
+\url{http://msdn.microsoft.com/en-us/library/windows/desktop/aa365780(v=vs.85).aspx}
+
+\url{http://msdn.microsoft.com/en-us/library/windows/desktop/aa365590(v=vs.85).aspx}
 
 \subsection{Multiprocessing}
-    http://msdn.microsoft.com/en-us/library/windows/desktop/ms684841\%28v=vs.85%29.aspx
+\url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms684841(v=vs.85).aspx}
 
 \end{document}
