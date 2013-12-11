@@ -71,9 +71,9 @@ All POSIX examples come from the Linux Man Pages v3.54, all Windows
 examples come from the Microsoft Developer Network (MSDN) website.
 References to example are provided at the end of this document.
 
-\section{Sockets}
+\section{Stream Sockets}
 
-The first API I will be comparing is Sockets. In Windows these are
+The first API I will be comparing is Stream Sockets. In Windows these are
 referred to as \emph{WinSock}. WinSock has the same commands for
 creating and accepting connections as POSIX sockets, with the addition
 of 'closesocket'. The difference is in Window's use of macros over
@@ -82,10 +82,46 @@ of 'closesocket'. The difference is in Window's use of macros over
 \lstinputlisting{posix_sockets_server.c}
 \lstinputlisting{win32_sockets_server.c}
 
+From the examples you can see that both use a \emph{struct addrinfo},
+make the same calls to \emph{getaddrinfo}, and free the struct with
+\emph{freeaddrinfo}.
+
+Both calls to sockets take the same arguments, with the difference that
+Windows returns a SOCKET type instead of an file descriptor. This is due
+to Windows using file handles, instead of descriptors.
+
+Windows defines some extra symbolic constants for sockets, like
+SOCKET_ERROR, which is similar to the return value of `-1' in POSIX.
+
+Instead of using \emph{recv} and \emph{send} the POSIX example uses
+\emph{read} and \emph{write} because they are the same call when no
+flags are passed. In Windows, because it uses file handles, the
+\emph{send} and \emph{recv} commands take SOCKET as their first argument
+instead of an integer.
+
 \section{Anonymous Pipes}
+
+The second API I will be comparing is Pipes. Pipes work similarly in
+POSIX in Windows. They have a designated read and write end, and errors
+occur when reading or writing to the wrong end. The ends are treated as
+files, so the file read and write commands work on them.The major
+difference is with their initialization.
+
+Here is a program using POSIX pipes that creates a pipe and a child
+process, and passes command line arguments through the pipe, which the
+child in turn write to standard out.
+
+The Windows program is different in which it have the child open a
+file, and write the file pipe, which the parent reads and then writes to
+standard out.
 
 \lstinputlisting{posix_pipes.c}
 \lstinputlisting{win32_pipes.c}
+
+On Windows pipes are created using two designated file HANDLEs and a
+SECURITY_ATTRIBUTES, which determines whether or not children inherit
+file HANDLES. Wereas in POSIX a pipe is created using an integer array
+of size 2.
 
 \section{Multiprocessing}
 
