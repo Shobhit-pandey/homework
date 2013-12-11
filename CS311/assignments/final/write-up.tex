@@ -43,19 +43,26 @@
 
 \section{Overview}
 
-This paper compares and contrasts Sockets, Anonymous Pipes, and
-Multiprocessing, between the Windows and POSIX APIs. Where
-parts are common, a direct API will comparison will be made between the
-function headers. For parts of the API that differ, an overview of the
-concepts between the two will be compared, along with Window's
-deviation from the POSIX specification.
+This paper compares and contrasts Stream Sockets, Anonymous Pipes, and
+Multiprocessing, between the Windows and POSIX APIs. For each section I
+will provide a sample piece of code for each interface, using as many
+API functions as possible. I will first give an overview of what the
+example does, provide the example, then explain how the APIs differ
+within each example. When these interfaces are placed side by side, this
+should allow the reader to easily see the similarites and differences
+between them.
 
 \section{Sockets}
 
 The first API I will be comparing is Sockets. In Windows these are
 referred to as \emph{WinSock}. WinSock has the same commands for
 creating and accepting connections as POSIX sockets, with the addition
-of 'closesocket'.
+of 'closesocket'. The difference is in Window's use of macros over
+\emph{file descriptors} (fds).
+
+%%%%%%
+\begin{comment}
+%%%%%%
 
 \subsection{socket}
 Windows:
@@ -157,41 +164,13 @@ int recv(
 POSIX:
 ssize\_t recv(int socket, void *buffer, size\_t length, int flags);
 
-\subsection{sendto}
-Windows:
-int sendto(
-  \_In\_  SOCKET s,
-  \_In\_  const char *buf,
-  \_In\_  int len,
-  \_In\_  int flags,
-  \_In\_  const struct sockaddr *to,
-  \_In\_  int tolen
-);
+%%%%%%
+\end{comment}
+%%%%%%
 
-POSIX:
-ssize\_t sendto(int socket, const void *message, size\_t length,
-       int flags, const struct sockaddr *dest\_addr,
-       socklen\_t dest\_len);
+\section{Anonymous Pipes}
 
-\subsection{recvfrom}
-Windows:
-int recvfrom(
-  \_In\_         SOCKET s,
-  \_Out\_        char *buf,
-  \_In\_         int len,
-  \_In\_         int flags,
-  \_Out\_        struct sockaddr *from,
-  \_Inout\_opt\_  int *fromlen
-);
-
-POSIX:
-ssize\_t recvfrom(int socket, void *restrict buffer, size\_t length,
-       int flags, struct sockaddr *restrict address,
-       socklen\_t *restrict address\_len);
-
-\section{Pipes and Named Pipes}
-
-\section{Multiprocessing and Threads}
+\section{Multiprocessing}
 
 \newpage
 
