@@ -35,6 +35,21 @@
   pdfpagemode = UseNone
 }
 
+% Setup listings
+\lstset{
+    language=C,
+    numbers=left,
+    basicstyle=\small,
+    stepnumber=1,
+    frame=single,
+    showstringspaces=false,
+    showtabs=false,
+    stringstyle=\ttfamily,
+    captionpos=b,
+    backgroundcolor=\color{white},
+    title=\lstname
+}
+
 \parindent = 0.0 in
 \parskip = 0.2 in
 
@@ -52,6 +67,10 @@ within each example. When these interfaces are placed side by side, this
 should allow the reader to easily see the similarites and differences
 between them.
 
+All POSIX examples come from the Linux Man Pages v3.54, all Windows
+examples come from the Microsoft Developer Network (MSDN) website.
+References to example are provided at the end of this document.
+
 \section{Sockets}
 
 The first API I will be comparing is Sockets. In Windows these are
@@ -60,123 +79,19 @@ creating and accepting connections as POSIX sockets, with the addition
 of 'closesocket'. The difference is in Window's use of macros over
 \emph{file descriptors} (fds).
 
-Client Socket Example: \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms737591\%28v=vs.85%29.aspx}
-
-%%%%%%
-\begin{comment}
-%%%%%%
-
-\subsection{socket}
-Windows:
-SOCKET WSAAPI socket(
-  \_In\_  int af,
-  \_In\_  int type,
-  \_In\_  int protocol
-);
-
-POSIX:
-int socket(int domain, int type, int protocol);
-
-\subsection{bind}
-Windows:
-int bind(
-  \_In\_  SOCKET s,
-  \_In\_  const struct sockaddr *name,
-  \_In\_  int namelen
-);
-
-POSIX:
-int bind(int socket, const struct sockaddr *address,
-       socklen\_t address\_len);
-
-\subsection{listen}
-Windows:
-int listen(
-  \_In\_  SOCKET s,
-  \_In\_  int backlog
-);
-
-POSIX:
-int listen(int socket, int backlog);
-
-\subsection{connect}
-Windows:
-int connect(
-  \_In\_  SOCKET s,
-  \_In\_  const struct sockaddr *name,
-  \_In\_  int namelen
-);
-
-POSIX:
-int connect(int socket, const struct sockaddr *address,
-       socklen\_t address\_len);
-
-\subsection{accept}
-Windows:
-SOCKET accept(
-  \_In\_     SOCKET s,
-  \_Out\_    struct sockaddr *addr,
-  \_Inout\_  int *addrlen
-);
-
-POSIX:
-int accept(int socket, struct sockaddr *restrict address,
-       socklen\_t *restrict address\_len);
-
-\subsection{shutdown}
-Windows:
-int shutdown(
-  \_In\_  SOCKET s,
-  \_In\_  int how
-);
-
-POSIX:
-int shutdown(int socket, int how);
-
-\subsection{close/closesocket}
-Widows:
-int closesocket(
-  \_In\_  SOCKET s
-);
-
-POSIX:
-int close(int fildes);
-
-\subsection{send}
-Windows:
-int send(
-  \_In\_  SOCKET s,
-  \_In\_  const char *buf,
-  \_In\_  int len,
-  \_In\_  int flags
-);
-
-POSIX:
-ssize\_t send(int socket, const void *buffer, size\_t length, int flags);
-
-\subsection{recv}
-Windows:
-int recv(
-  \_In\_   SOCKET s,
-  \_Out\_  char *buf,
-  \_In\_   int len,
-  \_In\_   int flags
-);
-
-POSIX:
-ssize\_t recv(int socket, void *buffer, size\_t length, int flags);
-
-%%%%%%
-\end{comment}
-%%%%%%
+\lstinputlisting{posix_sockets_server.c}
+\lstinputlisting{win32_sockets_server.c}
 
 \section{Anonymous Pipes}
 
-Pipes Example: \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms682499(v=vs.85).aspx}
+\lstinputlisting{posix_pipes.c}
+\lstinputlisting{win32_pipes.c}
 
 \section{Multiprocessing}
 
-Multiprocessing Example: \url{https://msdn.microsoft.com/en-us/library/windows/desktop/ms682512(v=vs.85).aspx}
+\lstinputlisting{posix_procs.c}
+\lstinputlisting{win32_procs.c}
+
 
 \newpage
 
@@ -188,12 +103,19 @@ Multiprocessing Example: \url{https://msdn.microsoft.com/en-us/library/windows/d
 Windows API Reference: \url{msdn.microsoft.com/en-us/library/windows/desktop/ms741394(v=vs.85).aspx}
 POSIX References: \url{http://pubs.opengroup.org/onlinepubs/9699919799/toc.htm}
 
+Client Socket Example: \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms737591(v=vs.85).aspx}
+Server Socket Example: \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms737593(v=vs.85).aspx}
+
 \subsection{Pipes}
 \url{http://msdn.microsoft.com/en-us/library/windows/desktop/aa365780(v=vs.85).aspx}
 
 \url{http://msdn.microsoft.com/en-us/library/windows/desktop/aa365590(v=vs.85).aspx}
 
+Pipes Example: \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms682499(v=vs.85).aspx}
+
 \subsection{Multiprocessing}
 \url{http://msdn.microsoft.com/en-us/library/windows/desktop/ms684841(v=vs.85).aspx}
+
+Multiprocessing Example: \url{https://msdn.microsoft.com/en-us/library/windows/desktop/ms682512(v=vs.85).aspx}
 
 \end{document}
