@@ -125,9 +125,26 @@ of size 2.
 
 \section{Multiprocessing}
 
+The third and file API I will be comparing is Multiprocessing. In POSIX
+multiprocessing is accomplished through \emph{fork}, whereas Windows
+uses \emph{CreateProcess}. The Windows multiprocessing inferface works
+more like \emph{exec} in POSIX. When CreateProcess is called it
+is pass a long list of commands that manage things like the processes
+file handle and environment inheritance, and the processes ability to
+create new threads or processes.
+
+Both of the example follow a similar procedure: create a process, and
+wait for it to have a signal passed. In the POSIX example, an extra
+argument of the child error code can be set, and in the Windows example
+the name of the child program needs to be passed into the appliction.
+
 \lstinputlisting{posix_procs.c}
 \lstinputlisting{win32_procs.c}
 
+The major difference here is that \emph{CreateProcess} is the closest
+thing Windows has to \emph{fork}, but in reality it is more similar to
+\emph{exec}. This is because the preferred way to create a `child
+process' in Windows is through threads.
 
 \newpage
 

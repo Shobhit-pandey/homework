@@ -2,10 +2,10 @@ TODO
 ====
 
 [x] Include source files into write up
-[ ] Explain API similarities and differences for:
+[x] Explain API similarities and differences for:
     [x] Stream Sockets
     [x] Anonymous Pipes
-    [ ] Multiprocesses
+    [x] Multiprocesses
 [x] Include Makefile for compiling POSIX code.
 [-] Update win32 code samples to be in line with POSIX.
 
