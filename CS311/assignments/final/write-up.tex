@@ -64,7 +64,7 @@ will provide a sample piece of code for each interface, using as many
 API functions as possible. I will first give an overview of what the
 example does, provide the example, then explain how the APIs differ
 within each example. When these interfaces are placed side by side, this
-should allow the reader to easily see the similarites and differences
+should allow the reader to easily see the similarities and differences
 between them.
 
 All POSIX examples come from the Linux Man Pages v3.54, all Windows
@@ -74,9 +74,9 @@ References to example are provided at the end of this document.
 \section{Stream Sockets}
 
 The first API I will be comparing is Stream Sockets. In Windows these are
-referred to as \emph{WinSock}. WinSock has the same commands for
+referred to as `WinSock'. `WinSock' has the same commands for
 creating and accepting connections as POSIX sockets, with the addition
-of 'closesocket'. The difference is in Window's use of macros over
+of \emph{closesocket}. The difference is in Window's use of macros over
 \emph{file descriptors} (fds).
 
 \lstinputlisting{posix_sockets_server.c}
@@ -91,7 +91,7 @@ Windows returns a SOCKET type instead of an file descriptor. This is due
 to Windows using file handles, instead of descriptors.
 
 Windows defines some extra symbolic constants for sockets, like
-SOCKET_ERROR, which is similar to the return value of `-1' in POSIX.
+SOCKET\_ERROR, which is similar to the return value of `-1' in POSIX.
 
 Instead of using \emph{recv} and \emph{send} the POSIX example uses
 \emph{read} and \emph{write} because they are the same call when no
@@ -119,16 +119,16 @@ standard out.
 \lstinputlisting{win32_pipes.c}
 
 On Windows pipes are created using two designated file HANDLEs and a
-SECURITY_ATTRIBUTES, which determines whether or not children inherit
-file HANDLES. Wereas in POSIX a pipe is created using an integer array
+SECURITY\_ATTRIBUTES, which determines whether or not children inherit
+file HANDLES. Whereas in POSIX a pipe is created using an integer array
 of size 2.
 
 \section{Multiprocessing}
 
 The third and file API I will be comparing is Multiprocessing. In POSIX
 multiprocessing is accomplished through \emph{fork}, whereas Windows
-uses \emph{CreateProcess}. The Windows multiprocessing inferface works
-more like \emph{exec} in POSIX. When CreateProcess is called it
+uses \emph{CreateProcess}. The Windows multiprocessing interface works
+more like \emph{exec} in POSIX. When \emph{CreateProcess} is called it
 is pass a long list of commands that manage things like the processes
 file handle and environment inheritance, and the processes ability to
 create new threads or processes.
@@ -136,7 +136,7 @@ create new threads or processes.
 Both of the example follow a similar procedure: create a process, and
 wait for it to have a signal passed. In the POSIX example, an extra
 argument of the child error code can be set, and in the Windows example
-the name of the child program needs to be passed into the appliction.
+the name of the child program needs to be passed into the application.
 
 \lstinputlisting{posix_procs.c}
 \lstinputlisting{win32_procs.c}
