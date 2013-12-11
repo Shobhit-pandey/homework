@@ -1,0 +1,15 @@
+# C Outputs
+*.o
+*.out
+
+# Tex Outputs
+*.dvi
+*.log
+*.aux
+*.ps
+
+# Binaries
+posix_sockets_client
+posix_sockets_server
+posix_procs
+posix_pipes
