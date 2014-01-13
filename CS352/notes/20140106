@@ -1,0 +1,43 @@
+First Day
+TA:Soroush Ghorashi
+
+---
+
+Gulf of Execution
+ 1.
+ 2.
+
+Goals of Usibility Engineering
+ - safety
+ - effectiveness
+ - utility
+ - learnability
+ - memorability
+ - efficiency
+
+Priciples of Design
+ - visibility
+   - What options/actions available
+ - feedback
+ - constrain
+   - some errors impossible
+   - eg: menus vs typing to prevent syntax errors
+ - consistency (internal)
+ - affordance
+   - makes clear how operate an object
+
+Process Activites
+ - Identify needs/requirements
+ - Developing alternatives
+   (That meet requirements)
+ - Building interactive versions of the designs
+   - assess
+ - Evaluate
+
+When to do Interaction Design
+ - At beginning
+ - During design
+ - During testing
+   (evaluate)
+
+Homework: Upload & Hardcopy, Jan. 10th.
