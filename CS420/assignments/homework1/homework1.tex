@@ -89,6 +89,34 @@ Shimble's algorithm with the minor change that in the second loop:
 \end{algorithm}
 
 
+\section*{Problem 2}
+Consider the following algorithm for finding the smallest element in an
+unsorted array:
+
+\begin{algorithm}
+    \caption{RandomMin $A [1 \ldots n]$}
+\begin{algorithmic}
+  \STATE $min \leftarrow \infty$
+  \FOR{$i \leftarrow 1$ to $n$ in random order}
+  \IF{ $A [i] < min$ }
+  \STATE $min \leftarrow A [i]$ \hspace{1 cm} $(*)$
+  \ENDIF
+  \ENDFOR
+  \RETURN $min$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{(a)}
+In the worst case, how many times does RandomMin execute line \(*\)?
+
+\subsection*{(b)}
+What is the probability that line \(*\) is executed during the $n$th
+iteration of the for loop?
+
+\subsection*{(c)}
+What is the $exact$ expected number of executions of line \(*\)?
+
+
 \section*{Problem 3}
 The randomized linear time algorithm of Karger, Klein and Tarjan for
 finding a minimum spanning tree performs two steps of the Boruvka
@@ -110,9 +138,9 @@ where $k$ is a positive integer?
 \section*{Problem 4}
 
 \subsection*{(a)}
-Describe and analyze a modifcation of Shimbel's shortest-path algorithm
+Describe and analyze a modification of Shimbel's shortest-path algorithm
 that actually returns a negative cycle if any such cycle is reachable
-from $s$, or a shortest-path tree if there is no such cycle. The modifed
+from $s$, or a shortest-path tree if there is no such cycle. The modified
 algorithm should still run in $O(mn)$ time.
 
 \begin{algorithm}
