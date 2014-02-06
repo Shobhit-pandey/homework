@@ -89,6 +89,8 @@ Shimble's algorithm with the minor change that in the second loop:
 \end{algorithm}
 
 
+\pagebreak
+
 \section*{Problem 4}
 
 \subsection*{(a)}
@@ -121,6 +123,7 @@ algorithm should still run in $O(mn)$ time.
 \end{algorithmic}
 \end{algorithm}
 
+\pagebreak
 
 \subsection*{(b)}
 Describe and analyze a modification of Shimbel's shortest-path
@@ -131,6 +134,25 @@ negative cycle, your algorithm should end with $dist(v) = -\infty$
 otherwise, $dist(v)$ should contain the length of the shortest path
 from $s$ to $v$. The modified algorithm should still run in $O(mn)$
 time.
+
+\begin{algorithm}
+\caption{ShimbleNegativeCycles}
+\begin{algorithmic}
+    \STATE InitSSSP($s$)
+    \FORALL{$V$}
+        \FORALL{$u \rightarrow v$}
+            \IF{$u \rightarrow v$ is tense}
+                \STATE Relax($u \rightarrow v$)
+            \ENDIF
+        \ENDFOR
+    \ENDFOR
+    \FORALL{$u \rightarrow v$}
+        \IF{$u \rightarrow v$ is tense \OR $dist(u) = -\infty$}
+            \STATE $dist(v) = -\infty$
+        \ENDIF
+    \ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 
 
