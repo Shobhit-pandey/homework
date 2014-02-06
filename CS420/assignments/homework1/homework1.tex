@@ -103,7 +103,7 @@ algorithm should still run in $O(mn)$ time.
 \caption{ShimbleNegCycleOrTree}
 \begin{algorithmic}
     \STATE InitSSSP($s$)
-    \FORALL{$V$}
+    \FORALL{$m$}
         \FORALL{$u \rightarrow v$}
             \IF{$u \rightarrow v$ is tense}
                 \STATE Relax($u \rightarrow v$)
@@ -139,7 +139,7 @@ time.
 \caption{ShimbleNegativeCycles}
 \begin{algorithmic}
     \STATE InitSSSP($s$)
-    \FORALL{$V$}
+    \FORALL{$m$}
         \FORALL{$u \rightarrow v$}
             \IF{$u \rightarrow v$ is tense}
                 \STATE Relax($u \rightarrow v$)
