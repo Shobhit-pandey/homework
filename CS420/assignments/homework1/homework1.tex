@@ -4,6 +4,9 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
 \usepackage{geometry}
 
 \usepackage{tikz}
@@ -68,5 +71,21 @@ if the following condition holds:
 \subsection*{(c)}
 Describe and analyze an algorithm to determine whether or not a graph
 has a unique minimum spanning tree.
+
+Shimble's algorithm with the minor change that in the second loop:
+\begin{algorithm}
+\caption{Modified Shimble}
+\begin{algorithmic}
+  \STATE
+  \STATE $\ldots$
+  \STATE
+  \FOR{every edge $u \rightarrow v$}
+    \IF{$u \rightarrow v$ is tense}
+      \STATE return False
+    \ENDIF
+  \STATE return True
+  \ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 \end{document}
