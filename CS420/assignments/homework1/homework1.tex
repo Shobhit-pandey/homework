@@ -88,4 +88,50 @@ Shimble's algorithm with the minor change that in the second loop:
 \end{algorithmic}
 \end{algorithm}
 
+
+\section*{Problem 4}
+
+\subsection*{(a)}
+Describe and analyze a modifcation of Shimbel's shortest-path algorithm
+that actually returns a negative cycle if any such cycle is reachable
+from $s$, or a shortest-path tree if there is no such cycle. The modifed
+algorithm should still run in $O(mn)$ time.
+
+\begin{algorithm}
+\caption{ShimbleNegCycleOrTree}
+\begin{algorithmic}
+    \STATE InitSSSP($s$)
+    \FORALL{$V$}
+        \FORALL{$u \rightarrow v$}
+            \IF{$u \rightarrow v$ is tense}
+                \STATE Relax($u \rightarrow v$)
+            \ENDIF
+        \ENDFOR
+    \ENDFOR
+    \STATE $u_{min} \leftarrow s$
+    \FORALL{$u \rightarrow v$}
+        \IF{$u \rightarrow v$ is tense}
+            \RETURN $\{ recurse\; pred(u)\; until\; v \}$
+        \ENDIF
+        \IF{$dist(u) < dist(u_{min})$}
+            \STATE $u_{min} \leftarrow u$
+        \ENDIF
+        \RETURN $\{ recurse\; pred(u)\; until\; s \}$
+    \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection*{(b)}
+Describe and analyze a modification of Shimbel's shortest-path
+algorithm that computes the correct shortest path distances from $s$ to
+every other vertex of the input graph, even if the graph contains
+negative cycles. Specifically, if any walk from $s$ to $v$ contains a
+negative cycle, your algorithm should end with $dist(v) = -\infty$
+otherwise, $dist(v)$ should contain the length of the shortest path
+from $s$ to $v$. The modified algorithm should still run in $O(mn)$
+time.
+
+
+
 \end{document}
