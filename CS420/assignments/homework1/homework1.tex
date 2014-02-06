@@ -1,0 +1,43 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{geometry}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+
+\title{CS420 - Homework \#1}
+\author{Trevor Bramwell}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Problem 1}
+
+Throughout the lecture, we assumed that no two edges in the input graph
+have equal weights, which implies that the minimum spanning tree is
+unique. In fact, a weaker condition on the edge weights implies MST
+uniqueness.
+
+\subsection*{(a)}
+Describe an edge-weighted graph that has a unique minimum spanning tree,
+even though two edges have equal weights.
+
+\subsection*{(b)}
+Prove that an edge-weighted graph $G$ has a unique minimum spanning tree
+if the following condition holds:
+
+\begin{itemize}
+    \item For any partition of the vertices of $G$ into two subsets, the
+          minimum-weight edge with one endpoint in each subset is unique.
+\end{itemize}
+
+\subsection*{(c)}
+Describe and analyze an algorithm to determine whether or not a graph
+has a unique minimum spanning tree.
+
+\end{document}
