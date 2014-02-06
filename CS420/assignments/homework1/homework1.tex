@@ -7,7 +7,7 @@
 \usepackage{geometry}
 
 \usepackage{tikz}
-\usetikzlibrary{arrows,automata}
+\usetikzlibrary{arrows}
 
 \title{CS420 - Homework \#1}
 \author{Trevor Bramwell}
@@ -26,6 +26,21 @@ uniqueness.
 \subsection*{(a)}
 Describe an edge-weighted graph that has a unique minimum spanning tree,
 even though two edges have equal weights.
+
+\begin{center}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=2cm,
+                    thick]
+  \tikzstyle{every state}=[fill=white]
+
+  \node[draw, circle]   (A)              {a};
+  \node[draw, circle]   (B) [right of=A] {b};
+  \node[draw, circle]   (C) [below of=B] {c};
+
+  \path (A) edge node {$3$} (B)
+            edge [below left] node {$3$} (C)
+        (B) edge node {$8$} (C);
+\end{tikzpicture}
+\end{center}
 
 \subsection*{(b)}
 Prove that an edge-weighted graph $G$ has a unique minimum spanning tree
