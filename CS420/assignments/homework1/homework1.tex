@@ -45,28 +45,28 @@ even though two edges have equal weights.
 \end{tikzpicture}
 \end{center}
 
-\subsection*{(b)}
-Prove that an edge-weighted graph $G$ has a unique minimum spanning tree
-if the following condition holds:
-
-\begin{itemize}
-    \item For any partition of the vertices of $G$ into two subsets, the
-          minimum-weight edge with one endpoint in each subset is unique.
-\end{itemize}
-
-\begin{proof}[Proof by Contradiction]
-    Let $G$ be an edge-weighted graph. Let $T_1$, $T_2$ be arbitrary
-    partitions of $G$.
-    
-    Assume the minimum-weight edge with one endpoint in each subset is
-    not unique.
-
-    Then $\exists$ some edges $e_1$ and $e_2$ which have one endpoint in each
-    subset.
-
-    $\ldots$
-
-\end{proof}
+%\subsection*{(b)}
+%Prove that an edge-weighted graph $G$ has a unique minimum spanning tree
+%if the following condition holds:
+%
+%\begin{itemize}
+%    \item For any partition of the vertices of $G$ into two subsets, the
+%          minimum-weight edge with one endpoint in each subset is unique.
+%\end{itemize}
+%
+%\begin{proof}[Proof by Contradiction]
+%    Let $G$ be an edge-weighted graph. Let $T_1$, $T_2$ be arbitrary
+%    partitions of $G$.
+%    
+%    Assume the minimum-weight edge with one endpoint in each subset is
+%    not unique.
+%
+%    Then $\exists$ some edges $e_1$ and $e_2$ which have one endpoint in each
+%    subset.
+%
+%    $\ldots$
+%
+%\end{proof}
 
 \subsection*{(c)}
 Describe and analyze an algorithm to determine whether or not a graph
@@ -88,6 +88,7 @@ Shimble's algorithm with the minor change that in the second loop:
 \end{algorithmic}
 \end{algorithm}
 
+\pagebreak
 
 \section*{Problem 2}
 Consider the following algorithm for finding the smallest element in an
@@ -126,8 +127,8 @@ This states that there are $\binom{n}{1}$ ways to organize the first $n
 - 1$ elements of RandomMin out of a total of $n!$ ways the array can be
 organized.
 
-\subsection*{(c)}
-What is the $exact$ expected number of executions of line \(*\)?
+%\subsection*{(c)}
+%What is the $exact$ expected number of executions of line \(*\)?
 
 
 \section*{Problem 3}
@@ -183,8 +184,6 @@ Thus $\bar{m}_1 \le \bar{m}p$
 \end{align*}
 
 
-\pagebreak
-
 \section*{Problem 4}
 
 \subsection*{(a)}
@@ -194,7 +193,7 @@ from $s$, or a shortest-path tree if there is no such cycle. The modified
 algorithm should still run in $O(mn)$ time.
 
 \begin{algorithm}
-\caption{ShimbleNegCycleOrTree}
+\caption{ShimbelNegCycleOrTree}
 \begin{algorithmic}
     \STATE InitSSSP($s$)
     \FORALL{$m$}
@@ -217,8 +216,6 @@ algorithm should still run in $O(mn)$ time.
 \end{algorithmic}
 \end{algorithm}
 
-\pagebreak
-
 \subsection*{(b)}
 Describe and analyze a modification of Shimbel's shortest-path
 algorithm that computes the correct shortest path distances from $s$ to
@@ -230,7 +227,7 @@ from $s$ to $v$. The modified algorithm should still run in $O(mn)$
 time.
 
 \begin{algorithm}
-\caption{ShimbleNegativeCycles}
+\caption{ShimbelNegativeCycles}
 \begin{algorithmic}
     \STATE InitSSSP($s$)
     \FORALL{$m$}
