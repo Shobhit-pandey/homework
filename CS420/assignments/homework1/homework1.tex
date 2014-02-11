@@ -14,7 +14,7 @@
 
 \title{CS420 - Homework \#1}
 \author{Trevor Bramwell}
-\date{\today}
+\date{February 6, 2014}
 
 \begin{document}
 \maketitle
@@ -134,17 +134,32 @@ What is the $exact$ expected number of executions of line \(*\)?
 The randomized linear time algorithm of Karger, Klein and Tarjan for
 finding a minimum spanning tree performs two steps of the Boruvka
 algorithm and uses sampling steps in which each edge of the graph is
-chosen, independently, with probability 1/2.
+chosen, independently, with probability 1/2.\newline
+
+The following solutions build off of the equation $\mathbb{E}[T(G)]$
+presented by Uri Zwick the Lecture notes for "Analysis of
+Algorithms": Minimum Spanning Trees.
+
 
 \subsection*{(a)}
 What would be the running time of the algorithm in terms of $m$, $n$,
 and $k$ if it performs $k$ steps of the Boruvka algorithm instead,
 where $k$ is a positive integer?
 
+\begin{equation*}
+    \mathbb{E}[T(G)] = a(m + n) + 2a(\frac{\bar{m}}{k} + 2 * \frac{\bar{n}}{k^2}) +
+    2a(\frac{\bar{n}}{k} + 2 * \frac{\bar{n}}{k^2})
+\end{equation*}
+
 \subsection*{(b)}
  What would be the expected running time of the algorithm in terms of
  $m$, $n$ and $p$ if the sampling probability were changed to $p$ ,
  where $0 \le p \le 1$?
+
+\begin{equation*}
+    \mathbb{E}[T(G)] = 2a(p(\bar{m} + \bar{n}) + 4 \bar{n} k^2)
+\end{equation*}
+
 
 \pagebreak
 
@@ -210,7 +225,5 @@ time.
     \ENDFOR
 \end{algorithmic}
 \end{algorithm}
-
-
 
 \end{document}
