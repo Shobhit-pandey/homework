@@ -109,9 +109,22 @@ unsorted array:
 \subsection*{(a)}
 In the worst case, how many times does RandomMin execute line \(*\)?
 
+
+\begin{equation*}
+O(n)
+\end{equation*}
+
 \subsection*{(b)}
 What is the probability that line \(*\) is executed during the $n$th
 iteration of the for loop?
+
+\begin{equation*}
+    \frac{\dbinom{n}{1}}{n!} = \frac{1}{(n-1)!}
+\end{equation*}
+
+This states that there are $\binom{n}{1}$ ways to organize the first $n
+- 1$ elements of RandomMin out of a total of $n!$ ways the array can be
+organized.
 
 \subsection*{(c)}
 What is the $exact$ expected number of executions of line \(*\)?
