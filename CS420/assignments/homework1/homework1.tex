@@ -152,13 +152,20 @@ where $k$ is a positive integer?
 \end{equation*}
 
 \subsection*{(b)}
- What would be the expected running time of the algorithm in terms of
- $m$, $n$ and $p$ if the sampling probability were changed to $p$ ,
- where $0 \le p \le 1$?
+What would be the expected running time of the algorithm in terms of
+$m$, $n$ and $p$ if the sampling probability were changed to $p$ ,
+where $0 \le p \le 1$?\\
 
-\begin{equation*}
-    \mathbb{E}[T(G)] = 2a(p(\bar{m} + \bar{n}) + 4 \bar{n} k^2)
-\end{equation*}
+The sampling probabilty only affects $\bar{m}_1$ in the original equation.
+Thus $\bar{m}_1 \le \bar{m}p$
+
+\begin{align*}
+    \mathbb{E}[T(G)] &\le a(\bar{m} + \bar{n}) + 2a\left(\bar{m}p
+                      + \cdot2\frac{\bar{n}}{4}\right)
+                      + 2a(\frac{\bar{n}}{2} + 2\cdot\frac{\bar{n}}{4})\\
+                     & \cdots \\
+                     &= 2a(\bar{m}(p + 1) + 2\bar{n})
+\end{align*}
 
 
 \pagebreak
