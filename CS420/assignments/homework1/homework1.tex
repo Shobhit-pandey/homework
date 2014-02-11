@@ -144,12 +144,27 @@ Algorithms": Minimum Spanning Trees.
 \subsection*{(a)}
 What would be the running time of the algorithm in terms of $m$, $n$,
 and $k$ if it performs $k$ steps of the Boruvka algorithm instead,
-where $k$ is a positive integer?
+where $k$ is a positive integer?\\
+
+When taking k steps of the Boruvka algorithm, the expected runtime changes
+to:
 
 \begin{equation*}
-    \mathbb{E}[T(G)] = a(m + n) + 2a(\frac{\bar{m}}{k} + 2 * \frac{\bar{n}}{k^2}) +
-    2a(\frac{\bar{n}}{k} + 2 * \frac{\bar{n}}{k^2})
+    \mathbb{E}[T(G)] = a(\bar{m} + \bar{n}) + \mathbb{E}[T(G_1)] +
+    (k-1)\mathbb{E}[T(G_2)]
 \end{equation*}
+
+This changes the upper bound to:
+
+\begin{align*}
+    \mathbb{E}[T(G)] &\le a(\bar{m} + \bar{n}) 
+        + 2a\left(\frac{\bar{m}}{2} + 2\cdot\frac{\bar{n}}{4}\right)
+        + (k-1)\left[2a\left(\frac{\bar{n}}{2} + 2\cdot\frac{\bar{n}}{4}\right)\right] \\
+                     &\le a(\bar{m} + \bar{n})
+        + 2a\left(\frac{\bar{m}}{2} + 2\cdot\frac{\bar{n}}{4}\right)
+        + 2a[(k-1)\bar{n}]\\
+                     &= 2a(\bar{m} + k\bar{n})
+\end{align*}
 
 \subsection*{(b)}
 What would be the expected running time of the algorithm in terms of
@@ -162,7 +177,7 @@ Thus $\bar{m}_1 \le \bar{m}p$
 \begin{align*}
     \mathbb{E}[T(G)] &\le a(\bar{m} + \bar{n}) + 2a\left(\bar{m}p
                       + \cdot2\frac{\bar{n}}{4}\right)
-                      + 2a(\frac{\bar{n}}{2} + 2\cdot\frac{\bar{n}}{4})\\
+                      + 2a\left(\frac{\bar{n}}{2} + 2\cdot\frac{\bar{n}}{4}\right)\\
                      & \cdots \\
                      &= 2a(\bar{m}(p + 1) + 2\bar{n})
 \end{align*}
