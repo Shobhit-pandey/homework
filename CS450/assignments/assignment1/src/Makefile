@@ -4,16 +4,16 @@ COPTIONS=$(GCC_OPTIONS) $(GL_OPTIONS)
 
 all: prog
 
-prog: initShader.o simpleProgram.o
-	g++ -o prog initShader.o simpleProgram.o $(GL_OPTIONS)
+prog: initShader.o assignment1.o
+	g++ -o prog initShader.o assignment1.o $(GL_OPTIONS)
 
 initShader.o: initShader.cpp
 	g++ $(GCC_OPTIONS) -c initShader.cpp
 
-simpleProgram.o: simpleProgram.cpp
-	g++ $(GCC_OPTIONS) -c simpleProgram.cpp
+assignment1.o: assignment1.cpp
+	g++ $(GCC_OPTIONS) -c assignment1.cpp
 
 clean:
 	rm initShader.o
-	rm simpleProgram.o
+	rm assignment1.o
 	rm prog

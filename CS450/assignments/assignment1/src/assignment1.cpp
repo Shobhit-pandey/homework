@@ -9,36 +9,45 @@
 #include "../include/Angel.h"
 
 // A global constant for the number of points that will be in our object.
-const int NumPoints = 6;
+const int NumPoints = 9;
 
+// Specifiy the vertices for a rectangle.  The first and last vertex are
+// duplicated to close the box.
+vec2 verticies[] = {
+    vec2(-0.5, -0.5),
+    vec2(-0.5, 0.5),
+    vec2(0.5, 0.5),
+    vec2(0.5, 0.5),
+    vec2(0.5, -0.5),
+    vec2(-0.5, -0.5),
+    vec2(-0.5, 0.25), // Triangle
+    vec2(-1, -0.5),
+    vec2(0, -0.5)
+};
+
+// Create two vertex array object---OpenGL needs this to manage the Vertex
+// Buffer Object
+GLuint vao;
+
+// Create and initialize a buffer object---that's the memory buffer that
+// will be on the card!
+GLuint buffer;
 
 void init(void)
 {
-    // Specifiy the vertices for a rectangle.  The first and last vertex are
-    // duplicated to close the box.
-    vec2 vertices[] = {
-        vec2(-0.5, -0.5),
-        vec2(-0.5, 0.5),
-        vec2(0.5, 0.5),
-        vec2(0.5, 0.5),
-        vec2(0.5, -0.5),
-        vec2(-0.5, -0.5)
-    };
 
-    // Create a vertex array object---OpenGL needs this to manage the Vertex
-    // Buffer Object
-    GLuint vao[1];
+    // Generate two vertex arrays.
+    glGenVertexArrays(1, &vao);
 
-    // Generate the vertex array and then bind it to make make it active.
-    glGenVertexArrays(1, vao);
-    glBindVertexArray(vao[0]);
-
-    // Create and initialize a buffer object---that's the memory buffer that
-    // will be on the card!
-    GLuint buffer;
-
-    // We only need one for this example.
+    // We need one for this example.
     glGenBuffers(1, &buffer);
+
+    // 
+    // ---- RECTAGLE ----
+    //
+
+    // Bind the first one to make it active
+    glBindVertexArray(vao);
 
     // Bind makes it the active VBO
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -47,8 +56,11 @@ void init(void)
     // parameters tell it the type of buffer object, the size of the
     // data in bytes, the pointer for the data itself, and a hint for
     // how we intend to use it.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
 
+    //
+    // ---- SHADERS ----
+    //
     // Load the shaders.  Note that this function is not offered by OpenGL
     // directly, but provided as a convenience.
     GLuint program = InitShader("vshader32.glsl", "fshader32.glsl");
@@ -83,9 +95,13 @@ display(void)
     // clear the window
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Draw Rectagle and Triangle
+    glBindVertexArray(vao);
+
     // Draw the points.  The parameters to the function are: the mode,
     // the first index, and the count.
     glDrawArrays(GL_TRIANGLES, 0, NumPoints);
+
     glFlush();
     glutSwapBuffers();
 }
