@@ -9,84 +9,97 @@
 #include "../include/Angel.h"
 
 // A global constant for the number of points that will be in our object.
-const int NumPoints = 9;
+const int TriPoints = 3;
+const int RectPoints = 6;
 
 // Specifiy the vertices for a rectangle.  The first and last vertex are
 // duplicated to close the box.
-vec2 verticies[] = {
+vec2 triangle[] = {
+    vec2(-0.5, 0.5), // Triangle
+    vec2(-1, -0.5),
+    vec2(0, -0.5)
+};
+
+vec4 tri_colors[] = {
+    vec4(0.0, 1.0, 0.0, 1.0),
+    vec4(1.0, 0.0, 0.0, 1.0),
+    vec4(1.0, 0.0, 0.0, 1.0)
+};
+
+vec2 rectangle[] = {
     vec2(-0.5, -0.5),
     vec2(-0.5, 0.5),
     vec2(0.5, 0.5),
     vec2(0.5, 0.5),
     vec2(0.5, -0.5),
-    vec2(-0.5, -0.5),
-    vec2(-0.5, 0.25), // Triangle
-    vec2(-1, -0.5),
-    vec2(0, -0.5)
+    vec2(-0.5, -0.5)
+};
+
+vec4 rect_colors[] = {
+    vec4(1.0, 0.0, 0.0, 1.0),
+    vec4(0.0, 1.0, 0.0, 1.0),
+    vec4(0.0, 0.0, 1.0, 1.0),
+    vec4(0.0, 0.0, 1.0, 1.0),
+    vec4(0.0, 0.0, 0.0, 1.0),
+    vec4(1.0, 0.0,0.0, 1.0)
 };
 
 // Create two vertex array object---OpenGL needs this to manage the Vertex
 // Buffer Object
-GLuint vao;
+GLuint vao[2];
 
 // Create and initialize a buffer object---that's the memory buffer that
 // will be on the card!
-GLuint buffer;
+GLuint buffer[2];
 
 void init(void)
 {
-
-    // Generate two vertex arrays.
-    glGenVertexArrays(1, &vao);
-
-    // We need one for this example.
-    glGenBuffers(1, &buffer);
-
-    // 
-    // ---- RECTAGLE ----
-    //
-
-    // Bind the first one to make it active
-    glBindVertexArray(vao);
-
-    // Bind makes it the active VBO
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-    // Here we copy the vertex data into our buffer on the card.  The
-    // parameters tell it the type of buffer object, the size of the
-    // data in bytes, the pointer for the data itself, and a hint for
-    // how we intend to use it.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
-
     //
     // ---- SHADERS ----
     //
-    // Load the shaders.  Note that this function is not offered by OpenGL
-    // directly, but provided as a convenience.
     GLuint program = InitShader("vshader32.glsl", "fshader32.glsl");
-
-    // Make that shader program active.
     glUseProgram(program);
+    GLuint pos = glGetAttribLocation(program, "vPosition");
+    GLuint col = glGetAttribLocation(program, "vColor");
 
-    // Initialize the vertex position attribute from the vertex shader.  When
-    // the shader and the program are linked, a table is created for the shader
-    // variables.  Here, we get the index of the vPosition variable.
-    GLuint loc = glGetAttribLocation(program, "vPosition");
+    // Generate two vertex arrays and two buffers
+    glGenVertexArrays(2, vao);
+    glGenBuffers(2, buffer);
 
-    // We want to set this with an array!
-    glEnableVertexAttribArray(loc);
+    // 
+    // ---- Triangle ----
+    //
 
-    // We map it to this offset in our current buffer (VBO) So, our position
-    // data is going into loc and contains 2 floats.  The parameters to this
-    // function are the index for the shader variable, the number of
-    // components, the type of the data, a boolean for whether or not
-    // this data is normalized (0--1), stride (or byte offset between
-    // consective attributes), and a pointer to the first component.
-    // Note that BUFFER_OFFSET is a macro defined in the Angel.h file.
-    glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+    glBindVertexArray(vao[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle)+sizeof(tri_colors), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle), triangle);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangle), sizeof(tri_colors), tri_colors);
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+    glEnableVertexAttribArray(col);
+    glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(triangle)));
+
+
+    // 
+    // ---- Rectangle ----
+    //
+
+    glBindVertexArray(vao[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rectangle)+sizeof(rect_colors), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(rectangle), rectangle);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(rectangle), sizeof(rect_colors), rect_colors);
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+    glEnableVertexAttribArray(col);
+    glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(rectangle)));
 
     // Make the background white
     glClearColor(1.0, 1.0, 1.0, 1.0);
+    glBindVertexArray(0);
 }
 
 void
@@ -95,12 +108,13 @@ display(void)
     // clear the window
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw Rectagle and Triangle
-    glBindVertexArray(vao);
+    // Draw Triangle
+    glBindVertexArray(vao[0]);
+    glDrawArrays(GL_TRIANGLES, 0, TriPoints);
 
-    // Draw the points.  The parameters to the function are: the mode,
-    // the first index, and the count.
-    glDrawArrays(GL_TRIANGLES, 0, NumPoints);
+    // Draw Rectangle
+    glBindVertexArray(vao[1]);
+    glDrawArrays(GL_TRIANGLES, 0, RectPoints);
 
     glFlush();
     glutSwapBuffers();
