@@ -12,18 +12,28 @@
 const int TriPoints = 3;
 const int RectPoints = 6;
 
-// Specifiy the vertices for a rectangle.  The first and last vertex are
-// duplicated to close the box.
 vec2 triangle[] = {
-    vec2(-0.5, 0.5), // Triangle
     vec2(-1, -0.5),
-    vec2(0, -0.5)
+    vec2(-0.5, 0.5),
+    vec2(-0.5, -0.5)
 };
 
 vec4 tri_colors[] = {
+    vec4(0.0, 1.0, 1.0, 1.0),
     vec4(0.0, 1.0, 0.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
     vec4(1.0, 0.0, 0.0, 1.0)
+};
+
+vec2 triangle2[] = {
+    vec2(0.5, 0.5),
+    vec2(1, 0.5),
+    vec2(0.5, -0.5)
+};
+
+vec4 tri2_colors[] = {
+    vec4(0.0, 0.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 0.0, 1.0),
+    vec4(0.0, 0.0, 0.0, 1.0)
 };
 
 vec2 rectangle[] = {
@@ -46,11 +56,11 @@ vec4 rect_colors[] = {
 
 // Create two vertex array object---OpenGL needs this to manage the Vertex
 // Buffer Object
-GLuint vao[2];
+GLuint vao[3];
 
 // Create and initialize a buffer object---that's the memory buffer that
 // will be on the card!
-GLuint buffer[2];
+GLuint buffer[3];
 
 void init(void)
 {
@@ -63,10 +73,10 @@ void init(void)
     GLuint col = glGetAttribLocation(program, "vColor");
 
     // Generate two vertex arrays and two buffers
-    glGenVertexArrays(2, vao);
-    glGenBuffers(2, buffer);
+    glGenVertexArrays(3, vao);
+    glGenBuffers(3, buffer);
 
-    // 
+    //
     // ---- Triangle ----
     //
 
@@ -81,13 +91,27 @@ void init(void)
     glEnableVertexAttribArray(col);
     glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(triangle)));
 
+    // 
+    // ---- Triangle2 ----
+    //
+    //
+    glBindVertexArray(vao[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle2)+sizeof(tri2_colors), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(triangle2), triangle2);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(triangle2), sizeof(tri2_colors), tri2_colors);
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+    glEnableVertexAttribArray(col);
+    glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(triangle2)));
 
     // 
     // ---- Rectangle ----
     //
 
-    glBindVertexArray(vao[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer[1]);
+    glBindVertexArray(vao[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectangle)+sizeof(rect_colors), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(rectangle), rectangle);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(rectangle), sizeof(rect_colors), rect_colors);
@@ -97,23 +121,29 @@ void init(void)
     glEnableVertexAttribArray(col);
     glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(rectangle)));
 
-    // Make the background white
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    // Make the background black
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+
+    // Ensure we don't try to implicitly draw something and fail.
     glBindVertexArray(0);
 }
 
 void
 display(void)
 {
-    // clear the window
+    // Clear the window
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw Triangle
+    // Draw a Triangle
     glBindVertexArray(vao[0]);
     glDrawArrays(GL_TRIANGLES, 0, TriPoints);
 
-    // Draw Rectangle
+    // Draw another Triangle
     glBindVertexArray(vao[1]);
+    glDrawArrays(GL_TRIANGLES, 0, TriPoints);
+
+    // Draw a Rectangle
+    glBindVertexArray(vao[2]);
     glDrawArrays(GL_TRIANGLES, 0, RectPoints);
 
     glFlush();
