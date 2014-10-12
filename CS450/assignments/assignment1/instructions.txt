@@ -1,0 +1,36 @@
+Assignment #1 - 2D Graphics
+===========================
+Due Sunday, 10/13 by Midnight
+
+There are two goals for this assignment.
+
+    Get a working development environment set up for all future assignments
+    Write your first 2D OpenGL program 
+
+The assignment is fairly open-ended in that YOU get to decide what to draw.
+There are, however, a few requirements that you must meet.
+
+    (30 pts) Scene must contain at least 3 geometric models with a combined
+             total of AT LEAST 25 vertices. You may use a single VBO or
+             multiple VBO's. At least one geometric model should contain
+             per vertex colors (see below) These vertices can be
+             hardcoded or generated algorithmically (e.g. like the
+             Sierpinski Gasket in the textbook) .
+    (15 pts) Demonstrate use of at least 3 OpenGL primitives (POINTS,
+             LINES, TRIANGLES)
+    (20 pts) Demonstrate use of an array of colors to color primitives
+    (15 pts) Use of only modern opengl functionality (no deprectaed
+             function calls)
+    (20 pts) Use clean programming style and documentation
+
+Be creative, have fun, and be sure to meet the requirements. You can
+work in OpenGL or WebGL...your choice.
+
+Turn In
+-------
+
+Using TEACH, please turn in a single zip file that includes your source
+code (.h, .cpp). PLEASE NO DEBUG FOLDERS or project files!!! Also,
+please turn in a readme.txt file with instructions on how to use your
+application(if necessary). You'll be demoing your code to the TAs for
+your final grade.
