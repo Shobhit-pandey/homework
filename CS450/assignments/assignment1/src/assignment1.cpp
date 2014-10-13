@@ -11,7 +11,42 @@
 // A global constant for the number of points that will be in our object.
 const int TriPoints = 3;
 const int RectPoints = 6;
+const int CoorPoints = 4;
+const int PointPoints = 5;
 
+// 2 Lines
+vec2 coor_plane[] = {
+    vec2(-1, 0),
+    vec2(1, 0),
+    vec2(0, -1),
+    vec2(0, 1)
+};
+
+vec4 coor_colors[] = {
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0)
+};
+
+// 3 Points
+vec2 points[] = {
+    vec2(-0.25, 0.75),
+    vec2(0.75, 0.25),
+    vec2(0.25, -0.25),
+    vec2(0.25, 0.25),
+    vec2(-0.25, -0.25),
+};
+
+vec4 point_colors[] = {
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0)
+};
+
+// Triangles
 vec2 triangle[] = {
     vec2(-1, -0.5),
     vec2(-0.5, 0.5),
@@ -56,25 +91,27 @@ vec4 rect_colors[] = {
 
 // Create two vertex array object---OpenGL needs this to manage the Vertex
 // Buffer Object
-GLuint vao[3];
+GLuint vao[5];
 
 // Create and initialize a buffer object---that's the memory buffer that
 // will be on the card!
-GLuint buffer[3];
+GLuint buffer[5];
 
 void init(void)
 {
     //
     // ---- SHADERS ----
     //
+
+    // Per vertex coloring
     GLuint program = InitShader("vshader32.glsl", "fshader32.glsl");
     glUseProgram(program);
     GLuint pos = glGetAttribLocation(program, "vPosition");
     GLuint col = glGetAttribLocation(program, "vColor");
 
     // Generate two vertex arrays and two buffers
-    glGenVertexArrays(3, vao);
-    glGenBuffers(3, buffer);
+    glGenVertexArrays(5, vao);
+    glGenBuffers(5, buffer);
 
     //
     // ---- Triangle ----
@@ -121,6 +158,34 @@ void init(void)
     glEnableVertexAttribArray(col);
     glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(rectangle)));
 
+    //
+    // ---- Lines ----
+    //
+
+    glBindVertexArray(vao[3]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(coor_plane)+sizeof(coor_colors), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(coor_plane), coor_plane);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(coor_plane), sizeof(coor_colors), coor_colors);
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+    glEnableVertexAttribArray(col);
+    glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(coor_plane)));
+
+    //
+    // ----- Points ----
+    //
+
+    glBindVertexArray(vao[4]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[4]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points)+sizeof(point_colors), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(points), points);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(points), sizeof(point_colors), point_colors);
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+    glEnableVertexAttribArray(col);
+    glVertexAttribPointer(col, 4, GL_FLOAT, GL_FALSE, 0,  BUFFER_OFFSET(sizeof(points)));
+
     // Make the background black
     glClearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -145,6 +210,14 @@ display(void)
     // Draw a Rectangle
     glBindVertexArray(vao[2]);
     glDrawArrays(GL_TRIANGLES, 0, RectPoints);
+
+    // Draw the R2 Coordinate Plane
+    glBindVertexArray(vao[3]);
+    glDrawArrays(GL_LINES, 0, CoorPoints);
+
+    // Draw some points in R2
+    glBindVertexArray(vao[4]);
+    glDrawArrays(GL_POINTS, 0, PointPoints);
 
     glFlush();
     glutSwapBuffers();
