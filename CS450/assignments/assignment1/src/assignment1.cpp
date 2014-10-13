@@ -19,7 +19,7 @@
 const int TriPoints = 3;
 const int RectPoints = 6;
 const int CoorPoints = 4;
-const int PointPoints = 5;
+const int PointPoints = 16;
 
 // Lines for the R2 Coordinate Plane
 vec2 coor_plane[] = {
@@ -39,16 +39,38 @@ vec4 coor_colors[] = {
 
 // Some Random Points within R2
 vec2 points[] = {
+    vec2(-0.75, 0.75),
+    vec2(-0.75, 0.5),
+    vec2(-0.75, 0.25),
+    vec2(-0.5, 0.75),
+    vec2(-0.5, 0.5),
+    vec2(-0.5, 0.25),
     vec2(-0.25, 0.75),
-    vec2(0.75, 0.25),
+    vec2(-0.25, 0.5),
+    vec2(-0.25, 0.25),
+    vec2(0, 0),
+    vec2(-0.25, -0.25),
     vec2(0.25, -0.25),
     vec2(0.25, 0.25),
-    vec2(-0.25, -0.25),
+    vec2(0.25, 0.75),
+    vec2(0.25, 0.5),
+    vec2(0.75, 0.25)
 };
 
 // All points are white so they show up on the black background and
 // multi-colored parallelogram
 vec4 point_colors[] = {
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0),
     vec4(1.0, 1.0, 1.0, 1.0),
     vec4(1.0, 1.0, 1.0, 1.0),
     vec4(1.0, 1.0, 1.0, 1.0),
