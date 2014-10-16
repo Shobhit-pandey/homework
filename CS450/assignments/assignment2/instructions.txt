@@ -1,0 +1,104 @@
+Assignment #2 - 3D Object Loader
+Due Wednesday, 10/22/2014 by 11:59pm
+
+This assignment is designed to introduce you to 3D graphics in OpenGL. You will
+build a basic object (.obj ) viewer that loads and renders 3D meshes. Again,
+you may work in pairs for this assignment, but it is not required.
+
+.OBJ loader/viewer
+------------------
+
+There are many common file formats for storing 3D objects. The .obj File
+Format[0] is a simple text-based format. For this assignment, you will write a
+loader for .obj files that reads the file and renders the corresponding 3D
+object with filled polygons.
+
+You will need to read and use the vertex and normal information for this
+assignment. You can ignore the texture coordinate information even though it
+will be given in the file. You can assume that we will give you files with
+triangle faces only. Your TA, Sean, has written up a nice tutorial for parsing
+files in general[1] and provided a pointer to a tutorial for parsing .obj files
+specifically.[2]
+
+Viewing Parameters
+------------------
+
+We would like you to experiment with various viewing parameters to familiarize
+yourself with the OpenGL Synthetic Camera Model. To be able to flexibly and
+efficiently experiment with different .obj files and viewing parameters, your
+application must provide a way for the user to input the following information
+WITHOUT RECOMPILING:
+
+ 1. .obj filename
+ 2. LookAt Parameters: eyex eyey eyez atx aty atz upx upy upz
+ 3. Projection Type: Perspective or Orthographic
+ 4. Projection Parameters: Persp (yfov, aspect ratio , near, far),
+    Ortho(left,right,bottom,top,near,far) 
+
+There are two acceptable options.
+
+ 1. You can define these in a separate scene file and read them in
+ 2. Or, you can read this data from input fields in a graphical user interface.
+
+Either of these options would be sufficient.
+
+You must also experiment with the viewing parameters for LookAt and your chosen
+Perspective or Orthographic projection to get a feel for how these parameters
+affect the rendering of your scene. When you demo, you must come prepared to
+show at least three separate views of the bunnyNS.obj file (see below).
+
+In addition, when you demo, we will provide an additional .obj file and viewing
+specification to test out your code.
+
+Shading
+-------
+
+Because we have not yet covered shading in 3D, we are providing the lighting
+and shading parameters in the skeleton code and the matching vertex and
+fragment shaders. We will use a uniform variable to set the color of the .obj
+file object. You should not have to modify any of this code.
+
+.obj Files and Viewing Params
+-----------------------------
+
+Here are some .obj files to load into your viewer along with the viewing
+parameters that should make them visible. In all cases, we used the following
+lighting parameters.
+
+var light_position = vec4( 1.5, 1.5, 2.0, 1.0 );
+var light_ambient = vec4( 0.2, 0.2, 0.2, 1.0 );
+var light_diffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var light_specular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var material_ambient = vec4( 1.0, 0.0, 1.0, 1.0 );
+var material_diffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+var material_specular = vec4( 1.0, 0.8, 0.0, 1.0 );
+var material_shininess = 100.0;
+
+sphere42NS.obj (small) ( .png )
+
+Perspective (90.0, 1.0, 0.1, 4.0);
+LookAt (0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+bunnyNS.obj (large 5000 verts)( .png )
+teapotNS.obj ( .png )
+
+Perspective (60.0, 1.0, 0.1, 0.5);
+LookAt (0.0, 0.0, 0.3, 0.0, 0.1, 0.0, 0.0, 1.0, 0.0);
+
+Skeleton code with shaders and shading inserted.
+
+    skeleton.zip 
+
+Grading
+
+    (10) Correctly parses all properly formatted .obj files
+    (40) Rendering (Does it appear correct?)
+    (10) Parameter Spec without Recompile
+    (20) Demonstrate 3 views of the bunnyNS.obj file
+    (20) Style/Compile 
+
+References
+----------
+[0] http://en.wikipedia.org/wiki/Wavefront_.obj_file
+[1] http://classes.engr.oregonstate.edu/eecs/fall2014/cs450/parsertut.html
+[2] http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
