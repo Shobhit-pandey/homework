@@ -1,0 +1,33 @@
+CS450
+=====
+Computer Graphics
+
+Professor Ron Metoyer
+
+Class Website: http://classes.engr.oregonstate.edu/eecs/fall2014/cs450/index.php
+Class Piazza: https://piazza.com/class/i0gyiy6kuv52vw
+Book Website: http://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SIXTH_EDITION/
+Book Availability: http://books.google.com/books?id=KhPmtgAACAAJ&sitesec=buy&source=gbs_atb
+
+Objectives
+----------
+
+* Graphics Pipeline
+* OpenGL
+* Basic Modeling
+* Transformations
+* Viewing
+* Shading & Texturing
+
+Assignments
+-----------
+
+* 6 Assignments
+* Quizzes on Fridays
+* Midterm and Final
+* Additional Requirements 
+  for CS550 on final assignment
+
+Grades
+------
+* Assignments: 50% 
