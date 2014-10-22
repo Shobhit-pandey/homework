@@ -15,24 +15,6 @@ GLuint  projection; // projection matrix uniform shader variable location
 
 ParserState ps;
 
-void
-printParserState(ParserState* ps) {
-    printf("Vertices: %ld\n", ps->vertices.size());
-    printf("Normals: %ld\n", ps->normals.size());
-    printf("Indexes: %ld\n", (ps->indexes.size()/3));
-    printf("lines: %d\n", ps->line);
-
-    for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
-        printf("v %f %f %f\n", ps->vertices[i][0], ps->vertices[i][1], ps->vertices[i][2]);
-    }
-    for (unsigned int i = 0; i < ps->normals.size(); ++i) {
-        printf("vn %f %f %f\n", ps->normals[i][0], ps->normals[i][1], ps->normals[i][2]);
-    }
-    for (unsigned int i = 0; i < ps->indexes.size()/3; ++i) {
-        printf("f %d %d %d\n", ps->indexes[i*3+0], ps->indexes[i*3+1], ps->indexes[i*3+2]);
-    }
-}
-
 int
 vec_size(std::vector<vec4> v) {
     return sizeof(v[0])*v.size();

@@ -16,6 +16,7 @@ struct ParserState
     char lookahead[256];
 };
 
+void printParserState(ParserState* ps);
 void line(ParserState* ps);
 void parse(ParserState* ps, const char* filename);
 #endif
