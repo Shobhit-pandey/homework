@@ -25,6 +25,15 @@ vec_size_int(std::vector<int> v) {
     return sizeof(v[0])*v.size();
 }
 
+mat4 p = Perspective (75.0, 1.0, 0.01, 15.0);
+
+GLfloat eye_x = 0.0;
+GLfloat eye_y = 0.0;
+
+GLfloat pos_x = 0.0;
+GLfloat pos_y = 0.0;
+GLfloat pos_z = 1.0;
+
 // OpenGL initialization
 void
 init(ParserState* ps)
@@ -114,31 +123,6 @@ init(ParserState* ps)
     projection = glGetUniformLocation( program, "Projection" );
 
 
-    // Sphere
-    //mat4 p = Perspective(90.0, 1.0, 0.1, 8.0);
-    //point4  eye( 0.0, 0.0, 2.0, 1.0);
-    //point4  at( 0.0, 0.0, 0.0, 1.0 );
-    //vec4    up( 0.0, 1.0, 0.0, 0.0 );
-
-    // Teapot
-    mat4 p = Perspective(45.0, 1.0, 0.1, 10.0);
-    point4  eye( 0.0, 0.0, 2.0, 1.0);
-    point4  at( 0.0, 0.0, 0.0, 1.0 );
-    vec4    up( 0.0, 1.0, 0.0, 0.0 );
-
-    // Teapot & Bunny
-    //mat4 p = Perspective (60.0, 1.0, 0.1, 15.0);
-    //point4  eye( 0.0, 0.0, 0.3, 1.0);
-    //point4  at( 0.0, 1.0, 0.0, 1.0 );
-    //vec4    up( 0.0, 1.0, 0.0, 0.0 );
-
-
-    mat4  mv = LookAt( eye, at, up );
-
-    glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
-    glUniformMatrix4fv( projection, 1, GL_TRUE, p );
-
-
     glEnable( GL_DEPTH_TEST );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
 }
@@ -147,6 +131,17 @@ void
 display( void )
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    // Update Camera
+    point4 eye( pos_x, pos_y, pos_z, 1.0);
+    point4  at( eye_x, eye_y, 0.0, 1.0 );
+    vec4    up( 0.0, 1.0, 0.0, 0.0 );
+
+    mat4  mv = LookAt( eye, at, up );
+
+    glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
+    glUniformMatrix4fv( projection, 1, GL_TRUE, p );
+
     glDrawElements( GL_TRIANGLES, ps.vertices.size()*6, GL_UNSIGNED_INT, 0 );
     glutSwapBuffers();
 }
@@ -156,10 +151,50 @@ keyboard( unsigned char key, int x, int y )
 {
     switch( key ) {
 	case 033:  // Escape key
-	case 'q': case 'Q':
+	case 'Q':
 	    exit( EXIT_SUCCESS );
 	    break;
+    case '4':
+        eye_x -= 0.10;
+        break;
+    case '6':
+        eye_x += 0.10;
+        break;
+    case '2':
+        eye_y -= 0.10;
+        break;
+    case '8':
+        eye_y += 0.10;
+        break;
+    case '5':
+        printf("Camera: \t%f %f %f\nLooking At:\t%f %f %f\n",
+               pos_x, pos_y, pos_z,
+               eye_x, eye_y, 0.0);
+        break;
+    case 'w':
+        pos_z -= 0.10;
+        break;
+    case 's':
+        pos_z += 0.10;
+        break;
+    case 'a':
+        pos_x -= 0.10;
+        eye_x -= 0.10;
+        break;
+    case 'd':
+        pos_x += 0.10;
+        eye_x += 0.10;
+        break;
+    case 'q':
+        pos_y -= 0.10;
+        eye_y -= 0.10;
+        break;
+    case 'e':
+        pos_y +=0.10;
+        eye_y += 0.10;
+        break;
     }
+    glutPostRedisplay();
 }
 
 
@@ -181,9 +216,6 @@ int main(int argc, char** argv)
     //parse(&ps, "../assets/sphere42NS.obj");
     parse(&ps, "../assets/teapotNS.obj");
     //parse(&ps, "../assets/bunnyNS.obj");
-
-    // Debug
-    //printParserState(&ps);
 
     // Pass to init
     init(&ps);
