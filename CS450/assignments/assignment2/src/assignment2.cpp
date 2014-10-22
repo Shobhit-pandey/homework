@@ -13,7 +13,7 @@ typedef Angel::vec4  point4;
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
 
-ParserState ps;
+std::vector<ParserState> objects;
 
 int
 vec_size(std::vector<vec4> v) {
@@ -142,7 +142,9 @@ display( void )
     glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
     glUniformMatrix4fv( projection, 1, GL_TRUE, p );
 
-    glDrawElements( GL_TRIANGLES, ps.vertices.size()*6, GL_UNSIGNED_INT, 0 );
+    for (unsigned int i = 0; i < objects.size(); ++i) {
+        glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+    }
     glutSwapBuffers();
 }
 
@@ -197,6 +199,30 @@ keyboard( unsigned char key, int x, int y )
     glutPostRedisplay();
 }
 
+void
+printArgs(int argc, char** argv) {
+    if (argc > 1) {
+        for (int i = 1; i < argc; ++i) {
+            if (i != argc && i != 1) printf(", ");
+            printf("arg%d: %s", i, argv[i]);
+        }
+        printf("\n");
+    }
+}
+
+void
+readObjFilenames(int argc, char** argv) {
+    if (argc > 1) {
+        for (int i = 1; i < argc; ++i) {
+            ParserState ps;
+            parse(&ps, argv[i]);
+            objects.push_back(ps);
+        }
+    } else {
+        printf("Please provide an object file.\n");
+        exit(0);
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -212,13 +238,12 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
-    // Parse obj
-    //parse(&ps, "../assets/sphere42NS.obj");
-    parse(&ps, "../assets/teapotNS.obj");
-    //parse(&ps, "../assets/bunnyNS.obj");
+    readObjFilenames(argc, argv);
 
     // Pass to init
-    init(&ps);
+    for (unsigned int i = 0; i < objects.size(); ++i) {
+        init(&objects[i]);
+    }
 
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
