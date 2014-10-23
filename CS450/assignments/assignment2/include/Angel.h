@@ -38,7 +38,6 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <GL/freeglut_ext.h>
 
 // Define a helpful macro for handling offsets into buffer objects
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
@@ -66,11 +65,5 @@ const GLfloat  DegreesToRadians = M_PI / 180.0;
 
 #include "vec.h"
 #include "mat.h"
-//#include "CheckError.h"
-
-#define Print(x)  do { std::cerr << #x " = " << (x) << std::endl; } while(0)
-
-//  Globally use our namespace in our example programs.
-using namespace Angel;
 
 #endif // __ANGEL_H__

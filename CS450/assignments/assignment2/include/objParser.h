@@ -3,6 +3,8 @@
 
 #include <vector>
 
+using Angel::vec4;
+
 // ParserState struct
 // Holds all the verticies, normals, and indexes listed in the obj file.
 struct ParserState

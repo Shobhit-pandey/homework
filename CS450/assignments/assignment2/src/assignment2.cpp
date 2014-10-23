@@ -7,6 +7,11 @@
 #include "objParser.h"
 #include <stdio.h>
 
+using Angel::vec4;
+using Angel::mat4;
+using Angel::Perspective;
+using Angel::InitShader;
+
 typedef Angel::vec4  color4;
 typedef Angel::vec4  point4;
 
