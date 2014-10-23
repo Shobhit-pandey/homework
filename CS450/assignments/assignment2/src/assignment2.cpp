@@ -212,20 +212,20 @@ printArgs(int argc, char** argv) {
 
 void
 readObjFilenames(int argc, char** argv) {
-    if (argc > 1) {
-        for (int i = 1; i < argc; ++i) {
-            ParserState ps;
-            parse(&ps, argv[i]);
-            objects.push_back(ps);
-        }
-    } else {
-        printf("Please provide an object file.\n");
-        exit(0);
+    for (int i = 1; i < argc; ++i) {
+        ParserState ps;
+        parse(&ps, argv[i]);
+        objects.push_back(ps);
     }
 }
 
 int main(int argc, char** argv)
 {
+    if (argc == 1) {
+        printf("Usage: %s filename.obj [filename.obj, ...]\n", argv[0]);
+        exit(0);
+    }
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitContextVersion (3, 2);
