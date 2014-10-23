@@ -222,9 +222,32 @@ readObjFilenames(int argc, char** argv) {
 int main(int argc, char** argv)
 {
     if (argc == 1) {
-        printf("Usage: %s filename.obj [filename.obj, ...]\n", argv[0]);
+        printf("Usage: %s filename.obj [filename.obj, ...]\n\n", argv[0]);
         exit(0);
     }
+
+    printf("\n"
+           "The camera location can be controlled with W,A,S,D, and Q,E.\n"
+           "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
+           "\n"
+           "All changes to the camera are done in 0.1 increments.\n"
+           "\n"
+           "Eye:\n"
+           "\tW\tMove the camera along +Z.\n"
+           "\tS\tMove the camera along -Z.\n"
+           "\tA\tMove the camera along +X.\n"
+           "\tD\tMove the camera along -X.\n"
+           "\tQ\tMove the camera along +Y.\n"
+           "\tE\tMove the camera along -Y.\n"
+           "At:\n"
+           "\t4\tLook  left (-X).\n"
+           "\t6\tLook right (+X).\n"
+           "\t8\tLook    up (+Y).\n"
+           "\t2\tLook  down (-Y).\n"
+           "\t7\tLook    up (+Z).\n"
+           "\t9\tLook  down (-Z).\n"
+           "\n"
+          );
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
