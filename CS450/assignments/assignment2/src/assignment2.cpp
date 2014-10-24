@@ -47,6 +47,38 @@ GLfloat up_x = 0.0;
 GLfloat up_y = 1.0;
 GLfloat up_z = 0.0;
 
+char usage[] = "\n"
+               "The camera location can be controlled with W,A,S,D, and Q,E.\n"
+               "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
+               "\n"
+               "All changes to the camera are done in 0.1 increments.\n"
+               "\n"
+               "Eye:\n"
+               "\tA\tMove    right (+X).\n"
+               "\tD\tMove     left (-X).\n"
+               "\tQ\tMove       up (+Y).\n"
+               "\tE\tMove     down (-Y).\n"
+               "\tW\tMove  forward (+Z).\n"
+               "\tS\tMove backward (-Z).\n"
+               "At:\n"
+               "\t6\tLook   right (+X).\n"
+               "\t4\tLook    left (-X).\n"
+               "\t8\tLook      up (+Y).\n"
+               "\t2\tLook    down (-Y).\n"
+               "\t9\tLook further (+Z).\n"
+               "\t7\tLook  nearer (-Z).\n"
+               "Up:\n"
+               "\tJ\tYaw    left (+X)\n"
+               "\tL\tYaw   right (-X)\n"
+               "\tI\tPitch    up (+Y)\n"
+               "\tK\tPitch  down (-Y)\n"
+               "\tU\tRoll   left (+Z)\n"
+               "\tO\tRoll  right (-Z)\n"
+               "Lens:\n"
+               "\tP\tPerspective\n"
+               "\tY\tOrtho\n"
+               "\n";
+
 // OpenGL initialization
 void
 init(ParserState* ps)
@@ -233,38 +265,7 @@ int main(int argc, char** argv)
         exit(0);
     }
 
-    printf("\n"
-           "The camera location can be controlled with W,A,S,D, and Q,E.\n"
-           "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
-           "\n"
-           "All changes to the camera are done in 0.1 increments.\n"
-           "\n"
-           "Eye:\n"
-           "\tA\tMove    right (+X).\n"
-           "\tD\tMove     left (-X).\n"
-           "\tQ\tMove       up (+Y).\n"
-           "\tE\tMove     down (-Y).\n"
-           "\tW\tMove  forward (+Z).\n"
-           "\tS\tMove backward (-Z).\n"
-           "At:\n"
-           "\t6\tLook   right (+X).\n"
-           "\t4\tLook    left (-X).\n"
-           "\t8\tLook      up (+Y).\n"
-           "\t2\tLook    down (-Y).\n"
-           "\t9\tLook further (+Z).\n"
-           "\t7\tLook  nearer (-Z).\n"
-           "Up:\n"
-           "\tJ\tYaw    left (+X)\n"
-           "\tL\tYaw   right (-X)\n"
-           "\tI\tPitch    up (+Y)\n"
-           "\tK\tPitch  down (-Y)\n"
-           "\tU\tRoll   left (+Z)\n"
-           "\tO\tRoll  right (-Z)\n"
-           "Lens:\n"
-           "\tP\tPerspective\n"
-           "\tY\tOrtho\n"
-           "\n"
-          );
+    printf("%s", usage);
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -284,7 +285,7 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < objects.size(); ++i) {
         init(&objects[i]);
     }
-    printf("Initialized: %ld objects\n", objects.size());
+    printf("Initialized: %ld objects\n\n", objects.size());
 
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
