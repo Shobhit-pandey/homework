@@ -250,7 +250,7 @@ readSceneFilename(char** argv) {
 int main(int argc, char** argv)
 {
     if (argc == 1) {
-        printf("Usage: %s filename.obj [filename.obj, ...]\n\n", argv[0]);
+        printf("Usage: %s scenefile.glsf filename.obj [filename.obj, ...]\n\n", argv[0]);
         exit(0);
     }
 
