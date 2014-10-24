@@ -5,9 +5,12 @@
 // macro definitions.
 #include "Angel.h"
 #include "objParser.h"
+#include "sceneParser.h"
 #include <stdio.h>
 
+using scene::SceneState;
 using obj::ParserState;
+
 using Angel::vec4;
 using Angel::mat4;
 using Angel::Perspective;
@@ -20,6 +23,7 @@ typedef Angel::vec4  point4;
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
 
+SceneState ss;
 std::vector<ParserState> objects;
 std::vector<GLuint> vaos;
 
@@ -251,11 +255,16 @@ printArgs(int argc, char** argv) {
 
 void
 readObjFilenames(int argc, char** argv) {
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 2; i < argc; ++i) {
         ParserState ps;
         obj::parse(&ps, argv[i]);
         objects.push_back(ps);
     }
+}
+
+void
+readSceneFilename(char** argv) {
+    scene::parse(&ss, argv[1]);
 }
 
 int main(int argc, char** argv)
@@ -279,7 +288,10 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
+    readSceneFilename(argv);
     readObjFilenames(argc, argv);
+
+    printSceneState(&ss);
 
     // Pass to init
     for (unsigned int i = 0; i < objects.size(); ++i) {

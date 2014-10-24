@@ -4,11 +4,14 @@ COPTIONS=$(GCC_OPTIONS) $(GL_OPTIONS)
 
 all: prog
 
-prog: objParser.o initShader.o assignment2.o
-	g++ -o prog objParser.o initShader.o assignment2.o $(GL_OPTIONS)
+prog: sceneParser.o objParser.o initShader.o assignment2.o
+	g++ -o prog sceneParser.o objParser.o initShader.o assignment2.o $(GL_OPTIONS)
 
 objParser.o: objParser.cpp
 	g++ $(GCC_OPTIONS) -c objParser.cpp
+
+sceneParser.o: sceneParser.cpp
+	g++ $(GCC_OPTIONS) -c sceneParser.cpp
 
 initShader.o: initShader.cpp
 	g++ $(GCC_OPTIONS) -c initShader.cpp
