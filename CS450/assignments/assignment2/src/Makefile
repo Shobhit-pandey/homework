@@ -20,7 +20,8 @@ assignment2.o: assignment2.cpp
 	g++ $(GCC_OPTIONS) -c assignment2.cpp
 
 clean:
-	rm initShader.o
-	rm objParser.o
-	rm assignment2.o
-	rm prog
+	-rm initShader.o
+	-rm objParser.o
+	-rm sceneParser.o
+	-rm assignment2.o
+	-rm prog
