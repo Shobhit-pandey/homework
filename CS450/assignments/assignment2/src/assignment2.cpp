@@ -70,9 +70,6 @@ char help_msg[] = "\n"
    "\tK\tPitch  down (-Y)\n"
    "\tU\tRoll   left (+Z)\n"
    "\tO\tRoll  right (-Z)\n"
-   "Lens:\n"
-   "\tP\tPerspective\n"
-   "\tY\tOrtho\n"
    "\n";
 
 // OpenGL initialization
