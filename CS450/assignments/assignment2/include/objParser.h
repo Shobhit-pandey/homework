@@ -5,6 +5,8 @@
 
 using Angel::vec4;
 
+namespace obj {
+
 // ParserState struct
 // Holds all the verticies, normals, and indexes listed in the obj file.
 struct ParserState
@@ -21,4 +23,6 @@ struct ParserState
 void printParserState(ParserState* ps);
 void line(ParserState* ps);
 void parse(ParserState* ps, const char* filename);
+
+}
 #endif

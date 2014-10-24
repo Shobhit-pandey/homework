@@ -7,6 +7,7 @@
 #include "objParser.h"
 #include <stdio.h>
 
+using obj::ParserState;
 using Angel::vec4;
 using Angel::mat4;
 using Angel::Perspective;
@@ -220,7 +221,7 @@ void
 readObjFilenames(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         ParserState ps;
-        parse(&ps, argv[i]);
+        obj::parse(&ps, argv[i]);
         objects.push_back(ps);
     }
 }

@@ -7,6 +7,8 @@
 
 using std::vector;
 
+namespace obj {
+
 void
 printParserState(ParserState* ps) {
     printf("Vertices: %ld\n", ps->vertices.size());
@@ -78,4 +80,6 @@ parse(ParserState* ps, const char* filename)
     }
 
     line(ps);
+}
+
 }
