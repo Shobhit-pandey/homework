@@ -167,27 +167,13 @@ keyboard( unsigned char key, int x, int y )
 {
     switch( key ) {
 	case 033:  // Escape key
-	case 'Q':
-	    exit( EXIT_SUCCESS );
-	    break;
-    case '4':
-        eye_x -= 0.10;
-        break;
-    case '6':
-        eye_x += 0.10;
-        break;
-    case '2':
-        eye_y -= 0.10;
-        break;
-    case '8':
-        eye_y += 0.10;
-        break;
-    case '7':
-        eye_z += 0.10;
-        break;
-    case '9':
-        eye_z -= 0.10;
-        break;
+	case 'Q': exit( EXIT_SUCCESS ); break;
+    case '4': eye_x -= 0.10; break;
+    case '6': eye_x += 0.10; break;
+    case '2': eye_y -= 0.10; break;
+    case '8': eye_y += 0.10; break;
+    case '7': eye_z += 0.10; break;
+    case '9': eye_z -= 0.10; break;
     case '5':
         printf("Camera: \t%.2f %.2f %.2f\n"
                "Looking At:\t%.2f %.2f %.2f\n"
@@ -196,42 +182,18 @@ keyboard( unsigned char key, int x, int y )
                eye_x, eye_y, eye_z,
                up_x, up_y, up_z);
         break;
-    case 'w':
-        pos_z -= 0.10;
-        break;
-    case 's':
-        pos_z += 0.10;
-        break;
-    case 'a':
-        pos_x -= 0.10;
-        break;
-    case 'd':
-        pos_x += 0.10;
-        break;
-    case 'q':
-        pos_y -= 0.10;
-        break;
-    case 'e':
-        pos_y +=0.10;
-        break;
-    case 'i':
-        up_x += 0.10;
-        break;
-    case 'k':
-        up_x -= 0.10;
-        break;
-    case 'j':
-        up_y += 0.10;
-        break;
-    case 'l':
-        up_y -= 0.10;
-        break;
-    case 'o':
-        up_z += 0.10;
-        break;
-    case 'u':
-        up_z -= 0.10;
-        break;
+    case 'w': pos_z -= 0.10; break;
+    case 's': pos_z += 0.10; break;
+    case 'a': pos_x -= 0.10; break;
+    case 'd': pos_x += 0.10; break;
+    case 'q': pos_y -= 0.10; break;
+    case 'e': pos_y += 0.10; break;
+    case 'i': up_x  += 0.10; break;
+    case 'k': up_x  -= 0.10; break;
+    case 'j': up_y  += 0.10; break;
+    case 'l': up_y  -= 0.10; break;
+    case 'o': up_z  += 0.10; break;
+    case 'u': up_z  -= 0.10; break;
     }
     glutPostRedisplay();
 }
