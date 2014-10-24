@@ -31,14 +31,19 @@ vec_size_int(std::vector<int> v) {
     return sizeof(v[0])*v.size();
 }
 
-mat4 p = Perspective (75.0, 1.0, 0.01, 15.0);
+mat4 p = Perspective (95.0, 1.0, 0.01, 15.0);
 
 GLfloat eye_x = 0.0;
 GLfloat eye_y = 0.0;
+GLfloat eye_z = 0.0;
 
 GLfloat pos_x = 0.0;
 GLfloat pos_y = 0.0;
 GLfloat pos_z = 1.0;
+
+GLfloat up_x = 0.0;
+GLfloat up_y = 1.0;
+GLfloat up_z = 0.0;
 
 // OpenGL initialization
 void
@@ -142,8 +147,8 @@ display( void )
 
     // Update Camera
     point4 eye( pos_x, pos_y, pos_z, 1.0);
-    point4  at( eye_x, eye_y, 0.0, 1.0 );
-    vec4    up( 0.0, 1.0, 0.0, 0.0 );
+    point4  at( eye_x, eye_y, eye_z, 1.0 );
+    vec4    up( up_x, up_y, up_z, 0.0 );
 
     mat4  mv = LookAt( eye, at, up );
 
@@ -177,10 +182,19 @@ keyboard( unsigned char key, int x, int y )
     case '8':
         eye_y += 0.10;
         break;
+    case '7':
+        eye_z += 0.10;
+        break;
+    case '9':
+        eye_z -= 0.10;
+        break;
     case '5':
-        printf("Camera: \t%f %f %f\nLooking At:\t%f %f %f\n",
+        printf("Camera: \t%.2f %.2f %.2f\n"
+               "Looking At:\t%.2f %.2f %.2f\n"
+               "Up:\t\t%.2f %.2f %.2f\n",
                pos_x, pos_y, pos_z,
-               eye_x, eye_y, 0.0);
+               eye_x, eye_y, eye_z,
+               up_x, up_y, up_z);
         break;
     case 'w':
         pos_z -= 0.10;
@@ -190,19 +204,33 @@ keyboard( unsigned char key, int x, int y )
         break;
     case 'a':
         pos_x -= 0.10;
-        eye_x -= 0.10;
         break;
     case 'd':
         pos_x += 0.10;
-        eye_x += 0.10;
         break;
     case 'q':
         pos_y -= 0.10;
-        eye_y -= 0.10;
         break;
     case 'e':
         pos_y +=0.10;
-        eye_y += 0.10;
+        break;
+    case 'i':
+        up_x += 0.10;
+        break;
+    case 'k':
+        up_x -= 0.10;
+        break;
+    case 'j':
+        up_y += 0.10;
+        break;
+    case 'l':
+        up_y -= 0.10;
+        break;
+    case 'o':
+        up_z += 0.10;
+        break;
+    case 'u':
+        up_z -= 0.10;
         break;
     }
     glutPostRedisplay();
@@ -242,19 +270,26 @@ int main(int argc, char** argv)
            "All changes to the camera are done in 0.1 increments.\n"
            "\n"
            "Eye:\n"
-           "\tW\tMove the camera along +Z.\n"
-           "\tS\tMove the camera along -Z.\n"
-           "\tA\tMove the camera along +X.\n"
-           "\tD\tMove the camera along -X.\n"
-           "\tQ\tMove the camera along +Y.\n"
-           "\tE\tMove the camera along -Y.\n"
+           "\tA\tMove    right (+X).\n"
+           "\tD\tMove     left (-X).\n"
+           "\tQ\tMove       up (+Y).\n"
+           "\tE\tMove     down (-Y).\n"
+           "\tW\tMove  forward (+Z).\n"
+           "\tS\tMove backward (-Z).\n"
            "At:\n"
-           "\t4\tLook  left (-X).\n"
-           "\t6\tLook right (+X).\n"
-           "\t8\tLook    up (+Y).\n"
-           "\t2\tLook  down (-Y).\n"
-           "\t7\tLook    up (+Z).\n"
-           "\t9\tLook  down (-Z).\n"
+           "\t6\tLook   right (+X).\n"
+           "\t4\tLook    left (-X).\n"
+           "\t8\tLook      up (+Y).\n"
+           "\t2\tLook    down (-Y).\n"
+           "\t9\tLook further (+Z).\n"
+           "\t7\tLook  nearer (-Z).\n"
+           "Up:\n"
+           "\tJ\tYaw    left (+X)\n"
+           "\tL\tYaw   right (-X)\n"
+           "\tI\tPitch    up (+Y)\n"
+           "\tK\tPitch  down (-Y)\n"
+           "\tU\tRoll   left (+Z)\n"
+           "\tO\tRoll  right (-Z)\n"
            "\n"
           );
 
