@@ -37,20 +37,6 @@ vec_size_int(std::vector<int> v) {
     return sizeof(v[0])*v.size();
 }
 
-mat4 p = Perspective (95.0, 1.0, 0.01, 15.0);
-
-GLfloat eye_x = 0.0;
-GLfloat eye_y = 0.0;
-GLfloat eye_z = 0.0;
-
-GLfloat pos_x = 0.0;
-GLfloat pos_y = 0.0;
-GLfloat pos_z = 1.0;
-
-GLfloat up_x = 0.0;
-GLfloat up_y = 1.0;
-GLfloat up_z = 0.0;
-
 char usage[] = "\n"
                "The camera location can be controlled with W,A,S,D, and Q,E.\n"
                "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
@@ -184,14 +170,14 @@ display( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Update Camera
-    point4 eye( pos_x, pos_y, pos_z, 1.0);
-    point4  at( eye_x, eye_y, eye_z, 1.0 );
-    vec4    up( up_x, up_y, up_z, 0.0 );
+    point4 eye( ss.eye, 1.0 );
+    point4  at( ss.at, 1.0 );
+    vec4    up( ss.up, 0.0 );
 
     mat4  mv = LookAt( eye, at, up );
 
     glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
-    glUniformMatrix4fv( projection, 1, GL_TRUE, p );
+    glUniformMatrix4fv( projection, 1, GL_TRUE, ss.lens );
 
     for (unsigned int i = 0; i < objects.size(); ++i) {
         glBindVertexArray(vaos[i]);
@@ -206,38 +192,32 @@ keyboard( unsigned char key, int x, int y )
     switch( key ) {
 	case 033:  // Escape key
 	case 'Q': exit( EXIT_SUCCESS ); break;
-    case '4': eye_x -= 0.10; break;
-    case '6': eye_x += 0.10; break;
-    case '2': eye_y -= 0.10; break;
-    case '8': eye_y += 0.10; break;
-    case '7': eye_z += 0.10; break;
-    case '9': eye_z -= 0.10; break;
+    case '4': ss.at[0] -= 0.10; break;
+    case '6': ss.at[0] += 0.10; break;
+    case '2': ss.at[1] -= 0.10; break;
+    case '8': ss.at[1] += 0.10; break;
+    case '7': ss.at[2] += 0.10; break;
+    case '9': ss.at[2] -= 0.10; break;
     case '5':
         printf("Camera: \t%.2f %.2f %.2f\n"
                "Looking At:\t%.2f %.2f %.2f\n"
                "Up:\t\t%.2f %.2f %.2f\n",
-               pos_x, pos_y, pos_z,
-               eye_x, eye_y, eye_z,
-               up_x, up_y, up_z);
+               ss.at[0], ss.at[1], ss.at[2],
+               ss.eye[0], ss.eye[1], ss.eye[2],
+               ss.up[0], ss.up[1], ss.up[2]);
         break;
-    case 'w': pos_z -= 0.10; break;
-    case 's': pos_z += 0.10; break;
-    case 'a': pos_x -= 0.10; break;
-    case 'd': pos_x += 0.10; break;
-    case 'q': pos_y -= 0.10; break;
-    case 'e': pos_y += 0.10; break;
-    case 'i': up_x  += 0.10; break;
-    case 'k': up_x  -= 0.10; break;
-    case 'j': up_y  += 0.10; break;
-    case 'l': up_y  -= 0.10; break;
-    case 'o': up_z  += 0.10; break;
-    case 'u': up_z  -= 0.10; break;
-    case 'p':
-        p = Perspective(95.0, 1.0, 0.01, 15.0);
-        break;
-    case 'y':
-        p = Ortho(-1.0, 1.0, -1.0, 1.0, 1.5, 10.0);
-        break;
+    case 'w': ss.eye[2] -= 0.10; break;
+    case 's': ss.eye[2] += 0.10; break;
+    case 'a': ss.eye[0] -= 0.10; break;
+    case 'd': ss.eye[0] += 0.10; break;
+    case 'q': ss.eye[1] -= 0.10; break;
+    case 'e': ss.eye[1] += 0.10; break;
+    case 'i': ss.up[0]  += 0.10; break;
+    case 'k': ss.up[0]  -= 0.10; break;
+    case 'j': ss.up[1]  += 0.10; break;
+    case 'l': ss.up[1]  -= 0.10; break;
+    case 'o': ss.up[2]  += 0.10; break;
+    case 'u': ss.up[2]  -= 0.10; break;
     }
     glutPostRedisplay();
 }
@@ -290,8 +270,6 @@ int main(int argc, char** argv)
 
     readSceneFilename(argv);
     readObjFilenames(argc, argv);
-
-    printSceneState(&ss);
 
     // Pass to init
     for (unsigned int i = 0; i < objects.size(); ++i) {
