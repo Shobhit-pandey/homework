@@ -199,7 +199,7 @@ keyboard( unsigned char key, int x, int y )
         p = Perspective(95.0, 1.0, 0.01, 15.0);
         break;
     case 'y':
-        p = Ortho( -1, 1, -1, 1, 1.5, 10.0);
+        p = Ortho(-1.0, 1.0, -1.0, 1.0, 1.5, 10.0);
         break;
     }
     glutPostRedisplay();
