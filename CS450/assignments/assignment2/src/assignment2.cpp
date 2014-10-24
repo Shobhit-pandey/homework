@@ -23,10 +23,15 @@ typedef Angel::vec4  point4;
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
 
+// SceneState hold viewing parameters
 SceneState ss;
+
+// ParserState hold parsed objects
 std::vector<ParserState> objects;
+// There is one vao for each object file that is loaded
 std::vector<GLuint> vaos;
 
+// Helper function for getting the size in bytes of a Angel::vec4
 int
 vec_size(std::vector<vec4> v) {
     return sizeof(v[0])*v.size();
@@ -37,37 +42,38 @@ vec_size_int(std::vector<int> v) {
     return sizeof(v[0])*v.size();
 }
 
-char usage[] = "\n"
-               "The camera location can be controlled with W,A,S,D, and Q,E.\n"
-               "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
-               "\n"
-               "All changes to the camera are done in 0.1 increments.\n"
-               "\n"
-               "Eye:\n"
-               "\tA\tMove    right (+X).\n"
-               "\tD\tMove     left (-X).\n"
-               "\tQ\tMove       up (+Y).\n"
-               "\tE\tMove     down (-Y).\n"
-               "\tW\tMove  forward (+Z).\n"
-               "\tS\tMove backward (-Z).\n"
-               "At:\n"
-               "\t6\tLook   right (+X).\n"
-               "\t4\tLook    left (-X).\n"
-               "\t8\tLook      up (+Y).\n"
-               "\t2\tLook    down (-Y).\n"
-               "\t9\tLook further (+Z).\n"
-               "\t7\tLook  nearer (-Z).\n"
-               "Up:\n"
-               "\tJ\tYaw    left (+X)\n"
-               "\tL\tYaw   right (-X)\n"
-               "\tI\tPitch    up (+Y)\n"
-               "\tK\tPitch  down (-Y)\n"
-               "\tU\tRoll   left (+Z)\n"
-               "\tO\tRoll  right (-Z)\n"
-               "Lens:\n"
-               "\tP\tPerspective\n"
-               "\tY\tOrtho\n"
-               "\n";
+// Usage information
+char help_msg[] = "\n"
+   "The camera location can be controlled with W,A,S,D, and Q,E.\n"
+   "The point to lookat can be controlled with 4,6,8,2, and 7,9.\n"
+   "\n"
+   "All changes to the camera are done in 0.1 increments.\n"
+   "\n"
+   "Eye:\n"
+   "\tA\tMove    right (+X).\n"
+   "\tD\tMove     left (-X).\n"
+   "\tQ\tMove       up (+Y).\n"
+   "\tE\tMove     down (-Y).\n"
+   "\tW\tMove  forward (+Z).\n"
+   "\tS\tMove backward (-Z).\n"
+   "At:\n"
+   "\t6\tLook   right (+X).\n"
+   "\t4\tLook    left (-X).\n"
+   "\t8\tLook      up (+Y).\n"
+   "\t2\tLook    down (-Y).\n"
+   "\t9\tLook further (+Z).\n"
+   "\t7\tLook  nearer (-Z).\n"
+   "Up:\n"
+   "\tJ\tYaw    left (+X)\n"
+   "\tL\tYaw   right (-X)\n"
+   "\tI\tPitch    up (+Y)\n"
+   "\tK\tPitch  down (-Y)\n"
+   "\tU\tRoll   left (+Z)\n"
+   "\tO\tRoll  right (-Z)\n"
+   "Lens:\n"
+   "\tP\tPerspective\n"
+   "\tY\tOrtho\n"
+   "\n";
 
 // OpenGL initialization
 void
@@ -179,6 +185,7 @@ display( void )
     glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
     glUniformMatrix4fv( projection, 1, GL_TRUE, ss.lens );
 
+    // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         glBindVertexArray(vaos[i]);
         glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
@@ -186,6 +193,7 @@ display( void )
     glutSwapBuffers();
 }
 
+// Keys primarily control the camera parameters
 void
 keyboard( unsigned char key, int x, int y )
 {
@@ -222,6 +230,7 @@ keyboard( unsigned char key, int x, int y )
     glutPostRedisplay();
 }
 
+// Debug helper for printing the passed arguments.
 void
 printArgs(int argc, char** argv) {
     if (argc > 1) {
@@ -233,6 +242,7 @@ printArgs(int argc, char** argv) {
     }
 }
 
+// Parses each obj file passed in and adds it the the objects array.
 void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
@@ -242,6 +252,7 @@ readObjFilenames(int argc, char** argv) {
     }
 }
 
+// Parses the scene file and assigns it to 'ss'
 void
 readSceneFilename(char** argv) {
     scene::parse(&ss, argv[1]);
@@ -249,12 +260,15 @@ readSceneFilename(char** argv) {
 
 int main(int argc, char** argv)
 {
+    // If no arguments passed, print usage and exit
     if (argc == 1) {
         printf("Usage: %s scenefile.glsf filename.obj [filename.obj, ...]\n\n", argv[0]);
         exit(0);
     }
 
-    printf("%s", usage);
+    // Print the help message each time the program is run.
+    //   This provides users with a list of keyboard commands to use.
+    printf("%s", help_msg);
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -268,13 +282,16 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
+    // Read and parse the scene file
     readSceneFilename(argv);
+    // Read and parse each object file passed in
     readObjFilenames(argc, argv);
 
-    // Pass to init
+    // Pass objects to init
     for (unsigned int i = 0; i < objects.size(); ++i) {
         init(&objects[i]);
     }
+    // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
 
     //NOTE:  callbacks must go after window is created!!!
