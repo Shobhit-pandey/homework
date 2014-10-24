@@ -10,6 +10,7 @@
 using Angel::vec4;
 using Angel::mat4;
 using Angel::Perspective;
+using Angel::Ortho;
 using Angel::InitShader;
 
 typedef Angel::vec4  color4;
@@ -194,6 +195,12 @@ keyboard( unsigned char key, int x, int y )
     case 'l': up_y  -= 0.10; break;
     case 'o': up_z  += 0.10; break;
     case 'u': up_z  -= 0.10; break;
+    case 'p':
+        p = Perspective(95.0, 1.0, 0.01, 15.0);
+        break;
+    case 'y':
+        p = Ortho( -1, 1, -1, 1, 1.5, 10.0);
+        break;
     }
     glutPostRedisplay();
 }
@@ -252,6 +259,9 @@ int main(int argc, char** argv)
            "\tK\tPitch  down (-Y)\n"
            "\tU\tRoll   left (+Z)\n"
            "\tO\tRoll  right (-Z)\n"
+           "Lens:\n"
+           "\tP\tPerspective\n"
+           "\tY\tOrtho\n"
            "\n"
           );
 
