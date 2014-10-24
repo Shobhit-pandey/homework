@@ -19,6 +19,7 @@ GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
 
 std::vector<ParserState> objects;
+std::vector<GLuint> vaos;
 
 int
 vec_size(std::vector<vec4> v) {
@@ -52,6 +53,8 @@ init(ParserState* ps)
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+
+    vaos.push_back(vao);
 
     // Create and initialize a buffer object
     GLuint vbo;
@@ -148,6 +151,7 @@ display( void )
     glUniformMatrix4fv( projection, 1, GL_TRUE, p );
 
     for (unsigned int i = 0; i < objects.size(); ++i) {
+        glBindVertexArray(vaos[i]);
         glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
     }
     glutSwapBuffers();
@@ -272,6 +276,7 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < objects.size(); ++i) {
         init(&objects[i]);
     }
+    printf("Initialized: %ld objects\n", objects.size());
 
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
