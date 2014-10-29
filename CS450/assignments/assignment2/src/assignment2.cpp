@@ -204,11 +204,11 @@ keyboard( unsigned char key, int x, int y )
     case '7': ss.at[2] += 0.10; break;
     case '9': ss.at[2] -= 0.10; break;
     case '5':
-        printf("Camera: \t%.2f %.2f %.2f\n"
-               "Looking At:\t%.2f %.2f %.2f\n"
-               "Up:\t\t%.2f %.2f %.2f\n",
-               ss.at[0], ss.at[1], ss.at[2],
+        printf("eye \t%.2f %.2f %.2f\n"
+               "at \t%.2f %.2f %.2f\n"
+               "up \t%.2f %.2f %.2f\n",
                ss.eye[0], ss.eye[1], ss.eye[2],
+               ss.at[0], ss.at[1], ss.at[2],
                ss.up[0], ss.up[1], ss.up[2]);
         break;
     case 'w': ss.eye[2] -= 0.10; break;
