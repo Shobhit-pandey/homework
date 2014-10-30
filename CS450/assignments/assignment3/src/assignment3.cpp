@@ -249,6 +249,31 @@ readObjFilenames(int argc, char** argv) {
     }
 }
 
+// Ortho(left, right, bottom, top, near, far)
+// frustum(left, right, bottom, top, near, far)
+void
+myReshape(int w, int h) {
+    glViewport(0, 0, w, h);
+    float ar = w/h;
+    if (ar < startAR) { // (w <= h) // taller
+        proj = Ortho(
+                vl,
+                vr,
+                vl * (GLfloat) h / (GLfloat) w,
+                vr * (GLfloat) h / (GLfloat) w,
+                0.1,
+                10.0);
+    } else { // wider
+        proj = Ortho(
+                vb * (GLfloat) w / (GLfloat) h,
+                vt * (GLfloat) w / (GLfloa) h,
+                vb,
+                vt,
+                0.1,
+                10.0);
+    }
+}
+
 // Parses the scene file and assigns it to 'ss'
 void
 readSceneFilename(char** argv) {
@@ -294,6 +319,7 @@ int main(int argc, char** argv)
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
     glutDisplayFunc(display);
+    //glutReshapeFunc(myReshape);
     glutMainLoop();
 
     return(0);
