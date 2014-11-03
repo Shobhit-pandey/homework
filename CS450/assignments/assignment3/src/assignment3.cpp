@@ -1,6 +1,9 @@
 //Includes vec, mat, and other include files as well as macro defs
 #define GL3_PROTOTYPES
 
+#define WINDOW_WIDTH  512
+#define WINDOW_HEIGHT 512
+
 // Include the vector and matrix utilities from the textbook, as well as some
 // macro definitions.
 #include "Angel.h"
@@ -296,7 +299,7 @@ int main(int argc, char** argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitContextVersion (3, 2);
     glutInitContextFlags (GLUT_FORWARD_COMPATIBLE);
-    glutInitWindowSize(512, 512);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(500, 300);
     glutCreateWindow("Simple Open GL Program");
     printf("%s\n%s\n", glGetString(GL_RENDERER), glGetString(GL_VERSION));
