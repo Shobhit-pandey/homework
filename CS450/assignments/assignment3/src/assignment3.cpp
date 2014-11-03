@@ -185,7 +185,7 @@ display( void )
     mat4  mv = LookAt( eye, at, up );
 
     glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
-    glUniformMatrix4fv( projection, 1, GL_TRUE, ss.lens );
+    glUniformMatrix4fv( projection, 1, GL_TRUE, ss.proj );
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -208,14 +208,7 @@ keyboard( unsigned char key, int x, int y )
     case '8': ss.at[1] += 0.10; break;
     case '7': ss.at[2] += 0.10; break;
     case '9': ss.at[2] -= 0.10; break;
-    case '5':
-        printf("eye \t%.2f %.2f %.2f\n"
-               "at \t%.2f %.2f %.2f\n"
-               "up \t%.2f %.2f %.2f\n",
-               ss.eye[0], ss.eye[1], ss.eye[2],
-               ss.at[0], ss.at[1], ss.at[2],
-               ss.up[0], ss.up[1], ss.up[2]);
-        break;
+    case '5': printSceneState(&ss); break;
     case 'w': ss.eye[2] -= 0.10; break;
     case 's': ss.eye[2] += 0.10; break;
     case 'a': ss.eye[0] -= 0.10; break;
@@ -259,17 +252,17 @@ myOrthoReshape(int w, int h) {
     glViewport(0, 0, w, h);
 
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
-    GLfloat zNear = 0.1;
-    GLfloat zFar = 10.0;
-    GLfloat right = 5.0;
-    GLfloat left = -right;
-    GLfloat top = 5.0;
-    GLfloat bottom = -top;
+    GLfloat left = ss.lens[0];
+    GLfloat right = ss.lens[1];
+    GLfloat bottom = ss.lens[2];
+    GLfloat top = ss.lens[3];
+    GLfloat zNear = ss.lens[4];
+    GLfloat zFar = ss.lens[5];
 
     if (w > h) {
-        ss.lens = Ortho(left*aspect, right*aspect, top, bottom, zNear, zFar);
+        ss.proj = Ortho(left*aspect, right*aspect, top, bottom, zNear, zFar);
     } else {
-        ss.lens = Ortho(left, right, top/aspect, bottom/aspect, zNear, zFar);
+        ss.proj = Ortho(left, right, top/aspect, bottom/aspect, zNear, zFar);
     }
 }
 
@@ -278,19 +271,19 @@ myPerspectiveReshape(int w, int h) {
     glViewport(0, 0, w, h);
 
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
-    GLfloat fovy = 65.0;
-    GLfloat zNear = 0.1;
-    GLfloat zFar = 10.0;
+    GLfloat fovy = ss.lens[0];
+    GLfloat zNear = ss.lens[2];
+    GLfloat zFar = ss.lens[3];
+
     GLfloat top   = tan(fovy*DegreesToRadians/2) * zNear;
     GLfloat right = top;
     GLfloat left = -right;
     GLfloat bottom = -top;
 
-
     if ( w > h ) {
-        ss.lens = Frustum(left*aspect, right*aspect, top, bottom, zNear, zFar);
+        ss.proj = Frustum(left*aspect, right*aspect, top, bottom, zNear, zFar);
     } else {
-        ss.lens = Frustum(left, right, top/aspect, bottom/aspect, zNear, zFar);
+        ss.proj = Frustum(left, right, top/aspect, bottom/aspect, zNear, zFar);
     }
 }
 
@@ -339,8 +332,11 @@ int main(int argc, char** argv)
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
     glutDisplayFunc(display);
-    //glutReshapeFunc(myPerspectiveReshape);
-    glutReshapeFunc(myOrthoReshape);
+    if (ss.lens.size() == 4) {
+        glutReshapeFunc(myPerspectiveReshape);
+    } else {
+        glutReshapeFunc(myOrthoReshape);
+    }
     glutMainLoop();
 
     return(0);
