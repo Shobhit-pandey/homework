@@ -17,7 +17,9 @@ using obj::ParserState;
 using Angel::vec4;
 using Angel::mat4;
 using Angel::Perspective;
+using Angel::DegreesToRadians;
 using Angel::Ortho;
+using Angel::Frustum;
 using Angel::InitShader;
 
 typedef Angel::vec4  color4;
@@ -252,28 +254,43 @@ readObjFilenames(int argc, char** argv) {
     }
 }
 
-// Ortho(left, right, bottom, top, near, far)
-// frustum(left, right, bottom, top, near, far)
 void
-myReshape(int w, int h) {
+myOrthoReshape(int w, int h) {
     glViewport(0, 0, w, h);
-    float ar = w/h;
-    if (ar < startAR) { // (w <= h) // taller
-        proj = Ortho(
-                vl,
-                vr,
-                vl * (GLfloat) h / (GLfloat) w,
-                vr * (GLfloat) h / (GLfloat) w,
-                0.1,
-                10.0);
-    } else { // wider
-        proj = Ortho(
-                vb * (GLfloat) w / (GLfloat) h,
-                vt * (GLfloat) w / (GLfloa) h,
-                vb,
-                vt,
-                0.1,
-                10.0);
+
+    GLfloat aspect = (GLfloat) w / (GLfloat) h;
+    GLfloat zNear = 0.1;
+    GLfloat zFar = 10.0;
+    GLfloat right = 5.0;
+    GLfloat left = -right;
+    GLfloat top = 5.0;
+    GLfloat bottom = -top;
+
+    if (w > h) {
+        ss.lens = Ortho(left*aspect, right*aspect, top, bottom, zNear, zFar);
+    } else {
+        ss.lens = Ortho(left, right, top/aspect, bottom/aspect, zNear, zFar);
+    }
+}
+
+void
+myPerspectiveReshape(int w, int h) {
+    glViewport(0, 0, w, h);
+
+    GLfloat aspect = (GLfloat) w / (GLfloat) h;
+    GLfloat fovy = 65.0;
+    GLfloat zNear = 0.1;
+    GLfloat zFar = 10.0;
+    GLfloat top   = tan(fovy*DegreesToRadians/2) * zNear;
+    GLfloat right = top;
+    GLfloat left = -right;
+    GLfloat bottom = -top;
+
+
+    if ( w > h ) {
+        ss.lens = Frustum(left*aspect, right*aspect, top, bottom, zNear, zFar);
+    } else {
+        ss.lens = Frustum(left, right, top/aspect, bottom/aspect, zNear, zFar);
     }
 }
 
@@ -322,7 +339,8 @@ int main(int argc, char** argv)
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
     glutDisplayFunc(display);
-    //glutReshapeFunc(myReshape);
+    //glutReshapeFunc(myPerspectiveReshape);
+    glutReshapeFunc(myOrthoReshape);
     glutMainLoop();
 
     return(0);
