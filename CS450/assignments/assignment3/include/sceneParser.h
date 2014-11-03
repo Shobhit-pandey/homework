@@ -6,6 +6,8 @@ using Angel::Ortho;
 using Angel::mat4;
 using Angel::vec3;
 
+using std::vector;
+
 namespace scene {
 
 // ParserState struct
@@ -15,9 +17,8 @@ struct SceneState
     vec3 eye;
     vec3 at;
     vec3 up;
-    mat4 lens;
-
-    //vec4 lens;
+    mat4 proj;
+    vector<float> lens;
 
     FILE* fp;
     int line;

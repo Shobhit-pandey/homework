@@ -10,10 +10,18 @@ namespace scene {
 
 void
 printSceneState(SceneState* ss) {
-    printf("Up: %f %f %f\n", ss->up[0], ss->up[1], ss->up[2]);
-    printf("Eye: %f %f %f\n", ss->eye[0], ss->eye[1], ss->eye[2]);
-    printf("At: %f %f %f\n", ss->at[0], ss->at[1], ss->at[2]);
-    for(int i=0; i<4; i++) printf("Lens: %f %f %f %f\n", ss->lens[i][0], ss->lens[i][1], ss->lens[i][2], ss->lens[i][3]);
+    printf("eye: %.2f %.2f %.2f\n", ss->eye[0], ss->eye[1], ss->eye[2]);
+    printf("at: %.2f %.2f %.2f\n", ss->at[0], ss->at[1], ss->at[2]);
+    printf("up: %.2f %.2f %.2f\n", ss->up[0], ss->up[1], ss->up[2]);
+    if ( ss->lens.size() == 4) {
+        printf("p:");
+    } else {
+        printf("o:");
+    }
+    for(unsigned int i=0; i<ss->lens.size(); ++i) {
+        printf(" %.2f", ss->lens[i]);
+    }
+    printf("\n");
 }
 
 void
@@ -49,13 +57,21 @@ line(SceneState* ss)
         } else if (strncmp(ss->lookahead, "p", 1) == 0) {
             GLfloat fovy, aspect, near, far;
             sscanf(ss->lookahead, "p %f %f %f %f", &fovy, &aspect, &near, &far);
-            mat4 pers_mat = Perspective(fovy, aspect, near, far);
-            ss->lens = pers_mat;
+            ss->lens.push_back(fovy);
+            ss->lens.push_back(aspect);
+            ss->lens.push_back(near);
+            ss->lens.push_back(far);
+            ss->proj = Perspective(fovy, aspect, near, far);
         } else if (strncmp(ss->lookahead, "o", 1) == 0) {
             GLfloat left, right, bottom, top, near, far;
             sscanf(ss->lookahead, "o %f %f %f %f %f %f", &left, &right, &bottom, &top, &near, &far);
-            mat4 ortho_mat = Ortho(left, right, bottom, top, near, far);
-            ss->lens = ortho_mat;
+            ss->lens.push_back(left);
+            ss->lens.push_back(right);
+            ss->lens.push_back(bottom);
+            ss->lens.push_back(top);
+            ss->lens.push_back(near);
+            ss->lens.push_back(far);
+            ss->proj = Ortho(left, right, bottom, top, near, far);
         } else if (strncmp(ss->lookahead, "eye", 3) == 0) {
             GLfloat x, y, z;
             sscanf(ss->lookahead, "eye %f %f %f", &x, &y, &z);
