@@ -260,9 +260,9 @@ myOrthoReshape(int w, int h) {
     GLfloat zFar = ss.lens[5];
 
     if (w > h) {
-        ss.proj = Ortho(left*aspect, right*aspect, top, bottom, zNear, zFar);
+        ss.proj = Ortho(left*aspect, right*aspect, bottom, top, zNear, zFar);
     } else {
-        ss.proj = Ortho(left, right, top/aspect, bottom/aspect, zNear, zFar);
+        ss.proj = Ortho(left, right, bottom/aspect, top/aspect, zNear, zFar);
     }
 }
 
@@ -270,8 +270,8 @@ void
 myPerspectiveReshape(int w, int h) {
     glViewport(0, 0, w, h);
 
-    GLfloat aspect = (GLfloat) w / (GLfloat) h;
     GLfloat fovy = ss.lens[0];
+    GLfloat aspect = (GLfloat) w / (GLfloat) h;
     GLfloat zNear = ss.lens[2];
     GLfloat zFar = ss.lens[3];
 
@@ -281,9 +281,9 @@ myPerspectiveReshape(int w, int h) {
     GLfloat bottom = -top;
 
     if ( w > h ) {
-        ss.proj = Frustum(left*aspect, right*aspect, top, bottom, zNear, zFar);
+        ss.proj = Frustum(left*aspect, right*aspect, bottom, top, zNear, zFar);
     } else {
-        ss.proj = Frustum(left, right, top/aspect, bottom/aspect, zNear, zFar);
+        ss.proj = Frustum(left, right, bottom/aspect, top/aspect, zNear, zFar);
     }
 }
 
