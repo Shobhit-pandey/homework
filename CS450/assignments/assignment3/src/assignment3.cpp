@@ -298,19 +298,14 @@ mouse( int button, int state, int x, int y ) {
             pixel[1] * 256 +
             pixel[2] * 256*256;
 
-        printf("%u %u %u %u - %d\n",
-                pixel[0],
-                pixel[1],
-                pixel[2],
-                pixel[3],
-                id);
-
         // Set wireframe_vao to vao index of clicked object.
         if (id > 0 && id <= vaos.size()) wireframe_vao = id;
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
         glUniform1i( swap_colors, 0 );
+        // Don't swap buffers, just render over what's there.
+        // Swapping buffers produces a flicker.
         glutPostRedisplay();
     }
 }
@@ -367,7 +362,7 @@ myPerspectiveReshape(int w, int h) {
     GLfloat zFar = ss.lens[3];
 
     GLfloat top   = tan(fovy*DegreesToRadians/2) * zNear;
-    GLfloat right = top;
+    GLfloat right = top*ss.lens[1];
     GLfloat left = -right;
     GLfloat bottom = -top;
 
