@@ -28,6 +28,9 @@ typedef Angel::vec4  point4;
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
 
+GLuint swap_colors;
+GLuint wireframe_vao = -1;
+
 // SceneState hold viewing parameters
 SceneState ss;
 
@@ -81,8 +84,6 @@ char help_msg[] = "\n"
 void
 init(ParserState* ps)
 {
-
-    // Load shaders and use the resulting shader program
     GLuint program = InitShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
 
@@ -93,12 +94,22 @@ init(ParserState* ps)
 
     vaos.push_back(vao);
 
+    // Generate a random color for each object
+    std::vector<vec4> colors;
+    for (unsigned int i = 0; i < ps->indexes.size(); ++i) {
+    GLuint r = (vao & 0x000000FF) >>  0;
+    GLuint g = (vao & 0x0000FF00) >>  8;
+    GLuint b = (vao & 0x00FF0000) >> 16;
+    color4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
+    colors.push_back(unique_color);
+    }
+
     // Create and initialize a buffer object
     GLuint vbo;
     glGenBuffers( 1, &vbo );
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
     glBufferData( GL_ARRAY_BUFFER,
-                  vec_size(ps->vertices) + vec_size(ps->normals),
+                  vec_size(ps->vertices) + vec_size(ps->normals) + vec_size(colors),
                   NULL,
                   GL_STATIC_DRAW );
     glBufferSubData( GL_ARRAY_BUFFER,
@@ -109,6 +120,10 @@ init(ParserState* ps)
                      vec_size(ps->vertices),
                      vec_size(ps->normals),
                      &ps->normals[0] );
+    glBufferSubData( GL_ARRAY_BUFFER,
+                     vec_size(ps->vertices)+vec_size(ps->normals),
+                     vec_size(colors),
+                     &colors[0]);
 
     // Create an Element Array Buffer
     GLuint ebo;
@@ -132,6 +147,15 @@ init(ParserState* ps)
                            GL_FALSE,
                            0,
                            BUFFER_OFFSET( (long int)vec_size(ps->vertices) ) );
+
+    GLuint vColor = glGetAttribLocation( program, "vColor" );
+    glEnableVertexAttribArray( vColor );
+    glVertexAttribPointer( vColor,
+                           4,
+                           GL_FLOAT,
+                           GL_FALSE,
+                           0,
+                           BUFFER_OFFSET( (long int)vec_size(ps->vertices)+vec_size(colors) ) );
 
     // Initialize shader lighting parameters
     // RAM: No need to change these...we'll learn about the details when we
@@ -167,6 +191,7 @@ init(ParserState* ps)
     model_view = glGetUniformLocation( program, "ModelView" );
     projection = glGetUniformLocation( program, "Projection" );
 
+    swap_colors = glGetUniformLocation( program, "Swap" );
 
     glEnable( GL_DEPTH_TEST );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
@@ -190,8 +215,16 @@ display( void )
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         glBindVertexArray(vaos[i]);
-        glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+        if (wireframe_vao > 0 && wireframe_vao == vaos[i]) {
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            glPolygonOffset( 1.0, 2.0 );
+            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+        } else {
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+        }
     }
+
     glutSwapBuffers();
 }
 
@@ -224,6 +257,64 @@ keyboard( unsigned char key, int x, int y )
     }
     glutPostRedisplay();
 }
+
+
+/**
+ * Each object in the scene is assigned a unique color determined by
+ *   it's index in the vao array.
+ * On click:
+ *   - Render scene in back buffer with color shader
+ *   - Use object color to obtain index to vao array
+ *   - Render scene in front buffer, but use wireframe for clicked
+ *     object.
+ */
+void
+mouse( int button, int state, int x, int y ) {
+    //state is GLUT_UP or GLUT_DOWN
+    //button is GLUT_{LEFT, RIGHT, MIDDLE}_BUTTON
+    if (state == GLUT_UP) {
+
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+        glUniform1i( swap_colors, 1 );
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+        // Render each loaded object file.
+        for (unsigned int i = 0; i < objects.size(); ++i) {
+            glBindVertexArray(vaos[i]);
+            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+        }
+
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        GLubyte pixel[4];
+        glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+
+        // id corresponds to a specific vertex. That vertex is part of an
+        // object.
+        GLuint id =
+            pixel[0] +
+            pixel[1] * 256 +
+            pixel[2] * 256*256;
+
+        printf("%u %u %u %u - %d\n",
+                pixel[0],
+                pixel[1],
+                pixel[2],
+                pixel[3],
+                id);
+
+        // Set wireframe_vao to vao index of clicked object.
+        if (id > 0 && id <= vaos.size()) wireframe_vao = id;
+
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+        glUniform1i( swap_colors, 0 );
+        glutPostRedisplay();
+    }
+}
+
 
 // Debug helper for printing the passed arguments.
 void
@@ -331,6 +422,7 @@ int main(int argc, char** argv)
 
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
     glutDisplayFunc(display);
     if (ss.lens.size() == 4) {
         glutReshapeFunc(myPerspectiveReshape);

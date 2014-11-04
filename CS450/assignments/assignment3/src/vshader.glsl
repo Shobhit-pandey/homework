@@ -2,6 +2,7 @@
 
 in  vec4 vPosition;
 in  vec4 vNormal;
+in  vec4 vColor;
 out vec4 color;
 
 uniform vec4 AmbientProduct, DiffuseProduct, SpecularProduct;
@@ -9,6 +10,7 @@ uniform mat4 ModelView;
 uniform mat4 Projection;
 uniform vec4 LightPosition;
 uniform float Shininess;
+uniform int Swap;
 
 void main()
 {
@@ -40,6 +42,10 @@ void main()
 
     gl_Position = Projection * ModelView * vPosition;
 
-    color = ambient + diffuse + specular;
-    color.a = 1.0;
+    if (Swap == 0) {
+        color = ambient + diffuse + specular;
+        color.a = 1.0;
+    } else {
+        color = vColor;
+    }
 }
