@@ -1,0 +1,62 @@
+Assignment #3 - Adding Interaction
+Due Sunday, 11/2 by 11:59pm
+
+This assignment is designed to give you practice with various useful
+interaction methods for 3D graphics. For this assignment, you must keep all
+functionality from Assignment#2. Specifically, you must load .obj files and
+properly render the shaded objects.
+
+In addition, you will modify your .obj loader to allow for proper
+
+  * Loading of multiple objects
+  * Object selection
+  * Behavior upon window resize (reshape) 
+
+Loading Multiple Objects
+------------------------
+
+Modify your application to allow the loading of multiple .obj meshes. Again,
+each should be loaded without requiring a recompile of your code. You should
+use the .obj files provided for Assignment #2.
+
+Object Selection
+----------------
+Use the color buffer 2-pass approach to implement selectable objects. Each mesh
+loaded from a .obj file should be selectable. Upon selection, you should draw
+the object in "Wireframe Mode".
+
+To draw in wireframe mode, use the glPolygonMode and the glPolygonOffset
+functions (http://www.opengl.org/sdk/docs/man/) before your call to
+glDrawArrays (or glDrawElements) . These are state modifying functions which
+require that you switch back in order to render in normal mode.
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonOffset(factor, units ); //Try 1.0 and 2 for factor and units
+
+and to switch back to normal rasterization mode:
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
+Reshape
+-------
+
+Your application should respond appropriately to window resizing without
+distortion (meaning the aspect ratio of the view volume should be the same as
+that of the viewport) and without clipping. Your reshape should work for either
+orthographic or perspective views and picking should continue to work properly
+after a resize.
+
+Use the reshape() function provided in the class notes. Recall, that in order
+to reshape when in perspective mode, you must modify the perspective view
+volume. A simple way to do this is to use the Frustum() call for specifying
+your perspective view and then use the same reshape() approach as you would for
+your orthographic view. To use Frustum(), you will have to compute the
+Frustum() parameters from the perspective parameter. Note, that you are
+required to keep the functionality from Assignment#2 which requires that your
+perspective projection be specified with fov, aspect ratio, near, far.
+
+What to turn in
+---------------
+
+You'll be demoing your code as usual. Turn in a .zip file of your
+implementation via TEACH 
