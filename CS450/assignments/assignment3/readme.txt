@@ -12,3 +12,11 @@ Obviously you should have build-essential installed.
 
 The Makefile has been updated to correctly set the linking flags to the
 END of the gcc call.
+
+Building & Running
+------------------
+
+> cd src
+> make
+> ./prog perspective.glsf ../assets/*.obj
+
