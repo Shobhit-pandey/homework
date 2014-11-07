@@ -1,62 +1,114 @@
-Assignment #3 - Adding Interaction
-Due Sunday, 11/2 by 11:59pm
+Assignment #4 - Fun with Transformations
+Due November 12, by 11:59pm
 
-This assignment is designed to give you practice with various useful
-interaction methods for 3D graphics. For this assignment, you must keep all
-functionality from Assignment#2. Specifically, you must load .obj files and
-properly render the shaded objects.
+This assignment is designed to give you practice with 3D transformations. For
+this assignment, you must keep all functionality from assignment#3.
+Specifically, you must load .obj files and properly render the shaded objects.
+In this assignment, however, all .obj files will load objects that are modeled
+with their centers at the origin. IT IS VERY IMPORTANT THAT YOU USE THE NEW
+PROVIDED .OBJ FILES!!
 
-In addition, you will modify your .obj loader to allow for proper
+Object Manipulations
+--------------------
 
-  * Loading of multiple objects
-  * Object selection
-  * Behavior upon window resize (reshape) 
+For this part of the assignment, we will implement object manipulations,
+similar to what you see in the default view in Blender.
 
-Loading Multiple Objects
-------------------------
+Upon selection, the object should be highlighted by drawing it in wireframe
+only mode. In addition, an object manipulator should be drawn, centered on the
+object, and aligned with the world axes. The x,y, and z axes should be red,
+green, and blue respectively. One simple way to create a manipulator is to
+simply draw lines for each axis and to cap the line with an object such as a
+small cube or sphere. You can use the glLineWidth() function to control the
+line thickness. This is important because a single pixel line width will make
+selection operations inaccurate!
 
-Modify your application to allow the loading of multiple .obj meshes. Again,
-each should be loaded without requiring a recompile of your code. You should
-use the .obj files provided for Assignment #2.
+The user will manipulate the object by selecting it (at which time the object
+will be drawn in wireframe and the manipulator will be drawn), 'grabbing' a
+manipulator axis and dragging. The type of manipulation depends on the mode the
+user is in (described next). For example, if the user selects rotation mode and
+grabs the x axis manipulator (click and drag), the object should rotate around
+the x axis (centered on the object). The same goes for translation and scale.
+Note that it is not necessary that the manipulator position exactly match that
+of the mouse pointer as you drag. It should, however, translate (but not scale
+or rotate) *with* the object.
 
-Object Selection
-----------------
-Use the color buffer 2-pass approach to implement selectable objects. Each mesh
-loaded from a .obj file should be selectable. Upon selection, you should draw
-the object in "Wireframe Mode".
+Viewing Specification (or Scene Transformation)
+-----------------------------------------------
 
-To draw in wireframe mode, use the glPolygonMode and the glPolygonOffset
-functions (http://www.opengl.org/sdk/docs/man/) before your call to
-glDrawArrays (or glDrawElements) . These are state modifying functions which
-require that you switch back in order to render in normal mode.
+Finally, we're going to move the camera around (kinda)!! Your camera should
+start at the origin looking down the –Z axis. You should implement camera
+control to be similar to that of Maya or Blender for rotation, tracking or
+panning (translate in the 2D plane of view), and dollying (translating forward
+and backward).
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPolygonOffset(factor, units ); //Try 1.0 and 2 for factor and units
+While we call them Camera manipulations, in reality, the most natural
+interaction is to allow the user to manipulate the entire scene. So, when in
+Camera Rotation Mode, when the user drags in the 'scene', the scene should
+rotate about the world origin (which is the origin of the scene) around the
+selected axis of rotation (see Mode Selection below). The rotation axes are
+always aligned with the camera view. When in Camera Translation Mode, dragging
+in the scene should pan the scene in the direction of the drag. There is no
+such thing as 'scaling' the scene. Finally, when in Camera Dolly Mode, dragging
+in the scene should result in moving the scene forward/back with respect to the
+camera.
 
-and to switch back to normal rasterization mode:
+Mode Selection
+--------------
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+There are several options for mode selection.
 
-Reshape
--------
+You may use simple GLUT menus or keyboard presses to implement mode selection.
+Or, you can build a GUI for mode selection. You should provide the following
+Modes and SubModes with a usable interface.
 
-Your application should respond appropriately to window resizing without
-distortion (meaning the aspect ratio of the view volume should be the same as
-that of the viewport) and without clipping. Your reshape should work for either
-orthographic or perspective views and picking should continue to work properly
-after a resize.
+    Object Transformation
+        Translation
+        Rotation
+        Scale (we will allow non-uniform scale)
+    Scene (or Camera) Transformation
+        Rotation
+            X
+            Y
+            Z
+        Translation
+        Dolly
 
-Use the reshape() function provided in the class notes. Recall, that in order
-to reshape when in perspective mode, you must modify the perspective view
-volume. A simple way to do this is to use the Frustum() call for specifying
-your perspective view and then use the same reshape() approach as you would for
-your orthographic view. To use Frustum(), you will have to compute the
-Frustum() parameters from the perspective parameter. Note, that you are
-required to keep the functionality from Assignment#2 which requires that your
-perspective projection be specified with fov, aspect ratio, near, far.
+Other Issues
+------------
 
-What to turn in
----------------
+When rotating and translating, your single light in the scene should move as if
+it were an object in the scene. Therefore as you rotate the camera
+(remember...really rotating entire scene), the lighting of the objects in the
+scene should remain unchanged. You should be able to rotate around, for
+example, to see the 'dark side' of an object that is lit on it's front side.
+Finally, please draw a ground plane as reference for the rest of the scene. You
+can draw it manually with gl commands or you can create a simple .obj file to
+use as your ground plane.
 
-You'll be demoing your code as usual. Turn in a .zip file of your
-implementation via TEACH 
+What you need
+-------------
+
+For this assignment, we'll use objects created in object space and centered
+around the origin. IMPORTANT: DO NOT USE THE OBJECTS FROM ASSIGNMENTS 2 or 3.
+
+    frog.obj
+    cow.obj
+    bunnyS.obj
+    teapotL.obj
+    sandal.obj
+    streeLamp.obj 
+
+How to Proceed
+--------------
+
+The bulk of the credit for the assignment will be achieved by completing
+
+    Manipulators
+    Object Transformations 
+
+I suggest that you get these components working, in this order. After these are
+working, add in
+
+    Camera Manipulation
+    Proper lighting transformation 
