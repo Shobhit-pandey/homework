@@ -29,6 +29,9 @@ public:
 
     const char* filename;
 
+    GLuint objColor;
+    static GLuint colorId;
+
 private:
     void genColors();
     void setupBuffers();

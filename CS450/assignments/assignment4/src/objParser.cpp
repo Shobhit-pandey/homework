@@ -88,21 +88,22 @@ void ObjParser::exportObj() {
 }
 
 void ObjParser::setupBuffers() {
-    // Determine sizes for buffer offsets.
-    GLsizeiptr verticesSize = sizeof(Angel::vec4) * vertices.size();
-    GLsizeiptr normalsSize = sizeof(Angel::vec4) * normals.size();
-    GLsizeiptr colorsSize = sizeof(Angel::vec4) * colors.size();
-    GLsizeiptr facesSize = sizeof(unsigned int) * faces.size();
     // Generate buffers
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
 
+    // vao
+    glBindVertexArray(vao);
+
     // Generate colors
     genColors();
 
-    // vao
-    glBindVertexArray(vao);
+    // Determine sizes for buffer offsets.
+    GLsizeiptr verticesSize = sizeof(Angel::vec4) * vertices.size();
+    GLsizeiptr normalsSize = sizeof(Angel::vec4) * normals.size();
+    GLsizeiptr colorsSize = sizeof(Angel::vec4) * colors.size();
+    GLsizeiptr facesSize = sizeof(GLuint) * faces.size();
 
     // vbo
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -131,15 +132,17 @@ void ObjParser::unbindBuffers() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-
 void ObjParser::genColors() {
-    // Generate a random color for each vertex
-    for (unsigned int i = 0; i < faces.size(); ++i) {
-        GLuint r = (vao & 0x000000FF) >>  0;
-        GLuint g = (vao & 0x0000FF00) >>  8;
-        GLuint b = (vao & 0x00FF0000) >> 16;
+    // Generate a random color for each vertex using colorId, assigning it to objColor.
+    for (unsigned int i = 0; i < vertices.size(); ++i) {
+        GLuint r = (colorId & 0x000000FF) >>  0;
+        GLuint g = (colorId & 0x0000FF00) >>  8;
+        GLuint b = (colorId & 0x00FF0000) >> 16;
 
         Angel::vec4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
         colors.push_back(unique_color);
     }
+
+    objColor = colorId;
+    ++colorId;
 }
