@@ -18,9 +18,9 @@ ObjParser::ObjParser(const char* objFilename) {
 
 ObjParser::~ObjParser() {
     // Delete buffers
-	glDeleteBuffers(1, &ebo);
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
+	//glDeleteBuffers(1, &ebo);
+	//glDeleteBuffers(1, &vbo);
+	//glDeleteVertexArrays(1, &vao);
 }
 
 void ObjParser::parse(const char* objFilename) {
