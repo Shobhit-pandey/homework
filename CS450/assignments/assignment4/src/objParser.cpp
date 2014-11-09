@@ -7,33 +7,25 @@
 
 using std::vector;
 
-namespace obj {
+ObjParser::ObjParser(const char* objFilename) {
+    lineNumber = 0;
+    filename = objFilename;
+    fp = fopen(filename, "r");
 
-void
-printParserState(ParserState* ps) {
-    printf("Vertices: %ld\n", ps->vertices.size());
-    printf("Normals: %ld\n", ps->normals.size());
-    printf("Indexes: %ld\n", (ps->indexes.size()/3));
-    printf("lines: %d\n", ps->line);
+    if (fp == 0) {
+        fprintf(stderr, "Failed to open: %s\n", filename);
+    }
 
-    for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
-        printf("v %f %f %f\n", ps->vertices[i][0], ps->vertices[i][1], ps->vertices[i][2]);
-    }
-    for (unsigned int i = 0; i < ps->normals.size(); ++i) {
-        printf("vn %f %f %f\n", ps->normals[i][0], ps->normals[i][1], ps->normals[i][2]);
-    }
-    for (unsigned int i = 0; i < ps->indexes.size()/3; ++i) {
-        printf("f %d %d %d\n", ps->indexes[i*3+0], ps->indexes[i*3+1], ps->indexes[i*3+2]);
-    }
+    parse();
 }
 
-void
-line(ParserState* ps)
-{
+ObjParser::~ObjParser() {}
+
+void ObjParser::parse(void) {
     int errno = 0;
     int numread;
 
-    while ((numread = fscanf(ps->fp, "%[^\n]\n", ps->lookahead)) != EOF) {
+    while ((numread = fscanf(fp, "%[^\n]\n", lookahead)) != EOF) {
         if (errno != 0) {
             perror("fscanf");
         }
@@ -42,44 +34,47 @@ line(ParserState* ps)
             fprintf(stderr, "Error reading file. Wrong number of chars.");
         }
 
-        if (strncmp(ps->lookahead, "#", 1) == 0) {
-            ps->line++;
+        if (strncmp(lookahead, "#", 1) == 0) {
+            lineNumber++;
             continue;
         }
 
-        if (strncmp(ps->lookahead, "vn", 2) == 0) {
+        if (strncmp(lookahead, "vn", 2) == 0) {
             GLfloat x, y, z;
-            sscanf(ps->lookahead, "vn %f %f %f", &x, &y, &z);
+            sscanf(lookahead, "vn %f %f %f", &x, &y, &z);
             vec4 normal(x, y, z, 0.0);
-            ps->normals.push_back(normal);
-        } else if (strncmp(ps->lookahead, "v", 1) == 0) {
+            normals.push_back(normal);
+        } else if (strncmp(lookahead, "v", 1) == 0) {
             GLfloat x, y, z;
-            sscanf(ps->lookahead, "v %f %f %f", &x, &y, &z);
+            sscanf(lookahead, "v %f %f %f", &x, &y, &z);
             vec4 vertex(x, y, z, 1.0);
-            ps->vertices.push_back(vertex);
-        } else if (strncmp(ps->lookahead, "f", 1) == 0) {
+            vertices.push_back(vertex);
+        } else if (strncmp(lookahead, "f", 1) == 0) {
             int xv, xn, yv, yn, zv, zn;
-            sscanf(ps->lookahead, "f %d//%d %d//%d %d//%d", &xv, &xn, &yv, &yn, &zv, &zn);
-            ps->indexes.push_back(xv-1);
-            ps->indexes.push_back(yv-1);
-            ps->indexes.push_back(zv-1);
+            sscanf(lookahead, "f %d//%d %d//%d %d//%d", &xv, &xn, &yv, &yn, &zv, &zn);
+            faces.push_back(xv-1);
+            faces.push_back(yv-1);
+            faces.push_back(zv-1);
         }
 
-        ps->line++;
+        lineNumber++;
     }
 }
 
-void
-parse(ParserState* ps, const char* filename)
-{
-    ps->line = 0;
-    ps->fp = fopen(filename, "r");
+void ObjParser::print(void) {
+    printf("Vertices: %ld\n", vertices.size());
+    printf("Normals: %ld\n", normals.size());
+    printf("Faces: %ld\n", (faces.size()/3));
+    printf("lines: %u\n", lineNumber);
 
-    if (ps->fp == 0) {
-        printf("Failed to create ParserState or open: %s", filename);
+    for (unsigned int i = 0; i < vertices.size(); ++i) {
+        printf("v %f %f %f\n", vertices[i][0], vertices[i][1], vertices[i][2]);
     }
-
-    line(ps);
+    for (unsigned int i = 0; i < normals.size(); ++i) {
+        printf("vn %f %f %f\n", normals[i][0], normals[i][1], normals[i][2]);
+    }
+    for (unsigned int i = 0; i < faces.size()/3; ++i) {
+        printf("f %d %d %d\n", faces[i*3+0], faces[i*3+1], faces[i*3+2]);
+    }
 }
 
-}

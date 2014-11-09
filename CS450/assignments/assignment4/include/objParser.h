@@ -1,28 +1,27 @@
-#ifndef __BRAMWELT_OBJ_PARSER__
-#define __BRAMWELT_OBJ_PARSER__
+#pragma once
 
 #include <vector>
 
 using Angel::vec4;
 
-namespace obj {
-
-// ParserState struct
+// ObjParser
 // Holds all the verticies, normals, and indexes listed in the obj file.
-struct ParserState
-{
-    std::vector<vec4> vertices;
-    std::vector<vec4> normals;
-    std::vector<int> indexes;
+class ObjParser {
+public:
+    ObjParser(const char* objFilename);
+    ~ObjParser();
 
+    void print();
+    void parse();
+
+    std::vector<Angel::vec4> vertices;
+    std::vector<Angel::vec4> normals;
+    std::vector<unsigned int> faces;
+
+    const char* filename;
+
+private:
     FILE* fp;
-    int line;
+    unsigned int lineNumber;
     char lookahead[256];
 };
-
-void printParserState(ParserState* ps);
-void line(ParserState* ps);
-void parse(ParserState* ps, const char* filename);
-
-}
-#endif
