@@ -10,9 +10,6 @@ using std::vector;
 ObjParser::ObjParser(const char* objFilename) {
     // Parse the file and set aside buffers
     parse(objFilename);
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
     setupBuffers();
 }
 
@@ -96,6 +93,10 @@ void ObjParser::setupBuffers() {
     GLsizeiptr normalsSize = sizeof(Angel::vec4) * normals.size();
     GLsizeiptr colorsSize = sizeof(Angel::vec4) * colors.size();
     GLsizeiptr facesSize = sizeof(unsigned int) * faces.size();
+    // Generate buffers
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
 
     // Generate colors
     genColors();
