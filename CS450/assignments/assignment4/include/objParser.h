@@ -12,11 +12,21 @@ public:
     ~ObjParser();
 
     void print();
-    void parse();
+    void parse(const char* objFilename);
+    void setupBuffers();
+    void genColors();
+
+    void bindBuffers();
+    void unbindBuffers();
 
     std::vector<Angel::vec4> vertices;
     std::vector<Angel::vec4> normals;
     std::vector<unsigned int> faces;
+    std::vector<Angel::vec4> colors;
+
+    GLuint vao; // vertex array
+    GLuint vbo; // vertex buffer
+    GLuint ebo; // element buffer
 
     const char* filename;
 

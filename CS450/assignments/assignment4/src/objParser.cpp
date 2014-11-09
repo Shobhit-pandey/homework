@@ -8,22 +8,32 @@
 using std::vector;
 
 ObjParser::ObjParser(const char* objFilename) {
+    // Parse the file and set aside buffers
+    parse(objFilename);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    setupBuffers();
+}
+
+ObjParser::~ObjParser() {
+    // Delete buffers
+	glDeleteBuffers(1, &ebo);
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
+}
+
+void ObjParser::parse(const char* objFilename) {
     lineNumber = 0;
     filename = objFilename;
     fp = fopen(filename, "r");
 
+    int errno = 0;
+    int numread;
+
     if (fp == 0) {
         fprintf(stderr, "Failed to open: %s\n", filename);
     }
-
-    parse();
-}
-
-ObjParser::~ObjParser() {}
-
-void ObjParser::parse(void) {
-    int errno = 0;
-    int numread;
 
     while ((numread = fscanf(fp, "%[^\n]\n", lookahead)) != EOF) {
         if (errno != 0) {
@@ -61,7 +71,7 @@ void ObjParser::parse(void) {
     }
 }
 
-void ObjParser::print(void) {
+void ObjParser::print() {
     printf("Vertices: %ld\n", vertices.size());
     printf("Normals: %ld\n", normals.size());
     printf("Faces: %ld\n", (faces.size()/3));
@@ -78,3 +88,51 @@ void ObjParser::print(void) {
     }
 }
 
+void ObjParser::setupBuffers() {
+    bindBuffers();
+
+    // Generate colors
+    genColors();
+
+    GLsizeiptr verticesSize = sizeof(Angel::vec4) * vertices.size();
+    GLsizeiptr normalsSize = sizeof(Angel::vec4) * normals.size();
+    GLsizeiptr colorsSize = sizeof(Angel::vec4) * colors.size();
+    GLsizeiptr facesSize = sizeof(unsigned int) * faces.size();
+
+    // vao & vbo
+    glBufferData( GL_ARRAY_BUFFER, verticesSize + normalsSize + colorsSize, NULL, GL_STATIC_DRAW );
+    glBufferSubData( GL_ARRAY_BUFFER, 0, verticesSize, vertices.data());
+    glBufferSubData( GL_ARRAY_BUFFER, verticesSize, normalsSize, normals.data());
+    glBufferSubData( GL_ARRAY_BUFFER, verticesSize + normalsSize, colorsSize, colors.data());
+
+    // ebo
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, facesSize, faces.data(), GL_STATIC_DRAW );
+
+    unbindBuffers();
+}
+
+
+void ObjParser::bindBuffers() {
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
+
+void ObjParser::unbindBuffers() {
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+
+void ObjParser::genColors() {
+    // Generate a random color for each vertex
+    for (unsigned int i = 0; i < faces.size(); ++i) {
+        GLuint r = (vao & 0x000000FF) >>  0;
+        GLuint g = (vao & 0x0000FF00) >>  8;
+        GLuint b = (vao & 0x00FF0000) >> 16;
+
+        Angel::vec4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
+        colors.push_back(unique_color);
+    }
+}
