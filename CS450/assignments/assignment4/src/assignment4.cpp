@@ -35,19 +35,6 @@ SceneState ss;
 
 // ObjParser hold parsed objects
 std::vector<ObjParser> objects;
-// There is one vao for each object file that is loaded
-std::vector<GLuint> vaos;
-
-// Helper function for getting the size in bytes of a Angel::vec4
-int
-vec_size(std::vector<vec4> v) {
-    return sizeof(v[0])*v.size();
-}
-
-int
-vec_size_int(std::vector<int> v) {
-    return sizeof(v[0])*v.size();
-}
 
 // Usage information
 char help_msg[] = "\n"
@@ -86,58 +73,15 @@ init(ObjParser *ps)
     GLuint program = InitShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
 
-    // Create a vertex array object
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    ps->bindBuffers();
 
-    vaos.push_back(vao);
-
-    // Generate a random color for each object
-    std::vector<vec4> colors;
-    for (unsigned int i = 0; i < ps->faces.size(); ++i) {
-    GLuint r = (vao & 0x000000FF) >>  0;
-    GLuint g = (vao & 0x0000FF00) >>  8;
-    GLuint b = (vao & 0x00FF0000) >> 16;
-    color4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
-    colors.push_back(unique_color);
-    }
-
-    // Create and initialize a buffer object
-    GLuint vbo;
-    glGenBuffers( 1, &vbo );
-    glBindBuffer( GL_ARRAY_BUFFER, vbo );
-    glBufferData( GL_ARRAY_BUFFER,
-                  vec_size(ps->vertices) + vec_size(ps->normals) + vec_size(colors),
-                  NULL,
-                  GL_STATIC_DRAW );
-    glBufferSubData( GL_ARRAY_BUFFER,
-                     0,
-                     vec_size(ps->vertices),
-                     &ps->vertices[0] );
-    glBufferSubData( GL_ARRAY_BUFFER,
-                     vec_size(ps->vertices),
-                     vec_size(ps->normals),
-                     &ps->normals[0] );
-    glBufferSubData( GL_ARRAY_BUFFER,
-                     vec_size(ps->vertices)+vec_size(ps->normals),
-                     vec_size(colors),
-                     &colors[0]);
-
-    // Create an Element Array Buffer
-    GLuint ebo;
-    glGenBuffers( 1, &ebo );
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                  ps->faces.size()*sizeof(&ps->faces[0]),
-                  &ps->faces[0],
-                  GL_STATIC_DRAW );
-
-    // set up vertex arrays
+    // vPosition
     GLuint vPosition = glGetAttribLocation( program, "vPosition" );
     glEnableVertexAttribArray( vPosition );
     glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0) );
 
+    // vNormal
+    GLint64 verticesSize = sizeof(Angel::vec4) * ps->vertices.size();
     GLuint vNormal = glGetAttribLocation( program, "vNormal" );
     glEnableVertexAttribArray( vNormal );
     glVertexAttribPointer( vNormal,
@@ -145,8 +89,10 @@ init(ObjParser *ps)
                            GL_FLOAT,
                            GL_FALSE,
                            0,
-                           BUFFER_OFFSET( (long int)vec_size(ps->vertices) ) );
+                           BUFFER_OFFSET(verticesSize) );
 
+    // vColor
+    GLint64 colorsSize = sizeof(Angel::vec4) * ps->colors.size();
     GLuint vColor = glGetAttribLocation( program, "vColor" );
     glEnableVertexAttribArray( vColor );
     glVertexAttribPointer( vColor,
@@ -154,7 +100,7 @@ init(ObjParser *ps)
                            GL_FLOAT,
                            GL_FALSE,
                            0,
-                           BUFFER_OFFSET( (long int)vec_size(ps->vertices)+vec_size(colors) ) );
+                           BUFFER_OFFSET((verticesSize + colorsSize)) );
 
     // Initialize shader lighting parameters
     // RAM: No need to change these...we'll learn about the details when we
@@ -192,6 +138,8 @@ init(ObjParser *ps)
 
     swap_colors = glGetUniformLocation( program, "Swap" );
 
+    ps->unbindBuffers();
+
     glEnable( GL_DEPTH_TEST );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
 }
@@ -213,8 +161,8 @@ display( void )
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
-        glBindVertexArray(vaos[i]);
-        if (wireframe_vao > 0 && wireframe_vao == vaos[i]) {
+        objects[i].bindBuffers();
+        if (wireframe_vao > 0 && wireframe_vao == objects[i].vao) {
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glPolygonOffset( 1.0, 2.0 );
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
@@ -222,6 +170,7 @@ display( void )
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         }
+        objects[i].unbindBuffers();
     }
 
     glutSwapBuffers();
@@ -280,8 +229,9 @@ mouse( int button, int state, int x, int y ) {
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
-            glBindVertexArray(vaos[i]);
+            objects[i].bindBuffers();
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
+            objects[i].unbindBuffers();
         }
 
         GLint viewport[4];
@@ -298,7 +248,7 @@ mouse( int button, int state, int x, int y ) {
             pixel[2] * 256*256;
 
         // Set wireframe_vao to vao index of clicked object.
-        if (id > 0 && id <= vaos.size()) wireframe_vao = id;
+        if (id > 0 && id <= objects.size()) wireframe_vao = id;
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -326,9 +276,8 @@ printArgs(int argc, char** argv) {
 void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
-        ObjParser ps(argv[i]);
-        ps.parse();
-        objects.push_back(ps);
+        ObjParser* ps = new ObjParser(argv[i]);
+        objects.push_back(*ps);
     }
 }
 
@@ -411,6 +360,7 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < objects.size(); ++i) {
         init(&objects[i]);
     }
+
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
 
