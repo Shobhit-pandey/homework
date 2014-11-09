@@ -92,7 +92,7 @@ init(ObjParser *ps)
                            BUFFER_OFFSET(verticesSize) );
 
     // vColor
-    GLint64 colorsSize = sizeof(Angel::vec4) * ps->colors.size();
+    GLint64 normalsSize = sizeof(Angel::vec4) * ps->normals.size();
     GLuint vColor = glGetAttribLocation( program, "vColor" );
     glEnableVertexAttribArray( vColor );
     glVertexAttribPointer( vColor,
@@ -100,7 +100,7 @@ init(ObjParser *ps)
                            GL_FLOAT,
                            GL_FALSE,
                            0,
-                           BUFFER_OFFSET((verticesSize + colorsSize)) );
+                           BUFFER_OFFSET((verticesSize + normalsSize)) );
 
     // Initialize shader lighting parameters
     // RAM: No need to change these...we'll learn about the details when we
@@ -251,8 +251,8 @@ mouse( int button, int state, int x, int y ) {
         if (id > 0 && id <= objects.size()) wireframe_vao = id;
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
         glUniform1i( swap_colors, 0 );
+
         // Don't swap buffers, just render over what's there.
         // Swapping buffers produces a flicker.
         glutPostRedisplay();
