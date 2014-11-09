@@ -57,8 +57,8 @@ void ObjParser::parse(const char* objFilename) {
             vec4 vertex(x, y, z, 1.0);
             vertices.push_back(vertex);
         } else if (strncmp(lookahead, "f", 1) == 0) {
-            int xv, xn, yv, yn, zv, zn;
-            sscanf(lookahead, "f %d//%d %d//%d %d//%d", &xv, &xn, &yv, &yn, &zv, &zn);
+            GLuint xv, xn, yv, yn, zv, zn;
+            sscanf(lookahead, "f %u//%u %u//%u %u//%u", &xv, &xn, &yv, &yn, &zv, &zn);
             faces.push_back(xv-1);
             faces.push_back(yv-1);
             faces.push_back(zv-1);
@@ -83,7 +83,7 @@ void ObjParser::exportObj() {
         printf("vn %f %f %f\n", normals[i][0], normals[i][1], normals[i][2]);
     }
     for (unsigned int i = 0; i < faces.size()/3; ++i) {
-        printf("f %d %d %d\n", faces[i*3+0], faces[i*3+1], faces[i*3+2]);
+        printf("f %u %u %u\n", faces[i*3+0], faces[i*3+1], faces[i*3+2]);
     }
 }
 

@@ -20,7 +20,7 @@ public:
 
     std::vector<Angel::vec4> vertices;
     std::vector<Angel::vec4> normals;
-    std::vector<unsigned int> faces;
+    std::vector<GLuint> faces;
     std::vector<Angel::vec4> colors;
 
     GLuint vao; // vertex array
