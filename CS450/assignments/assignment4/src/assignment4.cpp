@@ -11,6 +11,8 @@
 #include "sceneParser.h"
 #include <stdio.h>
 
+GLuint ObjParser::colorId = 0;
+
 using scene::SceneState;
 
 using Angel::vec4;
@@ -139,15 +141,14 @@ init(ObjParser *ps)
     swap_colors = glGetUniformLocation( program, "Swap" );
 
     ps->unbindBuffers();
-
-    glEnable( GL_DEPTH_TEST );
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
 }
 
 void
 display( void )
 {
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glUniform1i( swap_colors, 0 );
 
     // Update Camera
     point4 eye( ss.eye, 1.0 );
@@ -162,7 +163,7 @@ display( void )
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         objects[i].bindBuffers();
-        if (wireframe_vao > 0 && wireframe_vao == objects[i].vao) {
+        if (wireframe_vao == objects[i].objColor) {
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glPolygonOffset( 1.0, 2.0 );
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
@@ -207,6 +208,10 @@ keyboard( unsigned char key, int x, int y )
 }
 
 
+GLuint color_id(GLubyte pixel[4]) {
+    return pixel[0] + (pixel[1]*256) + (pixel[2]*256*256);
+}
+
 /**
  * Each object in the scene is assigned a unique color determined by
  *   it's index in the vao array.
@@ -218,14 +223,13 @@ keyboard( unsigned char key, int x, int y )
  */
 void
 mouse( int button, int state, int x, int y ) {
-    //state is GLUT_UP or GLUT_DOWN
-    //button is GLUT_{LEFT, RIGHT, MIDDLE}_BUTTON
+    // Viewport and selected pixel
+    GLint viewport[4];
+    GLubyte pixel[4];
     if (state == GLUT_UP) {
-
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-        glUniform1i( swap_colors, 1 );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        glUniform1i( swap_colors, 1 );
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -234,24 +238,12 @@ mouse( int button, int state, int x, int y ) {
             objects[i].unbindBuffers();
         }
 
-        GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
-
-        GLubyte pixel[4];
         glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 
         // id corresponds to a specific vertex. That vertex is part of an
-        // object.
-        GLuint id =
-            pixel[0] +
-            pixel[1] * 256 +
-            pixel[2] * 256*256;
-
-        // Set wireframe_vao to vao index of clicked object.
-        if (id > 0 && id <= objects.size()) wireframe_vao = id;
-
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-        glUniform1i( swap_colors, 0 );
+        // object. Set wireframe_vao to colorId of clicked object.
+        wireframe_vao = color_id(pixel);
 
         // Don't swap buffers, just render over what's there.
         // Swapping buffers produces a flicker.
@@ -373,6 +365,8 @@ int main(int argc, char** argv)
     } else {
         glutReshapeFunc(myOrthoReshape);
     }
+
+    glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 
     return(0);
