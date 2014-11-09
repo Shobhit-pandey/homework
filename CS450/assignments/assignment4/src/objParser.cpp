@@ -72,11 +72,13 @@ void ObjParser::parse(const char* objFilename) {
 }
 
 void ObjParser::print() {
-    printf("Vertices: %ld\n", vertices.size());
-    printf("Normals: %ld\n", normals.size());
-    printf("Faces: %ld\n", (faces.size()/3));
-    printf("lines: %u\n", lineNumber);
+    printf("\tLines: %u\n", lineNumber);
+    printf("\tVertices: %ld\n", vertices.size());
+    printf("\tNormals: %ld\n", normals.size());
+    printf("\tFaces: %ld\n", (faces.size()/3));
+}
 
+void ObjParser::exportObj() {
     for (unsigned int i = 0; i < vertices.size(); ++i) {
         printf("v %f %f %f\n", vertices[i][0], vertices[i][1], vertices[i][2]);
     }
@@ -89,24 +91,28 @@ void ObjParser::print() {
 }
 
 void ObjParser::setupBuffers() {
-    bindBuffers();
-
-    // Generate colors
-    genColors();
-
+    // Determine sizes for buffer offsets.
     GLsizeiptr verticesSize = sizeof(Angel::vec4) * vertices.size();
     GLsizeiptr normalsSize = sizeof(Angel::vec4) * normals.size();
     GLsizeiptr colorsSize = sizeof(Angel::vec4) * colors.size();
     GLsizeiptr facesSize = sizeof(unsigned int) * faces.size();
 
-    // vao & vbo
-    glBufferData( GL_ARRAY_BUFFER, verticesSize + normalsSize + colorsSize, NULL, GL_STATIC_DRAW );
-    glBufferSubData( GL_ARRAY_BUFFER, 0, verticesSize, vertices.data());
-    glBufferSubData( GL_ARRAY_BUFFER, verticesSize, normalsSize, normals.data());
-    glBufferSubData( GL_ARRAY_BUFFER, verticesSize + normalsSize, colorsSize, colors.data());
+    // Generate colors
+    genColors();
+
+    // vao
+    glBindVertexArray(vao);
+
+    // vbo
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, verticesSize + normalsSize + colorsSize, NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, verticesSize, vertices.data());
+    glBufferSubData(GL_ARRAY_BUFFER, verticesSize, normalsSize, normals.data());
+    glBufferSubData(GL_ARRAY_BUFFER, verticesSize + normalsSize, colorsSize, colors.data());
 
     // ebo
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, facesSize, faces.data(), GL_STATIC_DRAW );
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, facesSize, faces.data(), GL_STATIC_DRAW);
 
     unbindBuffers();
 }

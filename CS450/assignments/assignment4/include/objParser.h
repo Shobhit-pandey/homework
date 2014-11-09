@@ -12,9 +12,8 @@ public:
     ~ObjParser();
 
     void print();
+    void exportObj();
     void parse(const char* objFilename);
-    void setupBuffers();
-    void genColors();
 
     void bindBuffers();
     void unbindBuffers();
@@ -31,6 +30,9 @@ public:
     const char* filename;
 
 private:
+    void genColors();
+    void setupBuffers();
+
     FILE* fp;
     unsigned int lineNumber;
     char lookahead[256];
