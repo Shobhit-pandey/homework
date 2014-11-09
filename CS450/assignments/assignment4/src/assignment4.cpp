@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 using scene::SceneState;
-using obj::ParserState;
 
 using Angel::vec4;
 using Angel::mat4;
@@ -34,8 +33,8 @@ GLuint wireframe_vao = -1;
 // SceneState hold viewing parameters
 SceneState ss;
 
-// ParserState hold parsed objects
-std::vector<ParserState> objects;
+// ObjParser hold parsed objects
+std::vector<ObjParser> objects;
 // There is one vao for each object file that is loaded
 std::vector<GLuint> vaos;
 
@@ -82,7 +81,7 @@ char help_msg[] = "\n"
 
 // OpenGL initialization
 void
-init(ParserState* ps)
+init(ObjParser *ps)
 {
     GLuint program = InitShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
@@ -96,7 +95,7 @@ init(ParserState* ps)
 
     // Generate a random color for each object
     std::vector<vec4> colors;
-    for (unsigned int i = 0; i < ps->indexes.size(); ++i) {
+    for (unsigned int i = 0; i < ps->faces.size(); ++i) {
     GLuint r = (vao & 0x000000FF) >>  0;
     GLuint g = (vao & 0x0000FF00) >>  8;
     GLuint b = (vao & 0x00FF0000) >> 16;
@@ -130,8 +129,8 @@ init(ParserState* ps)
     glGenBuffers( 1, &ebo );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo );
     glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                  ps->indexes.size()*sizeof(&ps->indexes[0]),
-                  &ps->indexes[0],
+                  ps->faces.size()*sizeof(&ps->faces[0]),
+                  &ps->faces[0],
                   GL_STATIC_DRAW );
 
     // set up vertex arrays
@@ -218,10 +217,10 @@ display( void )
         if (wireframe_vao > 0 && wireframe_vao == vaos[i]) {
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glPolygonOffset( 1.0, 2.0 );
-            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         } else {
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         }
     }
 
@@ -282,7 +281,7 @@ mouse( int button, int state, int x, int y ) {
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
             glBindVertexArray(vaos[i]);
-            glDrawElements( GL_TRIANGLES, objects[i].indexes.size(), GL_UNSIGNED_INT, 0 );
+            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         }
 
         GLint viewport[4];
@@ -327,8 +326,8 @@ printArgs(int argc, char** argv) {
 void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
-        ParserState ps;
-        obj::parse(&ps, argv[i]);
+        ObjParser ps(argv[i]);
+        ps.parse();
         objects.push_back(ps);
     }
 }
