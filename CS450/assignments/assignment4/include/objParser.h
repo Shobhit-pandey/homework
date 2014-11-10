@@ -26,6 +26,7 @@ public:
     GLuint vao; // vertex array
     GLuint vbo; // vertex buffer
     GLuint ebo; // element buffer
+    Angel::mat4 transform;
 
     const char* filename;
 

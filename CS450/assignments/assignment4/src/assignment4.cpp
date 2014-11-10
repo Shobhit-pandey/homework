@@ -28,6 +28,7 @@ typedef Angel::vec4  point4;
 
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
+GLint   transformation;
 
 GLuint swap_colors;
 GLuint wireframe_vao = -1;
@@ -137,6 +138,7 @@ init(ObjParser *ps)
 
     model_view = glGetUniformLocation( program, "ModelView" );
     projection = glGetUniformLocation( program, "Projection" );
+    transformation = glGetUniformLocation( program, "Transform" );
 
     swap_colors = glGetUniformLocation( program, "Swap" );
 
@@ -163,14 +165,15 @@ display( void )
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         objects[i].bindBuffers();
-        if (wireframe_vao == objects[i].objColor) {
+        // Apply transformations
+        glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform);
+        if (wireframe_vao == i) {
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glPolygonOffset( 1.0, 2.0 );
-            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         } else {
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         }
+        glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
         objects[i].unbindBuffers();
     }
 
@@ -234,6 +237,7 @@ mouse( int button, int state, int x, int y ) {
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
             objects[i].bindBuffers();
+            glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform);
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
             objects[i].unbindBuffers();
         }
@@ -244,6 +248,11 @@ mouse( int button, int state, int x, int y ) {
         // id corresponds to a specific vertex. That vertex is part of an
         // object. Set wireframe_vao to colorId of clicked object.
         wireframe_vao = color_id(pixel);
+        for (unsigned int i = 0; i < objects.size(); ++i) {
+            if (wireframe_vao == objects[i].objColor) {
+                wireframe_vao = i;
+            }
+        }
 
         // Don't swap buffers, just render over what's there.
         // Swapping buffers produces a flicker.
