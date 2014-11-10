@@ -224,12 +224,15 @@ GLuint color_id(GLubyte pixel[4]) {
  *   - Render scene in front buffer, but use wireframe for clicked
  *     object.
  */
+GLint viewport[4];
+int first_click = 1;
 void
 mouse( int button, int state, int x, int y ) {
     // Viewport and selected pixel
-    GLint viewport[4];
     GLubyte pixel[4];
-    if (state == GLUT_UP) {
+
+    if (state == GLUT_DOWN) {
+
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glUniform1i( swap_colors, 1 );
@@ -251,6 +254,7 @@ mouse( int button, int state, int x, int y ) {
         for (unsigned int i = 0; i < objects.size(); ++i) {
             if (wireframe_vao == objects[i].objColor) {
                 wireframe_vao = i;
+                first_click = 1;
             }
         }
 
@@ -258,6 +262,41 @@ mouse( int button, int state, int x, int y ) {
         // Swapping buffers produces a flicker.
         glutPostRedisplay();
     }
+}
+
+/*
+ * Handle dragging of mouse for transformations
+ */
+int start_pos[2] = {-1, -1};
+void
+mouseMotion(int x, int y) {
+    if (first_click == 1) {
+        // record mouse start position
+        start_pos[0] = x;
+        start_pos[1] = y;
+        first_click = 0;
+    } else {
+        GLint dx =  (x - start_pos[0]);
+        GLint dy = -(y - start_pos[1]);
+
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        GLint w = viewport[2];
+        GLint h = viewport[3];
+
+        for (unsigned int i = 0; i < objects.size(); ++i) {
+            if (wireframe_vao == i) {
+                objects[i].transform *= Angel::Translate(
+                    (GLfloat) dx/w*4,
+                    (GLfloat) dy/h*4,
+                    0.0);
+            }
+        }
+        start_pos[0] = x;
+        start_pos[1] = y;
+    }
+
+    glutPostRedisplay();
 }
 
 
@@ -368,6 +407,7 @@ int main(int argc, char** argv)
     //NOTE:  callbacks must go after window is created!!!
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
+    glutMotionFunc(mouseMotion);
     glutDisplayFunc(display);
     if (ss.lens.size() == 4) {
         glutReshapeFunc(myPerspectiveReshape);
