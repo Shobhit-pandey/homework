@@ -39,6 +39,7 @@ SceneState ss;
 // ObjParser hold parsed objects
 std::vector<ObjParser> objects;
 
+
 // Usage information
 char help_msg[] = "\n"
    "The camera location can be controlled with W,A,S,D, and Q,E.\n"
@@ -225,13 +226,15 @@ GLuint color_id(GLubyte pixel[4]) {
  *     object.
  */
 GLint viewport[4];
-int first_click = 1;
+int start_pos[2];
 void
 mouse( int button, int state, int x, int y ) {
     // Viewport and selected pixel
     GLubyte pixel[4];
 
     if (state == GLUT_DOWN) {
+        start_pos[0] = x;
+        start_pos[1] = y;
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -248,13 +251,13 @@ mouse( int button, int state, int x, int y ) {
         glGetIntegerv(GL_VIEWPORT, viewport);
         glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 
+
         // id corresponds to a specific vertex. That vertex is part of an
         // object. Set wireframe_vao to colorId of clicked object.
         wireframe_vao = color_id(pixel);
         for (unsigned int i = 0; i < objects.size(); ++i) {
             if (wireframe_vao == objects[i].objColor) {
                 wireframe_vao = i;
-                first_click = 1;
             }
         }
 
@@ -267,34 +270,26 @@ mouse( int button, int state, int x, int y ) {
 /*
  * Handle dragging of mouse for transformations
  */
-int start_pos[2] = {-1, -1};
 void
 mouseMotion(int x, int y) {
-    if (first_click == 1) {
-        // record mouse start position
-        start_pos[0] = x;
-        start_pos[1] = y;
-        first_click = 0;
-    } else {
-        GLint dx =  (x - start_pos[0]);
-        GLint dy = -(y - start_pos[1]);
+    GLint dx =  (x - start_pos[0]);
+    GLint dy = -(y - start_pos[1]);
 
-        glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetIntegerv(GL_VIEWPORT, viewport);
 
-        GLint w = viewport[2];
-        GLint h = viewport[3];
+    GLint w = viewport[2];
+    GLint h = viewport[3];
 
-        for (unsigned int i = 0; i < objects.size(); ++i) {
-            if (wireframe_vao == i) {
-                objects[i].transform *= Angel::Translate(
-                    (GLfloat) dx/w*4,
-                    (GLfloat) dy/h*4,
-                    0.0);
-            }
+    for (unsigned int i = 0; i < objects.size(); ++i) {
+        if (wireframe_vao == i) {
+            objects[i].transform *= Angel::Translate(
+                (GLfloat) dx/w*4,
+                (GLfloat) dy/h*4,
+                0.0);
         }
-        start_pos[0] = x;
-        start_pos[1] = y;
     }
+    start_pos[0] = x;
+    start_pos[1] = y;
 
     glutPostRedisplay();
 }
