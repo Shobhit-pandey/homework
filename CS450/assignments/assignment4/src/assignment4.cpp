@@ -22,9 +22,12 @@ using Angel::DegreesToRadians;
 using Angel::Ortho;
 using Angel::Frustum;
 using Angel::InitShader;
+using Angel::inverse;
 
 typedef Angel::vec4  color4;
 typedef Angel::vec4  point4;
+
+mat4 mv;
 
 GLuint  model_view;  // model-view matrix uniform shader variable location
 GLuint  projection; // projection matrix uniform shader variable location
@@ -168,7 +171,7 @@ display( void )
     point4  at( ss.at, 1.0 );
     vec4    up( ss.up, 0.0 );
 
-    mat4  mv = LookAt( eye, at, up );
+    mv = LookAt( eye, at, up );
 
     glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
     glUniformMatrix4fv( projection, 1, GL_TRUE, ss.proj );
@@ -307,13 +310,17 @@ mouseMotion(int x, int y) {
             (GLfloat) dx/w,
             (GLfloat) dy/h);
 
-    Angel::vec4 t_vec( (GLfloat) dx/w*4, (GLfloat) dy/h*4, 0.0, 0.0);
-    //t_vec = ss.proj * t_vec;
+    vec4 t_vec( (GLfloat) dx/w*4, (GLfloat) dy/h*4, 0.0, 1.0);
+
+    vec4 invert_z( 1.0, 1.0, -1.0, 1.0);
+
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
             switch (mode) {
             case Translate:
-                objects[i].translate *= Angel::Translate(t_vec);
+                objects[i].translate *= Angel::Translate(
+                    mvmult(inverse(mv), t_vec) * invert_z
+                );
                 break;
             case RotateX:
                 objects[i].rotate *= Angel::RotateX((GLfloat) dy/2);
