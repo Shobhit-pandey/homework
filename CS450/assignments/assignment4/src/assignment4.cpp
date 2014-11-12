@@ -33,6 +33,16 @@ GLint   transformation;
 GLuint swap_colors;
 GLuint wireframe_vao = -1;
 
+enum Mode {
+    Translate = 1,
+    RotateX,
+    RotateY,
+    RotateZ,
+    Scale
+};
+
+Mode mode = Translate;
+
 // SceneState hold viewing parameters
 SceneState ss;
 
@@ -167,7 +177,7 @@ display( void )
     for (unsigned int i = 0; i < objects.size(); ++i) {
         objects[i].bindBuffers();
         // Apply transformations
-        glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform);
+        glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform());
         if (wireframe_vao == i) {
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glPolygonOffset( 1.0, 2.0 );
@@ -185,6 +195,17 @@ display( void )
 void
 keyboard( unsigned char key, int x, int y )
 {
+    if (key == 'x') {
+        if (mode == Translate || mode == Scale) {
+            mode = RotateX;
+        } else if (mode == RotateX) {
+            mode = RotateY;
+        } else if (mode == RotateY) {
+            mode = RotateZ;   
+        } else if (mode == RotateZ) {
+            mode = RotateX;   
+        }
+    }
     switch( key ) {
 	case 033:  // Escape key
 	case 'Q': exit( EXIT_SUCCESS ); break;
@@ -207,6 +228,8 @@ keyboard( unsigned char key, int x, int y )
     case 'l': ss.up[1]  -= 0.10; break;
     case 'o': ss.up[2]  += 0.10; break;
     case 'u': ss.up[2]  -= 0.10; break;
+    case 'z': mode = Translate; break;
+    case 'c': mode = Scale; break;
     }
     glutPostRedisplay();
 }
@@ -243,7 +266,7 @@ mouse( int button, int state, int x, int y ) {
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
             objects[i].bindBuffers();
-            glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform);
+            glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform());
             glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
             objects[i].unbindBuffers();
         }
@@ -280,16 +303,42 @@ mouseMotion(int x, int y) {
     GLint w = viewport[2];
     GLint h = viewport[3];
 
+    printf("diff: (%f, %f)\n",
+            (GLfloat) dx/w,
+            (GLfloat) dy/h);
+
+    Angel::vec4 t_vec( (GLfloat) dx/w*4, (GLfloat) dy/h*4, 0.0, 0.0);
+    //t_vec = ss.proj * t_vec;
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
-            objects[i].transform *= Angel::Translate(
-                (GLfloat) dx/w*4,
-                (GLfloat) dy/h*4,
-                0.0);
+            switch (mode) {
+            case Translate:
+                objects[i].translate *= Angel::Translate(t_vec);
+                break;
+            case RotateX:
+                objects[i].rotate *= Angel::RotateX((GLfloat) dy/2);
+                break;
+            case RotateY:
+                objects[i].rotate *= Angel::RotateY((GLfloat) dx/2);
+                break;
+            case RotateZ:
+                objects[i].rotate *= Angel::RotateZ((GLfloat) dx+dy/2);
+                break;
+            case Scale:
+                //GLfloat scaleX = objects[i].transform[0][0];
+                //GLfloat scaleY = objects[i].transform[1][1];
+                //objects[i].scale = Angel::Scale(
+                //    scaleX + (GLfloat) (w-x)/w,
+                //    scaleY + (GLfloat) dy/(h/2),
+                //    1.0);
+                break;
+            }
         }
     }
-    start_pos[0] = x;
-    start_pos[1] = y;
+    if (mode != Scale) {
+        start_pos[0] = x;
+        start_pos[1] = y;
+    }
 
     glutPostRedisplay();
 }
