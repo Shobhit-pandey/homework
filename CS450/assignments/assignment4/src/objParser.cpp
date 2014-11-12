@@ -119,6 +119,9 @@ void ObjParser::setupBuffers() {
     unbindBuffers();
 }
 
+Angel::mat4 ObjParser::transform() {
+    return translate * scale * rotate;
+}
 
 void ObjParser::bindBuffers() {
     glBindVertexArray(vao);

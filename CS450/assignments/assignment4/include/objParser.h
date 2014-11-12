@@ -26,7 +26,12 @@ public:
     GLuint vao; // vertex array
     GLuint vbo; // vertex buffer
     GLuint ebo; // element buffer
-    Angel::mat4 transform;
+
+    Angel::mat4 translate; // Translation matrix
+    Angel::mat4 scale; // Scale matrix
+    Angel::mat4 rotate; // Rotation matrix
+
+    Angel::mat4 transform(); // Matrix of all transformations
 
     const char* filename;
 
