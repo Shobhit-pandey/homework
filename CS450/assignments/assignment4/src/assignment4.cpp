@@ -238,7 +238,7 @@ mouseMotion(int x, int y) {
             switch (mode) {
             case Translate:
                 objects[i].translate *= Angel::Translate(
-                    mvmult(inverse(mv), t_vec) * invert_z
+                    inverse(mv) * t_vec * invert_z
                 );
                 break;
             case RotateX:
