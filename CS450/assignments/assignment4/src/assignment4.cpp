@@ -33,15 +33,21 @@ mat4 mv;
 GLuint program;
 
 GLuint wireframe_vao = -1;
+GLint new_axis = -1;
+
+enum Axis {
+    X = 1,
+    Y,
+    Z
+};
 
 enum Mode {
     Translate = 1,
-    RotateX,
-    RotateY,
-    RotateZ,
+    Rotate,
     Scale
 };
 
+Axis axis = X;
 Mode mode = Translate;
 
 // SceneState hold viewing parameters
@@ -108,7 +114,6 @@ display( void )
             // Draw manipulator
             for (unsigned int j = 0; j < manipulator.size(); ++j) {
                 manipulator[j].swapColors(1);
-                manipulator[j].translate = objects[i].translate;
                 manipulator[j].draw();
                 manipulator[j].swapColors(0);
             }
@@ -122,8 +127,8 @@ display( void )
 }
 
 
-GLuint color_id(GLubyte pixel[4]) {
-    return pixel[0] + (pixel[1]*256) + (pixel[2]*256*256);
+GLuint color_id(vec4 pixel) {
+    return (GLuint) ((pixel[0]*255.0f) + (pixel[1]*255.0f)*256 + (pixel[2]*255.0f)*256*256);
 }
 
 /**
@@ -140,7 +145,7 @@ int start_pos[2];
 void
 mouse( int button, int state, int x, int y ) {
     // Viewport and selected pixel
-    GLubyte pixel[4];
+    GLfloat pixel[4];
 
     if (state == GLUT_DOWN) {
         start_pos[0] = x;
@@ -155,15 +160,38 @@ mouse( int button, int state, int x, int y ) {
             objects[i].draw();
             objects[i].swapColors(0);
         }
+        // Render manipulators
+        for (unsigned int j = 0; j < manipulator.size(); ++j) {
+            manipulator[j].swapColors(1);
+            manipulator[j].draw();
+            manipulator[j].swapColors(0);
+        }
 
         glGetIntegerv(GL_VIEWPORT, viewport);
-        glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_FLOAT, pixel);
 
-        // id corresponds to a specific vertex. That vertex is part of an
-        // object. Set wireframe_vao to colorId of clicked object.
-        wireframe_vao = color_id(pixel);
+        vec4 selected_color(pixel[0], pixel[1], pixel[2], 1.0);
+
+        // Clicked an Axis
+        new_axis = -1;
+        for (unsigned int j = 0; j < manipulator.size(); ++j) {
+            if (color_id(selected_color) == color_id(manipulator[j].objColor)) {
+                new_axis = (j+1);
+            }
+        }
+        // Selected an axis
+        if (new_axis == -1) {
+            wireframe_vao = -1;
+        } else {
+            switch (new_axis) {
+                case 1: axis = X; break;
+                case 2: axis = Y; break;
+                case 3: axis = Z; break;
+            }
+        }
+        // Clicked an object
         for (unsigned int i = 0; i < objects.size(); ++i) {
-            if (wireframe_vao == objects[i].objColor) {
+            if (color_id(selected_color) == color_id(objects[i].objColor)) {
                 wireframe_vao = i;
             }
         }
@@ -187,30 +215,57 @@ mouseMotion(int x, int y) {
     GLint w = viewport[2];
     GLint h = viewport[3];
 
-    //printf("diff: (%f, %f)\n",
-    //        (GLfloat) dx/w,
-    //        (GLfloat) dy/h);
-
-    vec4 t_vec( (GLfloat) dx/w*4, (GLfloat) dy/h*4, 0.0, 1.0);
+    GLfloat tx = (GLfloat) dx/w*4;
+    GLfloat ty = (GLfloat) dy/h*4;
 
     vec4 invert_z( 1.0, 1.0, -1.0, 1.0);
+    vec4 tvec(tx, ty, 0.0, 1.0);
 
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
             switch (mode) {
             case Translate:
-                objects[i].translate *= Angel::Translate(
-                    inverse(mv) * t_vec * invert_z
-                );
+                if (new_axis != -1) {
+                    switch (axis) {
+                    case X:
+                        objects[i].translate *= Angel::Translate(
+                            inverse(mv) * tvec * invert_z *
+                            // X-mask
+                            vec4(1.0, 0.0, 0.0, 1.0)
+                        );
+                        break;
+                    case Y:
+                        objects[i].translate *= Angel::Translate(
+                            inverse(mv) * tvec * invert_z *
+                            // Y-mask
+                            vec4(0.0, 1.0, 0.0, 1.0)
+                        );
+                        break;
+                    case Z:
+                        objects[i].translate *= Angel::Translate(
+                            inverse(mv) * tvec * invert_z *
+                            // Z-mask
+                            vec4(0.0, 0.0, 1.0, 1.0)
+                        );
+                        break;
+                    }
+                }
+                for (unsigned int j = 0; j < manipulator.size(); ++j) {
+                    manipulator[j].translate = objects[i].translate;
+                }
                 break;
-            case RotateX:
-                objects[i].rotate *= Angel::RotateX((GLfloat) dy/2);
-                break;
-            case RotateY:
-                objects[i].rotate *= Angel::RotateY((GLfloat) dx/2);
-                break;
-            case RotateZ:
-                objects[i].rotate *= Angel::RotateZ((GLfloat) dx+dy/2);
+            case Rotate:
+                switch (axis) {
+                case X:
+                    objects[i].rotate *= Angel::RotateX((GLfloat) dy/2);
+                    break;
+                case Y:
+                    objects[i].rotate *= Angel::RotateY((GLfloat) dx/2);
+                    break;
+                case Z:
+                    objects[i].rotate *= Angel::RotateZ((GLfloat) dx+dy/2);
+                    break;
+                }
                 break;
             case Scale:
                 //GLfloat scaleX = objects[i].transform[0][0];
@@ -236,41 +291,36 @@ mouseMotion(int x, int y) {
 void
 keyboard( unsigned char key, int x, int y )
 {
-    if (key == 'x') {
-        if (mode == Translate || mode == Scale) {
-            mode = RotateX;
-        } else if (mode == RotateX) {
-            mode = RotateY;
-        } else if (mode == RotateY) {
-            mode = RotateZ;
-        } else if (mode == RotateZ) {
-            mode = RotateX;
-        }
-    }
     switch( key ) {
+    // States
 	case 033:  // Escape key
 	case 'Q': exit( EXIT_SUCCESS ); break;
+    case '5': printSceneState(&ss); break;
+    // At
     case '4': ss.at[0] -= 0.10; break;
     case '6': ss.at[0] += 0.10; break;
     case '2': ss.at[1] -= 0.10; break;
     case '8': ss.at[1] += 0.10; break;
     case '7': ss.at[2] += 0.10; break;
     case '9': ss.at[2] -= 0.10; break;
-    case '5': printSceneState(&ss); break;
+    // Eye
     case 'w': ss.eye[2] -= 0.10; break;
     case 's': ss.eye[2] += 0.10; break;
     case 'a': ss.eye[0] -= 0.10; break;
     case 'd': ss.eye[0] += 0.10; break;
     case 'q': ss.eye[1] -= 0.10; break;
     case 'e': ss.eye[1] += 0.10; break;
+    // Up
     case 'i': ss.up[0]  += 0.10; break;
     case 'k': ss.up[0]  -= 0.10; break;
     case 'j': ss.up[1]  += 0.10; break;
     case 'l': ss.up[1]  -= 0.10; break;
     case 'o': ss.up[2]  += 0.10; break;
     case 'u': ss.up[2]  -= 0.10; break;
-    case 'z': mode = Translate; break;
-    case 'c': mode = Scale; break;
+    // Transformations
+    case 't': mode = Translate; break;
+    case 'g': mode = Scale; break;
+    case 'r': mode = Rotate; break;
     }
     glutPostRedisplay();
 }

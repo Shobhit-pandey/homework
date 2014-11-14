@@ -150,10 +150,10 @@ Angel::mat4 Mesh::transform() {
 
 void Mesh::setColor(Angel::vec4 color) {
     for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
-        colors.push_back(Angel::vec4(color));
+        colors.push_back(color);
     }
-    objColor = colorId;
-    ++colorId;
+
+    objColor = color;
 }
 
 void Mesh::swapColors(int swap) {
@@ -175,15 +175,16 @@ void Mesh::unbindBuffers() {
 
 void Mesh::genColors() {
     // Generate a random color for each vertex using colorId, assigning it to objColor.
-    for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
-        GLuint r = (colorId & 0x000000FF) >>  0;
-        GLuint g = (colorId & 0x0000FF00) >>  8;
-        GLuint b = (colorId & 0x00FF0000) >> 16;
+    GLuint r = (colorId & 0x000000FF) >>  0;
+    GLuint g = (colorId & 0x0000FF00) >>  8;
+    GLuint b = (colorId & 0x00FF0000) >> 16;
 
-        vec4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
+    vec4 unique_color(r/255.0f, g/255.0f, b/255.0f, 1.0);
+
+    for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
         colors.push_back(unique_color);
     }
 
-    objColor = colorId;
+    objColor = unique_color;
     ++colorId;
 }

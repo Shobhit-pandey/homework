@@ -11,6 +11,8 @@ public:
     Mesh(const char* objFilename, Angel::vec4 color);
     ~Mesh();
 
+    static GLuint colorId;
+
     void draw();
     void wireframe();
     void setupShaders(GLuint program);
@@ -32,8 +34,7 @@ public:
     Angel::mat4 rotate; // Rotation matrix
 
     vector<vec4> colors;
-    GLuint objColor;
-    static GLuint colorId;
+    vec4 objColor;
 
 private:
     ObjParser* ps;
