@@ -91,7 +91,6 @@ display( void )
 {
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glUniform1i( glGetUniformLocation( program, "Swap" ), 0 );
 
     // Update Camera
     point4 eye( ss.eye, 1.0 );
@@ -187,11 +186,12 @@ mouse( int button, int state, int x, int y ) {
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        glUniform1i( glGetUniformLocation( program, "Swap" ), 1 );
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
+            objects[i].swapColors(1);
             objects[i].draw();
+            objects[i].swapColors(0);
         }
 
         glGetIntegerv(GL_VIEWPORT, viewport);

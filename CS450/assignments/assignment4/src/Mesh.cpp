@@ -142,6 +142,11 @@ Angel::mat4 Mesh::transform() {
     return translate * scale * rotate;
 }
 
+void Mesh::swapColors(int swap) {
+    glUniform1i(glGetUniformLocation( shader_program, "Swap" ),
+            swap);
+}
+
 void Mesh::bindBuffers() {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

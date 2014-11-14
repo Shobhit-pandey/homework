@@ -15,6 +15,7 @@ public:
     void setupShaders(GLuint program);
     void bindBuffers();
     void unbindBuffers();
+    void swapColors(int swap);
     Angel::mat4 transform(); // Matrix of all transformations
 
     GLuint shader_program; // shader program (vertex & fragment)
