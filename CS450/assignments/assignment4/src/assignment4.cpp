@@ -7,11 +7,11 @@
 // Include the vector and matrix utilities from the textbook, as well as some
 // macro definitions.
 #include "Angel.h"
-#include "objParser.h"
+#include "Mesh.h"
 #include "sceneParser.h"
 #include <stdio.h>
 
-GLuint ObjParser::colorId = 0;
+GLuint Mesh::colorId = 0;
 
 using scene::SceneState;
 
@@ -29,11 +29,8 @@ typedef Angel::vec4  point4;
 
 mat4 mv;
 
-GLuint  model_view;  // model-view matrix uniform shader variable location
-GLuint  projection; // projection matrix uniform shader variable location
-GLint   transformation;
+GLuint program;
 
-GLuint swap_colors;
 GLuint wireframe_vao = -1;
 
 enum Mode {
@@ -49,8 +46,8 @@ Mode mode = Translate;
 // SceneState hold viewing parameters
 SceneState ss;
 
-// ObjParser hold parsed objects
-std::vector<ObjParser> objects;
+// Mesh hold parsed objects
+std::vector<Mesh> objects;
 
 
 // Usage information
@@ -85,78 +82,8 @@ char help_msg[] = "\n"
 
 // OpenGL initialization
 void
-init(ObjParser *ps)
+init(Mesh *ps)
 {
-    GLuint program = InitShader("vshader.glsl", "fshader.glsl");
-    glUseProgram(program);
-
-    ps->bindBuffers();
-
-    // vPosition
-    GLuint vPosition = glGetAttribLocation( program, "vPosition" );
-    glEnableVertexAttribArray( vPosition );
-    glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0) );
-
-    // vNormal
-    GLint64 verticesSize = sizeof(Angel::vec4) * ps->vertices.size();
-    GLuint vNormal = glGetAttribLocation( program, "vNormal" );
-    glEnableVertexAttribArray( vNormal );
-    glVertexAttribPointer( vNormal,
-                           4,
-                           GL_FLOAT,
-                           GL_FALSE,
-                           0,
-                           BUFFER_OFFSET(verticesSize) );
-
-    // vColor
-    GLint64 normalsSize = sizeof(Angel::vec4) * ps->normals.size();
-    GLuint vColor = glGetAttribLocation( program, "vColor" );
-    glEnableVertexAttribArray( vColor );
-    glVertexAttribPointer( vColor,
-                           4,
-                           GL_FLOAT,
-                           GL_FALSE,
-                           0,
-                           BUFFER_OFFSET((verticesSize + normalsSize)) );
-
-    // Initialize shader lighting parameters
-    // RAM: No need to change these...we'll learn about the details when we
-    // cover Illumination and Shading
-    point4 light_position( 1.5, 1.5, 2.0, 1.0 );
-    color4 light_ambient( 0.2, 0.2, 0.2, 1.0 );
-    color4 light_diffuse( 1.0, 1.0, 1.0, 1.0 );
-    color4 light_specular( 1.0, 1.0, 1.0, 1.0 );
-
-    color4 material_ambient( 1.0, 0.0, 1.0, 1.0 );
-    color4 material_diffuse( 1.0, 0.8, 0.0, 1.0 );
-    color4 material_specular( 1.0, 0.8, 0.0, 1.0 );
-    float  material_shininess = 100.0;
-
-    color4 ambient_product = light_ambient * material_ambient;
-    color4 diffuse_product = light_diffuse * material_diffuse;
-    color4 specular_product = light_specular * material_specular;
-
-    glUniform4fv( glGetUniformLocation(program, "AmbientProduct"),
-		  1, ambient_product );
-    glUniform4fv( glGetUniformLocation(program, "DiffuseProduct"),
-		  1, diffuse_product );
-    glUniform4fv( glGetUniformLocation(program, "SpecularProduct"),
-		  1, specular_product );
-
-    glUniform4fv( glGetUniformLocation(program, "LightPosition"),
-		  1, light_position );
-
-    glUniform1f( glGetUniformLocation(program, "Shininess"),
-		 material_shininess );
-
-
-    model_view = glGetUniformLocation( program, "ModelView" );
-    projection = glGetUniformLocation( program, "Projection" );
-    transformation = glGetUniformLocation( program, "Transform" );
-
-    swap_colors = glGetUniformLocation( program, "Swap" );
-
-    ps->unbindBuffers();
 }
 
 void
@@ -164,7 +91,7 @@ display( void )
 {
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glUniform1i( swap_colors, 0 );
+    glUniform1i( glGetUniformLocation( program, "Swap" ), 0 );
 
     // Update Camera
     point4 eye( ss.eye, 1.0 );
@@ -173,22 +100,18 @@ display( void )
 
     mv = LookAt( eye, at, up );
 
-    glUniformMatrix4fv( model_view, 1, GL_TRUE, mv );
-    glUniformMatrix4fv( projection, 1, GL_TRUE, ss.proj );
+    glUniformMatrix4fv( glGetUniformLocation( program, "ModelView" ),
+            1, GL_TRUE, mv );
+    glUniformMatrix4fv( glGetUniformLocation( program, "Projection" ),
+            1, GL_TRUE, ss.proj );
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
-        objects[i].bindBuffers();
-        // Apply transformations
-        glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform());
         if (wireframe_vao == i) {
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            glPolygonOffset( 1.0, 2.0 );
+            objects[i].wireframe();
         } else {
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            objects[i].draw();
         }
-        glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
-        objects[i].unbindBuffers();
     }
 
     glutSwapBuffers();
@@ -264,19 +187,15 @@ mouse( int button, int state, int x, int y ) {
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        glUniform1i( swap_colors, 1 );
+        glUniform1i( glGetUniformLocation( program, "Swap" ), 1 );
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
-            objects[i].bindBuffers();
-            glUniformMatrix4fv(transformation, 1, GL_TRUE, objects[i].transform());
-            glDrawElements( GL_TRIANGLES, objects[i].faces.size(), GL_UNSIGNED_INT, 0 );
-            objects[i].unbindBuffers();
+            objects[i].draw();
         }
 
         glGetIntegerv(GL_VIEWPORT, viewport);
         glReadPixels(x, viewport[3]-y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-
 
         // id corresponds to a specific vertex. That vertex is part of an
         // object. Set wireframe_vao to colorId of clicked object.
@@ -367,9 +286,10 @@ printArgs(int argc, char** argv) {
 void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
-        ObjParser* ps = new ObjParser(argv[i]);
-        objects.push_back(*ps);
+        Mesh mesh(argv[i]);
+        objects.push_back(mesh);
     }
+
 }
 
 void
@@ -442,15 +362,25 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
+    // Create manipulator
+    //Mesh unit_cube("/home/bramwelt/unit_cube.obj");
+    //objects.push_back(unit_cube);
+
     // Read and parse the scene file
     readSceneFilename(argv);
     // Read and parse each object file passed in
     readObjFilenames(argc, argv);
 
+    // Initialize Shaders
+    program = InitShader("vshader.glsl", "fshader.glsl");
+
     // Pass objects to init
     for (unsigned int i = 0; i < objects.size(); ++i) {
-        init(&objects[i]);
+        objects[i].setupShaders(program);
     }
+
+    // Setup Manipulator
+    //setup_manipulator();
 
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
