@@ -8,11 +8,13 @@ using Angel::vec4;
 class Mesh {
 public:
     Mesh(const char* objFilename);
+    Mesh(const char* objFilename, Angel::vec4 color);
     ~Mesh();
 
     void draw();
     void wireframe();
     void setupShaders(GLuint program);
+    void setColor(Angel::vec4 color);
     void bindBuffers();
     void unbindBuffers();
     void swapColors(int swap);
@@ -24,6 +26,7 @@ public:
     GLuint vbo; // vertex buffer
     GLuint ebo; // element buffer
 
+    Angel::mat4 offset; // Base Translation offset.
     Angel::mat4 translate; // Translation matrix
     Angel::mat4 scale; // Scale matrix
     Angel::mat4 rotate; // Rotation matrix

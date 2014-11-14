@@ -15,6 +15,12 @@ Mesh::Mesh(const char* objFilename) {
     setupBuffers();
 }
 
+Mesh::Mesh(const char* objFilename, Angel::vec4 color) {
+    ps = new ObjParser(objFilename);
+    setColor(color);
+    setupBuffers();
+}
+
 Mesh::~Mesh() {}
 
 void Mesh::setupBuffers() {
@@ -139,7 +145,15 @@ void Mesh::draw() {
 }
 
 Angel::mat4 Mesh::transform() {
-    return translate * scale * rotate;
+    return (translate * offset) * scale * rotate;
+}
+
+void Mesh::setColor(Angel::vec4 color) {
+    for (unsigned int i = 0; i < ps->vertices.size(); ++i) {
+        colors.push_back(Angel::vec4(color));
+    }
+    objColor = colorId;
+    ++colorId;
 }
 
 void Mesh::swapColors(int swap) {

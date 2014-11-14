@@ -3,6 +3,7 @@
 
 #define WINDOW_WIDTH  512
 #define WINDOW_HEIGHT 512
+#define UNIT_CUBE "unit_cube.obj"
 
 // Include the vector and matrix utilities from the textbook, as well as some
 // macro definitions.
@@ -48,6 +49,7 @@ SceneState ss;
 
 // Mesh hold parsed objects
 std::vector<Mesh> objects;
+std::vector<Mesh> manipulator;
 
 
 // Usage information
@@ -80,11 +82,6 @@ char help_msg[] = "\n"
    "\tO\tRoll  right (-Z)\n"
    "\n";
 
-// OpenGL initialization
-void
-init(Mesh *ps)
-{
-}
 
 void
 display( void )
@@ -108,55 +105,20 @@ display( void )
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
             objects[i].wireframe();
+            // Draw manipulator
+            for (unsigned int j = 0; j < manipulator.size(); ++j) {
+                manipulator[j].swapColors(1);
+                manipulator[j].translate = objects[i].translate;
+                manipulator[j].draw();
+                manipulator[j].swapColors(0);
+            }
         } else {
             objects[i].draw();
         }
     }
 
-    glutSwapBuffers();
-}
 
-// Keys primarily control the camera parameters
-void
-keyboard( unsigned char key, int x, int y )
-{
-    if (key == 'x') {
-        if (mode == Translate || mode == Scale) {
-            mode = RotateX;
-        } else if (mode == RotateX) {
-            mode = RotateY;
-        } else if (mode == RotateY) {
-            mode = RotateZ;   
-        } else if (mode == RotateZ) {
-            mode = RotateX;   
-        }
-    }
-    switch( key ) {
-	case 033:  // Escape key
-	case 'Q': exit( EXIT_SUCCESS ); break;
-    case '4': ss.at[0] -= 0.10; break;
-    case '6': ss.at[0] += 0.10; break;
-    case '2': ss.at[1] -= 0.10; break;
-    case '8': ss.at[1] += 0.10; break;
-    case '7': ss.at[2] += 0.10; break;
-    case '9': ss.at[2] -= 0.10; break;
-    case '5': printSceneState(&ss); break;
-    case 'w': ss.eye[2] -= 0.10; break;
-    case 's': ss.eye[2] += 0.10; break;
-    case 'a': ss.eye[0] -= 0.10; break;
-    case 'd': ss.eye[0] += 0.10; break;
-    case 'q': ss.eye[1] -= 0.10; break;
-    case 'e': ss.eye[1] += 0.10; break;
-    case 'i': ss.up[0]  += 0.10; break;
-    case 'k': ss.up[0]  -= 0.10; break;
-    case 'j': ss.up[1]  += 0.10; break;
-    case 'l': ss.up[1]  -= 0.10; break;
-    case 'o': ss.up[2]  += 0.10; break;
-    case 'u': ss.up[2]  -= 0.10; break;
-    case 'z': mode = Translate; break;
-    case 'c': mode = Scale; break;
-    }
-    glutPostRedisplay();
+    glutSwapBuffers();
 }
 
 
@@ -225,9 +187,9 @@ mouseMotion(int x, int y) {
     GLint w = viewport[2];
     GLint h = viewport[3];
 
-    printf("diff: (%f, %f)\n",
-            (GLfloat) dx/w,
-            (GLfloat) dy/h);
+    //printf("diff: (%f, %f)\n",
+    //        (GLfloat) dx/w,
+    //        (GLfloat) dy/h);
 
     vec4 t_vec( (GLfloat) dx/w*4, (GLfloat) dy/h*4, 0.0, 1.0);
 
@@ -269,6 +231,49 @@ mouseMotion(int x, int y) {
     glutPostRedisplay();
 }
 
+
+// Keys primarily control the camera parameters
+void
+keyboard( unsigned char key, int x, int y )
+{
+    if (key == 'x') {
+        if (mode == Translate || mode == Scale) {
+            mode = RotateX;
+        } else if (mode == RotateX) {
+            mode = RotateY;
+        } else if (mode == RotateY) {
+            mode = RotateZ;
+        } else if (mode == RotateZ) {
+            mode = RotateX;
+        }
+    }
+    switch( key ) {
+	case 033:  // Escape key
+	case 'Q': exit( EXIT_SUCCESS ); break;
+    case '4': ss.at[0] -= 0.10; break;
+    case '6': ss.at[0] += 0.10; break;
+    case '2': ss.at[1] -= 0.10; break;
+    case '8': ss.at[1] += 0.10; break;
+    case '7': ss.at[2] += 0.10; break;
+    case '9': ss.at[2] -= 0.10; break;
+    case '5': printSceneState(&ss); break;
+    case 'w': ss.eye[2] -= 0.10; break;
+    case 's': ss.eye[2] += 0.10; break;
+    case 'a': ss.eye[0] -= 0.10; break;
+    case 'd': ss.eye[0] += 0.10; break;
+    case 'q': ss.eye[1] -= 0.10; break;
+    case 'e': ss.eye[1] += 0.10; break;
+    case 'i': ss.up[0]  += 0.10; break;
+    case 'k': ss.up[0]  -= 0.10; break;
+    case 'j': ss.up[1]  += 0.10; break;
+    case 'l': ss.up[1]  -= 0.10; break;
+    case 'o': ss.up[2]  += 0.10; break;
+    case 'u': ss.up[2]  -= 0.10; break;
+    case 'z': mode = Translate; break;
+    case 'c': mode = Scale; break;
+    }
+    glutPostRedisplay();
+}
 
 // Debug helper for printing the passed arguments.
 void
@@ -362,9 +367,6 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
-    // Create manipulator
-    //Mesh unit_cube("/home/bramwelt/unit_cube.obj");
-    //objects.push_back(unit_cube);
 
     // Read and parse the scene file
     readSceneFilename(argv);
@@ -379,8 +381,26 @@ int main(int argc, char** argv)
         objects[i].setupShaders(program);
     }
 
-    // Setup Manipulator
-    //setup_manipulator();
+    // Create manipulators
+    Mesh unit_x("unit_cube.obj", vec4(1.0, 0.0, 0.0, 1.0));
+    Mesh unit_y(UNIT_CUBE, vec4(0.0, 1.0, 0.0, 1.0));
+    Mesh unit_z(UNIT_CUBE, vec4(0.0, 0.0, 1.0, 1.0));
+
+    // Scale
+    unit_x.scale = unit_y.scale = unit_z.scale = Angel::Scale(0.5, 0.5, 0.5);
+
+    // Translate
+    unit_x.offset *= Angel::Translate(vec4(0.75, 0.0, 0.0, 0.0));
+    unit_y.offset *= Angel::Translate(vec4(0.0, 0.75, 0.0, 0.0));
+    unit_z.offset *= Angel::Translate(vec4(0.0, 0.0, 0.75, 0.0));
+
+    manipulator.push_back(unit_x);
+    manipulator.push_back(unit_y);
+    manipulator.push_back(unit_z);
+
+    for (unsigned int i = 0; i < manipulator.size(); ++i) {
+        manipulator[i].setupShaders(program);
+    }
 
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
