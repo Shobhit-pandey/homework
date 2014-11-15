@@ -20,3 +20,12 @@ Building & Running
 > make
 > ./prog perspective.glsf ../assets/*.obj
 
+
+Transformations
+---------------
+
+Keyboard keys switch state.
+
+T - Transform
+R - Rotate
+G - Scale
