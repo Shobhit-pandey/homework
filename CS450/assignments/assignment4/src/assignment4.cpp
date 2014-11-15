@@ -207,48 +207,36 @@ mouse( int button, int state, int x, int y ) {
  */
 void
 mouseMotion(int x, int y) {
-    GLint dx =  (x - start_pos[0]);
-    GLint dy = -(y - start_pos[1]);
+    GLint dx = (x - start_pos[0]);
+    GLint dy = (start_pos[1] - y);
 
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint w = viewport[2];
-    GLint h = viewport[3];
+    //vec4 invert_z( 1.0, 1.0, -1.0, 0.0);
+    vec4 tvec(dx, dy, 0.0, 0.0);
 
-    GLfloat tx = (GLfloat) dx/w*4;
-    GLfloat ty = (GLfloat) dy/h*4;
-
-    vec4 invert_z( 1.0, 1.0, -1.0, 1.0);
-    vec4 tvec(tx, ty, 0.0, 1.0);
+    vec4 world_vec = inverse(mv) * tvec;
 
     for (unsigned int i = 0; i < objects.size(); ++i) {
-        if (wireframe_vao == i) {
+        if (wireframe_vao == i && new_axis != -1) {
             switch (mode) {
             case Translate:
-                if (new_axis != -1) {
-                    switch (axis) {
-                    case X:
-                        objects[i].translate *= Angel::Translate(
-                            inverse(mv) * tvec * invert_z *
-                            // X-mask
-                            vec4(1.0, 0.0, 0.0, 1.0)
-                        );
-                        break;
-                    case Y:
-                        objects[i].translate *= Angel::Translate(
-                            inverse(mv) * tvec * invert_z *
-                            // Y-mask
-                            vec4(0.0, 1.0, 0.0, 1.0)
-                        );
-                        break;
-                    case Z:
-                        objects[i].translate *= Angel::Translate(
-                            inverse(mv) * tvec * invert_z *
-                            // Z-mask
-                            vec4(0.0, 0.0, 1.0, 1.0)
-                        );
-                        break;
-                    }
+                switch (axis) {
+                case X:
+                    objects[i].translate *= Angel::Translate(
+                        0.01f * world_vec * vec3(1.0, 0.0, 0.0) // X-mask
+                    );
+                    break;
+                case Y:
+                    objects[i].translate *= Angel::Translate(
+                        0.01f * world_vec * vec3(0.0, 1.0, 0.0) // Y-mask
+                    );
+                    break;
+                case Z:
+                    objects[i].translate *= Angel::Translate(
+                        0.01f * world_vec * vec3(0.0, 0.0, -1.0) // Z-mask
+                    );
+                    break;
                 }
                 for (unsigned int j = 0; j < manipulator.size(); ++j) {
                     manipulator[j].translate = objects[i].translate;
@@ -257,23 +245,40 @@ mouseMotion(int x, int y) {
             case Rotate:
                 switch (axis) {
                 case X:
-                    objects[i].rotate *= Angel::RotateX((GLfloat) dy/2);
+                    objects[i].rotate = Angel::RotateX(
+                        world_vec[0]
+                    ) * objects[i].rotate;
                     break;
                 case Y:
-                    objects[i].rotate *= Angel::RotateY((GLfloat) dx/2);
+                    objects[i].rotate = Angel::RotateY(
+                        world_vec[1]
+                    ) * objects[i].rotate;
                     break;
                 case Z:
-                    objects[i].rotate *= Angel::RotateZ((GLfloat) dx+dy/2);
+                    objects[i].rotate = Angel::RotateZ(
+                        world_vec[2]
+                    ) * objects[i].rotate;
                     break;
                 }
                 break;
             case Scale:
-                //GLfloat scaleX = objects[i].transform[0][0];
-                //GLfloat scaleY = objects[i].transform[1][1];
-                //objects[i].scale = Angel::Scale(
-                //    scaleX + (GLfloat) (w-x)/w,
-                //    scaleY + (GLfloat) dy/(h/2),
-                //    1.0);
+                switch (axis) {
+                case X:
+                    objects[i].scale = Angel::Scale(
+                        vec3(1.0+(world_vec[0]*1.50f), 1.0, 1.0)
+                    ) + objects[i].scale;
+                    break;
+                case Y:
+                    objects[i].scale = Angel::Scale(
+                        vec3(1.0, 1.0+(world_vec[1]*1.50f), 1.0)
+                    ) + objects[i].scale;
+                    break;
+                case Z:
+                    objects[i].scale = Angel::Scale(
+                        vec3(1.0, 1.0, -(world_vec[2]*1.50f))
+                    ) + objects[i].scale;
+                    break;
+                }
                 break;
             }
         }

@@ -145,7 +145,7 @@ void Mesh::draw() {
 }
 
 Angel::mat4 Mesh::transform() {
-    return (translate * offset) * scale * rotate;
+    return (translate * offset) * rotate * scale;
 }
 
 void Mesh::setColor(Angel::vec4 color) {
