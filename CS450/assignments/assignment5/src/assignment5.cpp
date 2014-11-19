@@ -116,6 +116,7 @@ display( void )
                 manipulator[j].swapColors(1);
                 manipulator[j].draw();
                 manipulator[j].swapColors(0);
+                manipulator[j].translate = objects[i].translate;
             }
         } else {
             objects[i].draw();
@@ -165,6 +166,9 @@ mouse( int button, int state, int x, int y ) {
             manipulator[j].swapColors(1);
             manipulator[j].draw();
             manipulator[j].swapColors(0);
+            if (wireframe_vao < objects.size()) {
+                manipulator[j].translate = objects[wireframe_vao].translate;
+            }
         }
 
         glGetIntegerv(GL_VIEWPORT, viewport);
