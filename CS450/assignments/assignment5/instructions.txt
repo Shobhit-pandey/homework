@@ -1,0 +1,47 @@
+Assignment #5 - Shading
+Due November 21, 2014 by 11:59 pm
+
+For this assignment you will write two shaders (each requiring a vertex
+and fragment shader program).
+
+Phong Shading
+-------------
+
+For this part, you must implement the Phong Shading model (per fragment
+shading). This will require that you create the proper vertex shader and
+accompanying fragment shader. The vertex shader will create the
+appropriate component vectors that will then be interpolated and used in
+the fragment shader to compute the Phong illumination model at each
+fragment.
+
+Toon Shader
+-----------
+
+Next, you will implement a toon shader. A toon shader produces
+discretized diffuse shading along with black silhouettes.
+
+One approach is to compute the diffuse component (dot(L,N)) and based on
+this value, pick one of N shades (N = 2 to 4) for the surface (usually
+ranging from white for the highlight to a dark shade for the object.
+Since the diffuse component is an illumination computation, done in 3D
+space, it should be based on 3D components N and L. You should write a
+vertex shader to compute the necessary components and pass them to the
+fragment shader. Since the discretization is part of determining the
+color for a fragment, the fragment shader should take the information it
+needs (from the vertex shader), compute the color and discretize it!.
+
+Silhouettes can be determined by comparing the Eye Vector (from the
+vertex point to the eye) to the Normal Vector at the point. If the eye
+vector and normal vector are perpendicular or near perpendicular (within
+some small threshold value) to one another, then the fragment is on a
+silhouette.
+
+http://en.wikipedia.org/wiki/Cel_shading
+
+Add a simple menu structure to allow the user to play with the shaders.
+
+We should be able to:
+
+* switch between the phong and toon shader
+* For the toon shader, choose a value of n for the number of discretized
+  shades 
