@@ -415,7 +415,7 @@ int main(int argc, char** argv)
     printf("%s", help_msg);
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitContextVersion (3, 2);
     glutInitContextFlags (GLUT_FORWARD_COMPATIBLE);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
