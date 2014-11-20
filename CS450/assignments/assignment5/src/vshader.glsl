@@ -5,16 +5,33 @@ in  vec4 vNormal;
 in  vec4 vColor;
 out vec4 color;
 
-uniform vec4 AmbientProduct, DiffuseProduct, SpecularProduct;
 uniform mat4 Transform;
 uniform mat4 ModelView;
 uniform mat4 Projection;
-uniform vec4 LightPosition;
-uniform float Shininess;
 uniform int Swap;
 
 void main()
 {
+    // Define Illumination Constants
+    vec3 light_ambient  = vec3(0.2);
+    vec3 light_diffuse  = vec3(1.0);
+    vec3 light_specular = vec3(1.0);
+
+    vec3 material_ambient  = vec3(1.0, 0.0, 1.0);
+    vec3 material_diffuse  = vec3(1.0, 0.8, 0.0);
+    vec3 material_specular = vec3(1.0, 0.8, 0.0);
+
+    vec4 LightPosition = vec4(1.5, 1.5, 2.0, 1.0);
+
+    vec3 AmbientProduct  = light_ambient  * material_ambient;
+    vec3 DiffuseProduct  = light_diffuse  * material_diffuse;
+    vec3 SpecularProduct = light_specular * material_specular;
+
+    //vec3 normal;
+    //vec3 light;
+    //vec3 viewer;
+    //vec3 reflection;
+
     // Transform vertex  position into eye coordinates
     vec3 pos = (ModelView * vPosition).xyz;
 
@@ -28,24 +45,22 @@ void main()
     //To correctly transform normals
     // vec3      N = (normalize (transpose (inverse (ModelView))*vNormal).xyz
 
-    // Compute terms in the illumination equation
-    vec4 ambient = AmbientProduct;
-
     float dr = max( dot(L, N), 0.0 );
-    vec4  diffuse = dr *DiffuseProduct;
+    vec3  diffuse = dr * DiffuseProduct;
 
-    float sr = pow( max(dot(N, H), 0.0), Shininess );
-    vec4  specular = sr * SpecularProduct;
+    // Power constant represents 'shininess'
+    float sr = pow( max(dot(N, H), 0.0), 100.0 );
+    vec3 specular = sr * SpecularProduct;
 
     if( dot(L, N) < 0.0 ) {
-	specular = vec4(0.0, 0.0, 0.0, 1.0);
+        specular = vec3(0.0, 0.0, 0.0);
     }
 
     gl_Position = Projection * ModelView * Transform * vPosition;
 
     if (Swap == 0) {
-        color = ambient + diffuse + specular;
-        color.a = 1.0;
+        vec3 light_color = AmbientProduct + diffuse + specular;
+        color = vec4(light_color, 1.0);
     } else {
         color = vColor;
     }

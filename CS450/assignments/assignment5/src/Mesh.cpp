@@ -84,37 +84,6 @@ void Mesh::setupShaders(GLuint program) {
                            0,
                            BUFFER_OFFSET(verticesSize + colorsSize) );
 
-
-    // Initialize shader lighting parameters
-    // RAM: No need to change these...we'll learn about the details when we
-    // cover Illumination and Shading
-    vec4 light_position( 1.5, 1.5, 2.0, 1.0 );
-    vec4 light_ambient( 0.2, 0.2, 0.2, 1.0 );
-    vec4 light_diffuse( 1.0, 1.0, 1.0, 1.0 );
-    vec4 light_specular( 1.0, 1.0, 1.0, 1.0 );
-
-    vec4 material_ambient( 1.0, 0.0, 1.0, 1.0 );
-    vec4 material_diffuse( 1.0, 0.8, 0.0, 1.0 );
-    vec4 material_specular( 1.0, 0.8, 0.0, 1.0 );
-    float  material_shininess = 100.0;
-
-    vec4 ambient_product = light_ambient * material_ambient;
-    vec4 diffuse_product = light_diffuse * material_diffuse;
-    vec4 specular_product = light_specular * material_specular;
-
-    glUniform4fv( glGetUniformLocation(program, "AmbientProduct"),
-		  1, ambient_product );
-    glUniform4fv( glGetUniformLocation(program, "DiffuseProduct"),
-		  1, diffuse_product );
-    glUniform4fv( glGetUniformLocation(program, "SpecularProduct"),
-		  1, specular_product );
-
-    glUniform4fv( glGetUniformLocation(program, "LightPosition"),
-		  1, light_position );
-
-    glUniform1f( glGetUniformLocation(program, "Shininess"),
-		 material_shininess );
-
     unbindBuffers();
 }
 
