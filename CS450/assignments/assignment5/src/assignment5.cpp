@@ -30,8 +30,10 @@ typedef Angel::vec4  point4;
 
 mat4 mv;
 
-GLuint program;
-GLuint program2;
+GLuint phong_illumination;
+GLuint uniform_color;
+
+GLuint cur_program;
 
 GLuint wireframe_vao = -1;
 GLint new_axis = -1;
@@ -103,22 +105,22 @@ display( void )
 
     mv = LookAt( eye, at, up );
 
-    glUniformMatrix4fv( glGetUniformLocation( program, "ModelView" ),
+    glUniformMatrix4fv( glGetUniformLocation( cur_program, "ModelView" ),
             1, GL_TRUE, mv );
-    glUniformMatrix4fv( glGetUniformLocation( program, "Projection" ),
+    glUniformMatrix4fv( glGetUniformLocation( cur_program, "Projection" ),
             1, GL_TRUE, ss.proj );
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
-            objects[i].wireframe(program);
+            objects[i].wireframe(uniform_color);
             // Draw manipulator
             for (unsigned int j = 0; j < manipulator.size(); ++j) {
-                manipulator[j].draw(program2);
+                manipulator[j].draw(uniform_color);
                 manipulator[j].translate = objects[i].translate;
             }
         } else {
-            objects[i].draw(program);
+            objects[i].draw(cur_program);
         }
     }
 
@@ -156,14 +158,14 @@ mouse( int button, int state, int x, int y ) {
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
-            objects[i].draw(program2);
+            objects[i].draw(uniform_color);
         }
         // Render manipulators
         for (unsigned int j = 0; j < manipulator.size(); ++j) {
-            if (wireframe_vao < objects.size()) {
+            if (wireframe_vao < objects.size() && wireframe_vao >= 0) {
                 manipulator[j].translate = objects[wireframe_vao].translate;
             }
-            manipulator[j].draw(program2);
+            manipulator[j].draw(uniform_color);
         }
 
         glGetIntegerv(GL_VIEWPORT, viewport);
@@ -325,6 +327,14 @@ keyboard( unsigned char key, int x, int y )
     case 't': mode = Translate; break;
     case 'g': mode = Scale; break;
     case 'r': mode = Rotate; break;
+    case 'p':
+        if(cur_program == phong_illumination) {
+            cur_program = uniform_color;
+        } else if (cur_program == uniform_color) {
+            cur_program = phong_illumination;
+        }
+        glutPostRedisplay();
+        break;
     }
     glutPostRedisplay();
 }
@@ -428,8 +438,9 @@ int main(int argc, char** argv)
     readObjFilenames(argc, argv);
 
     // Initialize Shaders
-    program2 = InitShader("vshader.glsl", "singlecolor.glsl");
-    program = InitShader("vshader.glsl", "fshader.glsl");
+    uniform_color = InitShader("vshader.glsl", "singlecolor.glsl");
+    phong_illumination = InitShader("vshader.glsl", "fshader.glsl");
+    cur_program = phong_illumination;
 
     // Create manipulators
     Mesh unit_x("unit_cube.obj", vec4(1.0, 0.0, 0.0, 1.0));
