@@ -5,6 +5,8 @@
 #include "Angel.h"
 #include "sceneParser.h"
 
+using Angel::vec4;
+
 namespace scene {
 
 
@@ -94,6 +96,11 @@ parse(SceneState* ss, const char* filename)
     }
 
     line(ss);
+    ss->mv = LookAt(
+        vec4(ss->eye, 1.0f),
+        vec4(ss->at, 1.0f),
+        vec4(ss->up, 0.0f)
+    );
 }
 
 }

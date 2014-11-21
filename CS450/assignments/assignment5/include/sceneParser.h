@@ -18,6 +18,7 @@ struct SceneState
     vec3 at;
     vec3 up;
     mat4 proj;
+    mat4 mv;
     vector<float> lens;
 
     FILE* fp;

@@ -98,15 +98,8 @@ display( void )
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    // Update Camera
-    point4 eye( ss.eye, 1.0 );
-    point4  at( ss.at, 1.0 );
-    vec4    up( ss.up, 0.0 );
-
-    mv = LookAt( eye, at, up );
-
     glUniformMatrix4fv( glGetUniformLocation( cur_program, "ModelView" ),
-            1, GL_TRUE, mv );
+            1, GL_TRUE, ss.mv );
     glUniformMatrix4fv( glGetUniformLocation( cur_program, "Projection" ),
             1, GL_TRUE, ss.proj );
 
