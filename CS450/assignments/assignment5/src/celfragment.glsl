@@ -17,8 +17,10 @@ vec3 material_specular = vec3(1.0, 1.0, 1.0);
 out vec4 color;
 
 float discratize(float normal_diffuse) {
-    if( normal_diffuse <= 0.2) {
+    if( normal_diffuse <= 0.1) {
         return 0.0;
+    } else if( normal_diffuse <= 0.3) {
+        return 0.15;
     } else if( normal_diffuse <= 0.4) {
         return 0.25;
     } else if( normal_diffuse <= 0.6) {
@@ -40,9 +42,10 @@ void main()
 
     vec3 ambient = light_ambient * material_ambient;
     vec3 diffuse = discratize(normal_diffuse) * light_diffuse * material_diffuse;
+    //dot(R, V)
     vec3 specular = pow(max(dot(L, R), 0.0), 1024.0) * light_specular * material_specular;
 
-    if (max(dot(L, N), 0.0) <= 0.4f) {
+    if (max(dot(N, V), 0.0) <= 0.3f) {
         color = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
         color = vec4(ambient + diffuse + specular, 1.0);
