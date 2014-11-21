@@ -19,7 +19,7 @@ void main()
 {
     // Transform position, normals, and light into eye coordinates
     pos    = vec3(ModelView * vPosition);
-    normal = vec3(transpose(inverse(ModelView))*vNormal );
+    normal = vec3(transpose(inverse(ModelView * Transform))*vNormal );
     light  = vec3(ModelView * vLight);
 
     gl_Position = Projection * ModelView * Transform * vPosition;
