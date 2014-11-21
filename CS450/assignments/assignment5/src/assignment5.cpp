@@ -55,7 +55,7 @@ Axis axis = X;
 Mode mode = Translate;
 
 // SceneState hold viewing parameters
-SceneState ss;
+SceneState* ss;
 
 // Mesh hold parsed objects
 std::vector<Mesh> objects;
@@ -99,6 +99,11 @@ display( void )
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    ss->mv = LookAt(
+        vec4(ss->eye, 1.0f),
+        vec4(ss->at, 1.0f),
+        vec4(ss->up, 0.0f)
+    );
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -291,28 +296,28 @@ keyboard( unsigned char key, int x, int y )
     // States
 	case 033:  // Escape key
 	case 'Q': exit( EXIT_SUCCESS ); break;
-    case '5': printSceneState(&ss); break;
+    case '5': printSceneState(ss); break;
     // At
-    case '4': ss.at[0] -= 0.10; break;
-    case '6': ss.at[0] += 0.10; break;
-    case '2': ss.at[1] -= 0.10; break;
-    case '8': ss.at[1] += 0.10; break;
-    case '7': ss.at[2] += 0.10; break;
-    case '9': ss.at[2] -= 0.10; break;
+    case '4': ss->at[0] -= 0.10; break;
+    case '6': ss->at[0] += 0.10; break;
+    case '2': ss->at[1] -= 0.10; break;
+    case '8': ss->at[1] += 0.10; break;
+    case '7': ss->at[2] += 0.10; break;
+    case '9': ss->at[2] -= 0.10; break;
     // Eye
-    case 'w': ss.eye[2] -= 0.10; break;
-    case 's': ss.eye[2] += 0.10; break;
-    case 'a': ss.eye[0] -= 0.10; break;
-    case 'd': ss.eye[0] += 0.10; break;
-    case 'q': ss.eye[1] -= 0.10; break;
-    case 'e': ss.eye[1] += 0.10; break;
+    case 'w': ss->eye[2] -= 0.10; break;
+    case 's': ss->eye[2] += 0.10; break;
+    case 'a': ss->eye[0] -= 0.10; break;
+    case 'd': ss->eye[0] += 0.10; break;
+    case 'q': ss->eye[1] -= 0.10; break;
+    case 'e': ss->eye[1] += 0.10; break;
     // Up
-    case 'i': ss.up[0]  += 0.10; break;
-    case 'k': ss.up[0]  -= 0.10; break;
-    case 'j': ss.up[1]  += 0.10; break;
-    case 'l': ss.up[1]  -= 0.10; break;
-    case 'o': ss.up[2]  += 0.10; break;
-    case 'u': ss.up[2]  -= 0.10; break;
+    case 'i': ss->up[0]  += 0.10; break;
+    case 'k': ss->up[0]  -= 0.10; break;
+    case 'j': ss->up[1]  += 0.10; break;
+    case 'l': ss->up[1]  -= 0.10; break;
+    case 'o': ss->up[2]  += 0.10; break;
+    case 'u': ss->up[2]  -= 0.10; break;
     // Transformations
     case 't': mode = Translate; break;
     case 'g': mode = Scale; break;
@@ -323,7 +328,6 @@ keyboard( unsigned char key, int x, int y )
         } else if (cur_program == cel_shading) {
             cur_program = phong_illumination;
         }
-        glutPostRedisplay();
         break;
     }
     glutPostRedisplay();
@@ -346,7 +350,7 @@ void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
         Mesh mesh(argv[i]);
-        mesh.ss = &ss;
+        mesh.ss = ss;
         objects.push_back(mesh);
     }
 
@@ -357,17 +361,17 @@ myOrthoReshape(int w, int h) {
     glViewport(0, 0, w, h);
 
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
-    GLfloat left = ss.lens[0];
-    GLfloat right = ss.lens[1];
-    GLfloat bottom = ss.lens[2];
-    GLfloat top = ss.lens[3];
-    GLfloat zNear = ss.lens[4];
-    GLfloat zFar = ss.lens[5];
+    GLfloat left = ss->lens[0];
+    GLfloat right = ss->lens[1];
+    GLfloat bottom = ss->lens[2];
+    GLfloat top = ss->lens[3];
+    GLfloat zNear = ss->lens[4];
+    GLfloat zFar = ss->lens[5];
 
     if (w > h) {
-        ss.proj = Ortho(left*aspect, right*aspect, bottom, top, zNear, zFar);
+        ss->proj = Ortho(left*aspect, right*aspect, bottom, top, zNear, zFar);
     } else {
-        ss.proj = Ortho(left, right, bottom/aspect, top/aspect, zNear, zFar);
+        ss->proj = Ortho(left, right, bottom/aspect, top/aspect, zNear, zFar);
     }
 }
 
@@ -375,27 +379,27 @@ void
 myPerspectiveReshape(int w, int h) {
     glViewport(0, 0, w, h);
 
-    GLfloat fovy = ss.lens[0];
+    GLfloat fovy = ss->lens[0];
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
-    GLfloat zNear = ss.lens[2];
-    GLfloat zFar = ss.lens[3];
+    GLfloat zNear = ss->lens[2];
+    GLfloat zFar = ss->lens[3];
 
     GLfloat top   = tan(fovy*DegreesToRadians/2) * zNear;
-    GLfloat right = top*ss.lens[1];
+    GLfloat right = top*ss->lens[1];
     GLfloat left = -right;
     GLfloat bottom = -top;
 
     if ( w > h ) {
-        ss.proj = Frustum(left*aspect, right*aspect, bottom, top, zNear, zFar);
+        ss->proj = Frustum(left*aspect, right*aspect, bottom, top, zNear, zFar);
     } else {
-        ss.proj = Frustum(left, right, bottom/aspect, top/aspect, zNear, zFar);
+        ss->proj = Frustum(left, right, bottom/aspect, top/aspect, zNear, zFar);
     }
 }
 
 // Parses the scene file and assigns it to 'ss'
 void
 readSceneFilename(char** argv) {
-    scene::parse(&ss, argv[1]);
+    scene::parse(ss, argv[1]);
 }
 
 int main(int argc, char** argv)
@@ -422,6 +426,8 @@ int main(int argc, char** argv)
     glewExperimental = GL_TRUE;
     glewInit();
 
+    SceneState camera;
+    ss = &camera;
 
     // Read and parse the scene file
     readSceneFilename(argv);
@@ -449,9 +455,9 @@ int main(int argc, char** argv)
     unit_z.offset *= Angel::Translate(vec4(0.0, 0.0, 0.75, 0.0));
 
     // Camera
-    unit_x.ss = &ss;
-    unit_y.ss = &ss;
-    unit_z.ss = &ss;
+    unit_x.ss = ss;
+    unit_y.ss = ss;
+    unit_z.ss = ss;
 
     manipulator.push_back(unit_x);
     manipulator.push_back(unit_y);
@@ -465,7 +471,7 @@ int main(int argc, char** argv)
     glutMouseFunc(mouse);
     glutMotionFunc(mouseMotion);
     glutDisplayFunc(display);
-    if (ss.lens.size() == 4) {
+    if (ss->lens.size() == 4) {
         glutReshapeFunc(myPerspectiveReshape);
     } else {
         glutReshapeFunc(myOrthoReshape);
