@@ -32,6 +32,7 @@ mat4 mv;
 
 GLuint phong_illumination;
 GLuint uniform_color;
+GLuint cel_shading;
 
 GLuint cur_program;
 
@@ -318,8 +319,8 @@ keyboard( unsigned char key, int x, int y )
     case 'r': mode = Rotate; break;
     case 'p':
         if(cur_program == phong_illumination) {
-            cur_program = uniform_color;
-        } else if (cur_program == uniform_color) {
+            cur_program = cel_shading;
+        } else if (cur_program == cel_shading) {
             cur_program = phong_illumination;
         }
         glutPostRedisplay();
@@ -429,7 +430,9 @@ int main(int argc, char** argv)
 
     // Initialize Shaders
     uniform_color = InitShader("vshader.glsl", "singlecolor.glsl");
+    cel_shading = InitShader("celshader.glsl", "celfragment.glsl");
     phong_illumination = InitShader("vshader.glsl", "fshader.glsl");
+
     cur_program = phong_illumination;
 
     // Create manipulators
