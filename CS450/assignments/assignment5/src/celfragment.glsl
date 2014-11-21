@@ -12,7 +12,7 @@ vec3 light_specular = vec3(1.0);
 
 vec3 material_ambient  = vec3(1.0, 0.0, 1.0);
 vec3 material_diffuse  = vec3(1.0, 0.8, 0.0);
-vec3 material_specular = vec3(1.0, 0.8, 0.0);
+vec3 material_specular = vec3(1.0, 1.0, 1.0);
 
 out vec4 color;
 
@@ -40,8 +40,11 @@ void main()
 
     vec3 ambient = light_ambient * material_ambient;
     vec3 diffuse = discratize(normal_diffuse) * light_diffuse * material_diffuse;
-    vec3 specular = pow(max(dot(R, V), 0.0), 100.0) * light_specular * material_specular;
+    vec3 specular = pow(max(dot(L, R), 0.0), 1024.0) * light_specular * material_specular;
 
-    vec3 light_color = ambient + diffuse + specular;
-    color = vec4(light_color, 1.0);
+    if (max(dot(L, N), 0.0) <= 0.4f) {
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+    } else {
+        color = vec4(ambient + diffuse + specular, 1.0);
+    }
 }
