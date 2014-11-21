@@ -31,6 +31,7 @@ typedef Angel::vec4  point4;
 mat4 mv;
 
 GLuint program;
+GLuint program2;
 
 GLuint wireframe_vao = -1;
 GLint new_axis = -1;
@@ -110,16 +111,14 @@ display( void )
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
-            objects[i].wireframe();
+            objects[i].wireframe(program);
             // Draw manipulator
             for (unsigned int j = 0; j < manipulator.size(); ++j) {
-                manipulator[j].swapColors(1);
-                manipulator[j].draw();
-                manipulator[j].swapColors(0);
+                manipulator[j].draw(program2);
                 manipulator[j].translate = objects[i].translate;
             }
         } else {
-            objects[i].draw();
+            objects[i].draw(program);
         }
     }
 
@@ -157,18 +156,14 @@ mouse( int button, int state, int x, int y ) {
 
         // Render each loaded object file.
         for (unsigned int i = 0; i < objects.size(); ++i) {
-            objects[i].swapColors(1);
-            objects[i].draw();
-            objects[i].swapColors(0);
+            objects[i].draw(program2);
         }
         // Render manipulators
         for (unsigned int j = 0; j < manipulator.size(); ++j) {
-            manipulator[j].swapColors(1);
-            manipulator[j].draw();
-            manipulator[j].swapColors(0);
             if (wireframe_vao < objects.size()) {
                 manipulator[j].translate = objects[wireframe_vao].translate;
             }
+            manipulator[j].draw(program2);
         }
 
         glGetIntegerv(GL_VIEWPORT, viewport);
@@ -433,12 +428,8 @@ int main(int argc, char** argv)
     readObjFilenames(argc, argv);
 
     // Initialize Shaders
+    program2 = InitShader("vshader.glsl", "singlecolor.glsl");
     program = InitShader("vshader.glsl", "fshader.glsl");
-
-    // Pass objects to init
-    for (unsigned int i = 0; i < objects.size(); ++i) {
-        objects[i].setupShaders(program);
-    }
 
     // Create manipulators
     Mesh unit_x("unit_cube.obj", vec4(1.0, 0.0, 0.0, 1.0));
@@ -456,10 +447,6 @@ int main(int argc, char** argv)
     manipulator.push_back(unit_x);
     manipulator.push_back(unit_y);
     manipulator.push_back(unit_z);
-
-    for (unsigned int i = 0; i < manipulator.size(); ++i) {
-        manipulator[i].setupShaders(program);
-    }
 
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());

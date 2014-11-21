@@ -13,16 +13,9 @@ public:
 
     static GLuint colorId;
 
-    void draw();
-    void wireframe();
-    void setupShaders(GLuint program);
-    void setColor(Angel::vec4 color);
-    void bindBuffers();
-    void unbindBuffers();
-    void swapColors(int swap);
+    void draw(GLuint program);
+    void wireframe(GLuint program);
     Angel::mat4 transform(); // Matrix of all transformations
-
-    GLuint shader_program; // shader program (vertex & fragment)
 
     GLuint vao; // vertex array
     GLuint vbo; // vertex buffer
@@ -38,6 +31,11 @@ public:
 
 private:
     ObjParser* ps;
+    GLuint shader;
     void setupBuffers();
+    void setupShaders(GLuint program);
+    void setColor(Angel::vec4 color);
+    void bindBuffers();
+    void unbindBuffers();
     void genColors();
 };

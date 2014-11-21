@@ -53,11 +53,6 @@ void Mesh::setupBuffers() {
 }
 
 void Mesh::setupShaders(GLuint program) {
-    shader_program = program;
-    glUseProgram(program);
-
-    bindBuffers();
-
     // vPosition
     GLuint vPosition = glGetAttribLocation( program, "vPosition" );
     glEnableVertexAttribArray( vPosition );
@@ -84,29 +79,30 @@ void Mesh::setupShaders(GLuint program) {
                            0,
                            BUFFER_OFFSET(verticesSize + colorsSize) );
 
-    unbindBuffers();
+    // Apply transformations
+    glUniformMatrix4fv(glGetUniformLocation(program, "Transform" ),
+            1, GL_TRUE, transform());
 }
 
-void Mesh::wireframe() {
+void Mesh::wireframe(GLuint program) {
     // Enable wireframe mode
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPolygonOffset(1.0, 2.0);
 
     // Draw the object
-    draw();
+    draw(program);
     
     // Change back to normal GL_FILL mode.
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }
 
-void Mesh::draw() {
-    glUseProgram(shader_program);
+void Mesh::draw(GLuint program) {
+    shader = program;
+    glUseProgram(program);
 
     bindBuffers();
 
-    // Apply transformations
-    glUniformMatrix4fv(glGetUniformLocation(shader_program, "Transform" ),
-            1, GL_TRUE, transform());
+    setupShaders(program);
 
     glDrawElements(GL_TRIANGLES, ps->faces.size(), GL_UNSIGNED_INT, 0);
 
@@ -123,11 +119,6 @@ void Mesh::setColor(Angel::vec4 color) {
     }
 
     objColor = color;
-}
-
-void Mesh::swapColors(int swap) {
-    glUniform1i(glGetUniformLocation( shader_program, "Swap" ),
-            swap);
 }
 
 void Mesh::bindBuffers() {
