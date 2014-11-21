@@ -98,10 +98,6 @@ display( void )
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glUniformMatrix4fv( glGetUniformLocation( cur_program, "ModelView" ),
-            1, GL_TRUE, ss.mv );
-    glUniformMatrix4fv( glGetUniformLocation( cur_program, "Projection" ),
-            1, GL_TRUE, ss.proj );
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -349,6 +345,7 @@ void
 readObjFilenames(int argc, char** argv) {
     for (int i = 2; i < argc; ++i) {
         Mesh mesh(argv[i]);
+        mesh.ss = &ss;
         objects.push_back(mesh);
     }
 
@@ -447,6 +444,11 @@ int main(int argc, char** argv)
     unit_x.offset *= Angel::Translate(vec4(0.75, 0.0, 0.0, 0.0));
     unit_y.offset *= Angel::Translate(vec4(0.0, 0.75, 0.0, 0.0));
     unit_z.offset *= Angel::Translate(vec4(0.0, 0.0, 0.75, 0.0));
+
+    // Camera
+    unit_x.ss = &ss;
+    unit_y.ss = &ss;
+    unit_z.ss = &ss;
 
     manipulator.push_back(unit_x);
     manipulator.push_back(unit_y);

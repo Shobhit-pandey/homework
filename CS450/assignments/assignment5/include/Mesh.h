@@ -2,8 +2,10 @@
 
 #include <vector>
 #include "ObjParser.h"
+#include "sceneParser.h"
 
 using Angel::vec4;
+using scene::SceneState;
 
 class Mesh {
 public:
@@ -12,6 +14,7 @@ public:
     ~Mesh();
 
     static GLuint colorId;
+    SceneState *ss;
 
     void draw(GLuint program);
     void wireframe(GLuint program);
