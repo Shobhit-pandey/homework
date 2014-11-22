@@ -79,7 +79,7 @@ void Mesh::setupShaders(GLuint program) {
                            0,
                            BUFFER_OFFSET(verticesSize + colorsSize) );
 
-    glUniformMatrix4fv( glGetUniformLocation(program, "ModelView"),
+    glUniformMatrix4fv( glGetUniformLocation(program, "View"),
             1, GL_TRUE, ss->mv );
     glUniformMatrix4fv( glGetUniformLocation(program, "Projection"),
             1, GL_TRUE, ss->proj );
