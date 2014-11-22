@@ -121,8 +121,8 @@ display( void )
             objects[i].wireframe(uniform_color);
             // Draw manipulator
             for (unsigned int j = 0; j < manipulator.size(); ++j) {
-                manipulator[j].draw(uniform_color);
                 manipulator[j].translate = objects[i].translate;
+                manipulator[j].draw(uniform_color);
             }
         } else {
             glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
