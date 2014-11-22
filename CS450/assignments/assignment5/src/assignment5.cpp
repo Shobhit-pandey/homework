@@ -36,6 +36,8 @@ GLuint cel_shading;
 
 GLuint cur_program;
 
+int disks = 2;
+
 GLuint wireframe_vao = -1;
 GLint new_axis = -1;
 
@@ -115,6 +117,7 @@ display( void )
                 manipulator[j].translate = objects[i].translate;
             }
         } else {
+            glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
             objects[i].draw(cur_program);
         }
     }
@@ -322,11 +325,24 @@ keyboard( unsigned char key, int x, int y )
     case 't': mode = Translate; break;
     case 'g': mode = Scale; break;
     case 'r': mode = Rotate; break;
+    // Shading
     case 'p':
         if(cur_program == phong_illumination) {
             cur_program = cel_shading;
         } else if (cur_program == cel_shading) {
             cur_program = phong_illumination;
+        }
+        break;
+    case '-':
+        disks--;
+        if (disks <= 0) {
+            disks = 0;
+        }
+        break;
+    case '=':
+        disks++;
+        if (disks >= 4) {
+            disks = 4;
         }
         break;
     }
@@ -436,6 +452,7 @@ int main(int argc, char** argv)
 
     // Initialize Shaders
     uniform_color = InitShader("vshader.glsl", "singlecolor.glsl");
+    glUniform1i(glGetUniformLocation(uniform_color, "disks" ), disks);
     cel_shading = InitShader("celshader.glsl", "celfragment.glsl");
     phong_illumination = InitShader("vshader.glsl", "fshader.glsl");
 
