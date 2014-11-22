@@ -92,6 +92,14 @@ char help_msg[] = "\n"
    "\tK\tPitch  down (-Y)\n"
    "\tU\tRoll   left (+Z)\n"
    "\tO\tRoll  right (-Z)\n"
+   "Transform:\n"
+   "\tT\tTranslate\n"
+   "\tR\tRotate\n"
+   "\tG\tScale\n"
+   "Shading:\n"
+   "\tP\tSwap Shaders\n"
+   "\t-\tDecrease disks\n"
+   "\t+\tIncrease disks\n"
    "\n";
 
 
