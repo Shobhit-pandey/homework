@@ -1,0 +1,39 @@
+Assignment #6 - Simple Shadow Mapping
+Due December 5, 2014 by 11:59 pm
+
+For the sixth and final assignment for this class, I would like to
+implement a simple shadow map, and a moving light source. I am
+choosing this topic for 3 reasons: 
+   
+    1. The scope is small. 
+    2. It continues upon the logical progression presented by this class. 
+    3. It involves the depth buffer ­ a buffer we have had little
+       interaction with. 
+    
+Simple shadow maps, also known as projective shadowing, are on the same
+level of realism as the Phong Illumination model. They use a simple
+model of light to construct simple shadows, and can be computed in this
+way: 
+
+    1. Transform from world coordinates to light coordinates. In other
+       words, render the scene as if the view (eye) was directly at the
+       light source. 
+    2. Save the depth buffer 
+    3. Continue transformations to screen coordinates. 
+    4. In the fragment shader, use the depth buffer to check if a fragment
+       is within shadow. 
+    5. If the fragment is not in shadow,  illuminate it. 
+
+They may be more steps involved in this process, or unneeded steps, as
+these steps were 
+extrapolated from the Wikipedia explanation. 
+  
+Rubric 
+   
+    * Shadows present. 
+    * Ground Plane present. 
+    * Light rotates around object. 
+    * Shadows rotate with light. 
+    * Shadows match rotation of object. 
+
+
