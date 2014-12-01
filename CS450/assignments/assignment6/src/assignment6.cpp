@@ -28,8 +28,6 @@ using Angel::inverse;
 typedef Angel::vec4  color4;
 typedef Angel::vec4  point4;
 
-mat4 mv;
-
 GLuint phong_illumination;
 GLuint uniform_color;
 GLuint cel_shading;
@@ -217,12 +215,7 @@ mouseMotion(int x, int y) {
     GLint dx = (x - start_pos[0]);
     GLint dy = (start_pos[1] - y);
 
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    //vec4 invert_z( 1.0, 1.0, -1.0, 0.0);
-    vec4 tvec(dx, dy, 0.0, 0.0);
-
-    vec4 world_vec = inverse(mv) * tvec;
+    vec4 world_vec = inverse(ss->mv) * vec4(dx, dy, 0.0, 0.0);
 
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i && new_axis != -1) {
