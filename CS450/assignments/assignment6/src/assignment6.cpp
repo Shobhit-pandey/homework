@@ -262,22 +262,17 @@ mouseMotion(int x, int y) {
                 }
                 break;
             case Scale:
+                vec4 scale = world_vec * 0.005f;
+                vec3 scale_vec = vec3(scale.x, scale.y, scale.z);
                 switch (axis) {
-                case X:
-                    objects[i].scale = Angel::Scale(
-                        vec3(1.0+(world_vec[0]*1.50f), 1.0, 1.0)
-                    ) + objects[i].scale;
-                    break;
-                case Y:
-                    objects[i].scale = Angel::Scale(
-                        vec3(1.0, 1.0+(world_vec[1]*1.50f), 1.0)
-                    ) + objects[i].scale;
-                    break;
-                case Z:
-                    objects[i].scale = Angel::Scale(
-                        vec3(1.0, 1.0, -(world_vec[2]*1.50f))
-                    ) + objects[i].scale;
-                    break;
+                case X: objects[i].scale[0][0] += scale_vec[0]; break;
+                case Y: objects[i].scale[1][1] += scale_vec[1]; break;
+                case Z: objects[i].scale[2][2] -= scale_vec[2]; break;
+                }
+                for (short j = 0; j < 3; ++j) {
+                    if (objects[i].scale[j][j] < 1.0f) {
+                        objects[i].scale[j][j] = 1.0f;
+                    }
                 }
                 break;
             }

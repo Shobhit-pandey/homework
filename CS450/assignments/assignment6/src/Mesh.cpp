@@ -114,7 +114,7 @@ void Mesh::draw(GLuint program) {
 }
 
 Angel::mat4 Mesh::transform() {
-    return (translate * offset) * rotate * scale;
+    return (translate * offset) * scale * rotate;
 }
 
 void Mesh::setColor(Angel::vec4 color) {
