@@ -8,7 +8,7 @@ uniform mat4 Transform;
 uniform mat4 View;
 uniform mat4 Projection;
 
-vec4 vLight = vec4(1.5, 1.5, 2.0, 1.0);
+uniform vec4 vLight;
 
 out vec3 pos;
 out vec3 normal;

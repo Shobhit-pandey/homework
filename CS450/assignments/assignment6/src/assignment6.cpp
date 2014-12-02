@@ -36,6 +36,8 @@ GLuint cur_program;
 
 int disks = 2;
 
+vec4 light_pos = vec4(1.5, 1.5, 2.0, 1.0);
+
 GLuint wireframe_vao = -1;
 GLint new_axis = -1;
 
@@ -107,6 +109,8 @@ display( void )
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    GLfloat time = (GLfloat) (glutGet(GLUT_ELAPSED_TIME)/1000.0f);
+
     ss->mv = LookAt(
         vec4(ss->eye, 1.0f),
         vec4(ss->at, 1.0f),
@@ -124,6 +128,8 @@ display( void )
             }
         } else {
             glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
+            light_pos.x = 1.5f + sin(time) * 2.0f;
+            glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
             objects[i].draw(cur_program);
         }
     }
