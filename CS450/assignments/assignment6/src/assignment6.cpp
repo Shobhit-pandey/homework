@@ -128,7 +128,8 @@ display( void )
             }
         } else {
             glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
-            light_pos.x = 1.5f + sin(time) * 2.0f;
+            light_pos.x = 1.5f + (sin(time) * 2.0f);
+            light_pos.z = 2.0f + (cos(time) / 0.5f);
             glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
             objects[i].draw(cur_program);
         }
