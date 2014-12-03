@@ -452,6 +452,10 @@ int main(int argc, char** argv)
     readSceneFilename(argv);
     // Read and parse each object file passed in
     readObjFilenames(argc, argv);
+    // Add plane to list of objects.
+    Mesh plane("plane.obj", vec4(0.3, 0.3, 0.3, 1.0));
+    plane.ss = ss;
+    objects.push_back(plane);
 
     // Initialize Shaders
     uniform_color = InitShader("vshader.glsl", "singlecolor.glsl");
