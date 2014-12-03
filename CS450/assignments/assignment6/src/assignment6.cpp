@@ -117,6 +117,12 @@ display( void )
         vec4(ss->up, 0.0f)
     );
 
+    glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
+
+    light_pos.x = 1.5f + (sin(time) * 2.0f);
+    light_pos.z = 2.0f + (cos(time) / 0.5f);
+    glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
+
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
         if (wireframe_vao == i) {
@@ -127,10 +133,6 @@ display( void )
                 manipulator[j].draw(uniform_color);
             }
         } else {
-            glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
-            light_pos.x = 1.5f + (sin(time) * 2.0f);
-            light_pos.z = 2.0f + (cos(time) / 0.5f);
-            glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
             objects[i].draw(cur_program);
         }
     }
