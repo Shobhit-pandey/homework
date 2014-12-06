@@ -5,6 +5,8 @@ in vec3 normal;
 in vec3 light;
 in vec4 fColor;
 
+in vec4 shadowVec;
+
 // Define Illumination Constants
 vec3 light_ambient  = vec3(0.2);
 vec3 light_diffuse  = vec3(1.0);
@@ -13,6 +15,8 @@ vec3 light_specular = vec3(1.0);
 vec3 material_ambient  = vec3(1.0, 0.0, 1.0);
 vec3 material_diffuse  = vec3(1.0, 0.8, 0.0);
 vec3 material_specular = vec3(1.0, 0.8, 0.0);
+
+uniform sampler2DShadow shadowMap;
 
 out vec4 color;
 
@@ -27,6 +31,15 @@ void main()
     vec3 diffuse = max(dot(L, N), 0.0) * light_diffuse * material_diffuse;
     vec3 specular = pow(max(dot(R, V), 0.0), 100.0) * light_specular * material_specular;
 
-    vec3 light_color = ambient + diffuse + specular;
+    // Look up shadow depth, and compare to current depth
+    float visibility = 1.0;
+    if( texture(shadowMap, shadowVec.xy).z < shadowVec.z) {
+        visibility = 0.5;
+    }
+    //float visibility = texture(shadowMap, shadowVec.xyz);
+    //float visibility = 0.5;
+
+    vec3 light_color = ambient + (visibility * diffuse) + (visibility * specular);
+    //vec3 light_color = ambient +  diffuse + specular;
     color = vec4(light_color, 1.0);
 }

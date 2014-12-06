@@ -31,8 +31,12 @@ typedef Angel::vec4  point4;
 GLuint phong_illumination;
 GLuint uniform_color;
 GLuint cel_shading;
+GLuint shadow_shader;
 
 GLuint cur_program;
+
+GLuint shadow_buffer;
+GLuint shadow_texture;
 
 int disks = 2;
 
@@ -111,6 +115,55 @@ display( void )
 
     GLfloat time = (GLfloat) (glutGet(GLUT_ELAPSED_TIME)/1000.0f);
 
+    // Enable the Shadow Framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, shadow_texture);
+
+    // Move camera to light position, do an orthographic projection.
+    SceneState ls;
+    ls.proj = Ortho(-2.0, 2.0, -2.0, 2.0, 0.01, 10.0);
+    ls.at = vec3(0.0, 0.0, 0.0);
+    ls.up = vec3(0.0, 1.0, 0.0);
+    ls.eye = vec3(light_pos.x, light_pos.y, light_pos.z);
+
+    ls.mv = LookAt(
+        light_pos,
+        vec4(ls.at, 1.0f),
+        vec4(ls.up, 0.0f)
+    );
+    //printSceneState(&ls);
+
+    // Render scene with all objects.
+    for (unsigned int i = 0; i < objects.size(); ++i) {
+        objects[i].ss = &ls;
+        objects[i].draw(shadow_shader);
+        objects[i].ss = ss;
+    }
+
+    // Disable the Shadow Framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+
+    // Pass ortho proj of light to shader. Multiplied by bias matrix.
+    //  See we want to look up information about vertices in a texture,
+    //  but that texture is defined from 0 to height and 0 to width. We
+    //  want this in projection bounds.
+    // Pass texture to shader.
+    mat4 bias(
+        0.5, 0.0, 0.0, 0.5,
+        0.0, 0.5, 0.0, 0.5,
+        0.0, 0.0, 0.5, 0.5,
+        0.0, 0.0, 0.0, 1.0
+    );
+    glUniformMatrix4fv( glGetUniformLocation(cur_program, "ShadowView"),
+            1, GL_TRUE, ls.mv );
+    glUniformMatrix4fv( glGetUniformLocation(cur_program, "BiasedShadowProjection"),
+            1, GL_TRUE, bias*ls.proj );
+    glUniform1i(glGetUniformLocation(cur_program, "shadowMap"),
+            shadow_texture);
+
     ss->mv = LookAt(
         vec4(ss->eye, 1.0f),
         vec4(ss->at, 1.0f),
@@ -136,7 +189,6 @@ display( void )
             objects[i].draw(cur_program);
         }
     }
-
 
     glutSwapBuffers();
 }
@@ -463,7 +515,9 @@ int main(int argc, char** argv)
     uniform_color = InitShader("vshader.glsl", "singlecolor.glsl");
     glUniform1i(glGetUniformLocation(uniform_color, "disks" ), disks);
     cel_shading = InitShader("celshader.glsl", "celfragment.glsl");
+    shadow_shader = InitShader("vshadow.glsl", "fshadow.glsl");
     phong_illumination = InitShader("vshader.glsl", "fshader.glsl");
+    // TODO: Add simple depth shader for rendering shadow texture.
 
     cur_program = phong_illumination;
 
@@ -489,6 +543,53 @@ int main(int argc, char** argv)
     manipulator.push_back(unit_y);
     manipulator.push_back(unit_z);
 
+    glEnable(GL_DEPTH_TEST);
+
+    // TODO: Start Shadow Buffers
+    glGenFramebuffers(1, &shadow_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
+
+    glGenTextures(1, &shadow_texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, shadow_texture);
+
+    // Reserve texture memory
+    glTexImage2D(
+        GL_TEXTURE_2D, 0,
+        GL_DEPTH_COMPONENT,
+        WINDOW_WIDTH, WINDOW_HEIGHT, 0,
+        GL_DEPTH_COMPONENT, GL_FLOAT, 0
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        shadow_texture,
+        0
+    );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+
+    // TODO: WHY IS THIS FAILING?!
+    glDrawBuffer(GL_NONE);
+
+    // Make sure the frame buffer is good-to-go
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        printf("Framebuffer not OK!\n");
+    }
+
+    // Unbind framebuffer until we need to render to it.
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // TODO: End Shadow Buffers
+
+
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
 
@@ -503,7 +604,6 @@ int main(int argc, char** argv)
         glutReshapeFunc(myOrthoReshape);
     }
 
-    glEnable(GL_DEPTH_TEST);
     glutMainLoop();
 
     return(0);
