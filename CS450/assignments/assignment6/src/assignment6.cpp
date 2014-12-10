@@ -115,9 +115,12 @@ display( void )
 
     GLfloat time = (GLfloat) (glutGet(GLUT_ELAPSED_TIME)/1000.0f);
 
+    light_pos.x = 1.5f + (sin(time) * 2.0f);
+    light_pos.z = 2.0f + (cos(time) / 0.5f);
+    glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
+
     // Enable the Shadow Framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, shadow_texture);
 
     // Move camera to light position, do an orthographic projection.
@@ -143,6 +146,7 @@ display( void )
 
     // Disable the Shadow Framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
 
@@ -172,9 +176,6 @@ display( void )
 
     glUniform1i(glGetUniformLocation(cur_program, "disks" ), disks);
 
-    light_pos.x = 1.5f + (sin(time) * 2.0f);
-    light_pos.z = 2.0f + (cos(time) / 0.5f);
-    glUniform4fv(glGetUniformLocation(cur_program, "vLight"), 1, light_pos);
 
     // Render each loaded object file.
     for (unsigned int i = 0; i < objects.size(); ++i) {
@@ -546,19 +547,16 @@ int main(int argc, char** argv)
     glEnable(GL_DEPTH_TEST);
 
     // TODO: Start Shadow Buffers
-    glGenFramebuffers(1, &shadow_buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
 
     glGenTextures(1, &shadow_texture);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, shadow_texture);
 
     // Reserve texture memory
     glTexImage2D(
         GL_TEXTURE_2D, 0,
         GL_DEPTH_COMPONENT,
-        WINDOW_WIDTH, WINDOW_HEIGHT, 0,
-        GL_DEPTH_COMPONENT, GL_FLOAT, 0
+        1024, 1024, 0,
+        GL_DEPTH_COMPONENT, GL_FLOAT, NULL
     );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -566,16 +564,16 @@ int main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glFramebufferTexture(
+    glGenFramebuffers(1, &shadow_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadow_buffer);
+
+    glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
         shadow_texture,
         0
     );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
-
-    // TODO: WHY IS THIS FAILING?!
     glDrawBuffer(GL_NONE);
 
     // Make sure the frame buffer is good-to-go
@@ -589,6 +587,8 @@ int main(int argc, char** argv)
 
     // TODO: End Shadow Buffers
 
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
 
     // Print the number of objects 'init-ed'
     printf("Initialized: %ld objects\n\n", objects.size());
