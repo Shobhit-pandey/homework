@@ -1,0 +1,55 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{geometry}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+
+\title{Cryptography: HW1}
+\author{Trevor Bramwell}
+\date{Sun Jan 11 17:02:53 PST 2015}
+
+\begin{document}
+\maketitle
+
+1a. k = 10110101, m = 11101011
+    k ^ m = 10100001
+
+    1) Verify AND operation for Enc and Dec
+
+1b.
+
+    1) Verify Enc and Dec output
+
+2.
+
+Perfect secrecy states that the distribution is uniform at random. It
+is possible a word can be decrypted to multiple valid English strings.
+Even if Eve did try every k in K, she would not know if she had found
+the correct one or not.
+
+3. 
+
+In order for perfect secrecy to hold, all terms (c, k, m) must
+distribute uniformly at random. Because the OTP key is reused, there is
+now a larger distribution of c, which allows Eve to narrow down k and
+correctly guess m.
+
+4. 
+
+
+5.
+
+The secret is first divided into 3 parts in a 3-out-of-3 scheme. Each
+of these parts is then further divided into a 2-out-of-3 scheme.
+
+In order for the full secret to be revealed, all 3 parts of the scheme
+have to be used, and in order for all 3 parts of the scheme to be
+revealed, at least 2 out of the 3 members of each subcommittee must be
+present.
+
+\end{document}
