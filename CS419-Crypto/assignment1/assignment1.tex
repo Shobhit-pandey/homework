@@ -11,45 +11,109 @@
 
 \title{Cryptography: HW1}
 \author{Trevor Bramwell}
-\date{Sun Jan 11 17:02:53 PST 2015}
+\date{
+    Professor Mike Rosulek\\
+    January 15, 2015
+}
 
 \begin{document}
 \maketitle
 
-1a. k = 10110101, m = 11101011
-    k ^ m = 10100001
 
-    1) Verify AND operation for Enc and Dec
+\paragraph{1} Perfect secrecy is defined as:
 
-1b.
+\begin{gather*}
+    \forall m, m' \in M, \text{the distributions} \;
+    \{k \gets \text{KeyGen}; \text{Enc}(k,m)\}\\ \text{and} \; \{k \gets
+    \text{KeyGen}; \text{Enc}(k, m')\}
+    \; \text{are identical.}
+\end{gather*}
 
-    1) Verify Enc and Dec output
+This means the distribution of possible ciphertexts for any two messages
+is equal.  In other words, they are idependent variables of the
+ciphertext, and the ciphertext does not depend upon the message.
 
-2.
+\subparagraph{a}
 
-Perfect secrecy states that the distribution is uniform at random. It
-is possible a word can be decrypted to multiple valid English strings.
-Even if Eve did try every k in K, she would not know if she had found
-the correct one or not.
+    Let Enc($k$, $m$) = $k \wedge m$, where $\wedge$ is bit-wise AND.\\
 
-3. 
+    This encryption scheme does not have perfect secrecy. A
+    counterexample is the plaintext bitstrings $m = 10$, and $m' = 11$.
+    These plaintexts have different ciphertext distributions.
 
-In order for perfect secrecy to hold, all terms (c, k, m) must
-distribute uniformly at random. Because the OTP key is reused, there is
-now a larger distribution of c, which allows Eve to narrow down k and
-correctly guess m.
+    \begin{align*}
+        m = 10,\; &c = \{00, 10\} \\
+        m' = 11,\; &c = \{00, 01, 11\}
+    \end{align*}
 
-4. 
+\subparagraph{b}
+
+    Let Enc($k$, $m$) = $(k + m) \bmod 2^n$.\\
+    
+    \begin{align*}
+        \text{Pr}[c &= (k + m) \bmod 2^n]\\
+        \text{Pr}[(c + 2^n) \bmod 2^n &= (k + m) \bmod 2^n]\\
+        \text{Pr}[(c - m + 2^n) \bmod 2^n &= k \bmod 2^n]\\
+        \text{Pr}[c - m &= k \bmod 2^n]
+    \end{align*}
+
+    The ciphertext distribution is: $1/(2^n)$
+
+\paragraph{2}
+
+Perfect secrecy states that the distribution of ciphertexts is uniform
+at random. By Shannon's Theorem this means that for every $m \in M$ and
+$c \in C$, there exists a unique $k \in K$ such that Enc$(k, m) = c$.
+Perfect secrecy states only that $k$ must be unique, not $c$.
+This means that given two seperate messages $m, m' \in M$, and their
+cipher texts $c, c' \in C$, for $c = c'$. In english, this means two
+messages could be encrypted to the same ciphertext. And only given the
+ciphertext you would not be able to determine, trying every $k \in K$,
+which plaintext was encrypted.
+
+\paragraph{3}
+
+By reusing the OTP key to encrypt to messages $m$ and $m'$, Alice has
+leaked $m \oplus m'$ to Eve.
+
+\begin{align*}
+    c &= k \oplus m\\
+    c' &= k \oplus m'
+\end{align*}
+\begin{align*}
+    c \oplus c' &= k \oplus m \oplus k \oplus m'\\
+                &= (k \oplus k) \oplus (m \oplus m')\\
+                &= 0 \oplus (m \oplus m')\\
+                &= m \oplus m'
+\end{align*}
+
+Now this may not seem to mean anything. But if for example $m$ and $m'$
+were images, this would produce the overlay of both images on top of
+each other. Quite a leak!
+
+\paragraph{4}
+
+A $t$-out-of-$n$ secret sharing scheme with message space $M$ is secure
+if, for all deficient sets $X \subseteq \{1,\dots,n\}$, and $m, m' \in M$, the
+following distributions are identical:
+
+\[
+    \{S \gets \text{Share}(m);S|_{x}\} \: \text{and} \: \{S \gets \text{Share}(m');S|_{x}\}
+\]
+
+Given $s_1 < k$ bits long, these distributions would not be equal.
 
 
-5.
+\paragraph{5}
 
-The secret is first divided into 3 parts in a 3-out-of-3 scheme. Each
-of these parts is then further divided into a 2-out-of-3 scheme.
+In order for a secreate to be shared between Alice, Bob, Carol, David,
+Eve, Frank, Gina, Harold, \& Irene, the primary secret is first divided
+into 3 parts in a 3-out-of-3 scheme. Each of these parts is then further
+divided into a secondary secret in a 2-out-of-3 scheme.
 
-In order for the full secret to be revealed, all 3 parts of the scheme
-have to be used, and in order for all 3 parts of the scheme to be
-revealed, at least 2 out of the 3 members of each subcommittee must be
-present.
+In order for the full secret to be revealed, all 3 parts of the primary
+secret have to be used, and in order for that to happen,
+at least 2 out of the 3 members of each subcommittee must be
+present to reveal the 3 secondary secrets.
 
 \end{document}
