@@ -1,0 +1,66 @@
+#---
+#CS312 - Homework #1
+#Trevor Bramwell
+#---
+
+1. sudo yum install epel-release \
+   && sudo yum install bash-completion curl \
+   jwhois lsof man man-pages man-pages-overrides \
+   nc net-tools
+
+2. rpm -qf /bin/bash
+
+3. sork -k2 pkgs | cut -d' ' -f2 | uniq -c
+
+4. du reports /tmp as 1.1G because of the `-L` option passed to du. `-L`
+dereferences symbolic links, which makes du count `/home/centos/zeros`
+as part of the size of /tmp.
+
+5. There is always reserved space for the root user so that even if
+other users fill out the system, root still has space to maneuver files.
+A large file may been deleted, but the process that opened the file is
+still running. du would not show the file, but df would as df looks at
+inodes.
+
+6. These special characters can be found in the bash man page under
+PARAMETERS -> Special Parameters.
+
+$* - positional arguments expanded to a single word separated by the
+     first character of IFS.
+$@ - positional arguments expanded to separate words"$1" "$2"
+$? - exit code of last command
+$! - process id of most recently backgrounded process
+$$ - process id of the current shell, even if in a subshell
+
+7. In the mid-2000 there was a shift towards more agile and responsive
+operations. This lead to an explosion of tools and greater collaboration
+between developers and operations.
+
+8. Linus Torvalds created and maintains the mainline Linux Kernel. Greg
+Kroah-Hartman maintains the stable release.
+
+The first Linux distribution was 'SLS Linux'
+
+9. 
+
+- Ext 4: 2008, current standard and works for large files - Good for new
+         drives.
+- Ext 3: 2001, Added journaling to ext2 - 
+- Ext 2: 1993, 'Second extended filesystem' - Good for USB drives and /boot
+         because it doesn't have the overhead of journaling.
+
+10. /usr/local
+
+11.
+
+12.
+
+13.
+
+14.
+
+15.
+
+16.
+
+17.
