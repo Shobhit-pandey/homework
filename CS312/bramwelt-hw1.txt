@@ -51,16 +51,70 @@ The first Linux distribution was 'SLS Linux'
 
 10. /usr/local
 
-11.
+11. 
 
-12.
+- chkconfig ntpd on
+- service ntpd start
 
-13.
+12. dd if=/dev/zeros of=disk-image bs=1M count=20
+
+13. mkfs.ext4 disk-image
+
+mke2fs 1.41.12 (17-May-2010)
+disk-image is not a block special device.
+Proceed anyway? (y,n) y
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=0 blocks, Stripe width=0 blocks
+5136 inodes, 20480 blocks
+1024 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=20971520
+3 block groups
+8192 blocks per group, 8192 fragments per group
+1712 inodes per group
+Superblock backups stored on blocks: 
+    8193
+
+Allocating group tables: done                            
+Creating journal (1024 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+This filesystem will be automatically checked every 31 mounts or
+100 days, whichever comes first. Use tune2fs -c or -i to override.
+
 
 14.
 
+losetup /dev/loop0 disk-image
+
+mkdir /mnt/disk-image
+mount -o loop /dev/loop0 /mnt/disk-image/
+
+user@localhost:~$ df -h /mnt/disk-image/
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop1       19M  172K   17M   1% /mnt/disk-image
+
+
 15.
 
-16.
+user@localhost:~$ fsck.ext4 /dev/loop0 
+e2fsck 1.42.9 (4-Feb-2014)
+/dev/loop0: clean, 11/5136 files, 1849/20480 blocks
 
-17.
+Running fsck on a mounted filesystem will corrupt the filesystem.
+
+16. The maximum mount count is set to 31, and the check interval to
+15552000 (6 months).
+
+I found this by running:
+
+    tune2fs -l /dev/loop0
+
+To change the interval to 10 days, I could run:
+
+    tune2fs -i 10d /dev/loop0
+
+17. resize2fs /dev/loop0 40M
