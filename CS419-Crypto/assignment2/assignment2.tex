@@ -282,4 +282,26 @@ Unless otherwise stated, all the following functions are negligible.
     }
 \]
 
+\noindent
+Justification of steps:
+\begin{itemize}
+    \addtolength{\leftskip}{24pt}
+    \item[(a)] This is just $A \link \lib{prg-real}^G$ with the deatils of
+        $H$ filled in.
+    \item[(a)$\Rightarrow$(b)] We have split $s$ into it's $left$ and
+        $right$ parts. No effect on the program.
+    \item[(c)$\Rightarrow$(d)] Factored out $s_{left}$ and first call to
+        $G$ in it's own subroutine $QUERY'()$. No effect on the program.
+    \item[(e)] We swap the call to the length-tripling PRG $G$. Assuming
+        $G$ is a secure PRG, we can replace it's call with the
+        generation and return of $3n$ random-bits.
+    \item[(e)$\Rightarrow$(f)] Inlining of $QUERY'()$. No effect on the
+        program.
+    \item[(g)$\Rightarrow$(i)] The process of (d) through (f) is
+        repeated for $y$.
+    \item[(j)] Because we know that XOR produces a random distribution
+        at uniform, it is simple to state that this process is the same
+        as generating $3n$ random-bits $\square$
+\end{itemize}
+
 \end{document}
