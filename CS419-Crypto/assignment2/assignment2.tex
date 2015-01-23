@@ -304,4 +304,29 @@ Justification of steps:
         as generating $3n$ random-bits $\square$
 \end{itemize}
 
+\paragraph{4} Length-Quadrupaling PRG Distinguisher
+
+\[
+    \fcodebox{
+        \underline{$\subname{A}()$:} \\
+        \> $s \gets \{0,1\}^{n}$ \\
+        \> $x := \subname{H}(s)$ \\
+        \> return $x_{left} = x_{right}$
+    }
+\]\\
+
+\noindent
+To show that $H$ is \textbf{not} a PRG the above distinguisher is given.
+Because $H$ uses $G$ multiple times with the same $s$, $x$ and $y$
+equal. Thus the bias for $A$ is:
+
+\begin{align*}
+    \bias(A, &\lib{prg-real}^{H}, \lib{prg-rand}^{H}) = \\
+             &| Pr[A \link \lib{prg-real}^{H} \mbox{ outputs 1}] - Pr[A
+\link \lib{prg-rand}^H \mbox{ outputs 1}] | = \\
+             &| 1 - 0 | =\\
+             & 1
+\end{align*}
+
+
 \end{document}
