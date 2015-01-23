@@ -124,4 +124,20 @@ Unless otherwise stated, all the following functions are negligible.
         \frac{1}{n^{\sqrt{n}}} < \frac{1}{n^{\log{n}}} < \frac{1}{n^c}
     \]
 
+\paragraph{2} Distinguisher for the injective PRG: $G$.
+
+\begin{itemize}
+    \item[\textbf{a}] $\bias(A, \lib{prg-real}^G, \lib{prg-rand}^G) =$
+        $\frac{1}{2^{n+\ell}}$\\\\
+        This distinguisher is no better than a random guess, except that
+        it randomly guesses all possible outputs. 
+    \item[\textbf{b}] This does not contradict $G$ being a PRG. The
+        security property of $\lib{prg-real}^G$ and $\lib{prg-rand}^G$
+        still holds.
+    \item[\textbf{c}] When the bias of $G$ is not injective, the bias
+        has the possibility of increasing a non-negligible amount, thus
+        rendering $\lib{prg-real}$ insecure.
+\end{itemize}
+
+
 \end{document}
