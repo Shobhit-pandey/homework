@@ -139,5 +139,147 @@ Unless otherwise stated, all the following functions are negligible.
         rendering $\lib{prg-real}$ insecure.
 \end{itemize}
 
+\paragraph{3} Secure Length-Tripling PRG\\
+
+(a)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $s \gets \{0,1\}^{2n}$ \\
+        \> \highlightline{$x := \subname{G}(s_{left})$} \\
+        \> \highlightline{$y := \subname{G}(s_{right})$} \\
+        \> \highlightline{return $x \oplus y$}
+    }
+\]
+
+(b)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> \highlightline{$s_{left} \gets \{0,1\}^{n}$} \\
+        \> \highlightline{$s_{right} \gets \{0,1\}^{n}$} \\
+        \> $x := \subname{G}(s_{left})$ \\
+        \> $y := \subname{G}(s_{right})$ \\
+        \> return $x \oplus y$
+    }
+\]
+
+(c)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $s_{left} \gets \{0,1\}^{n}$ \\
+        \> $x := \subname{G}(s_{left})$ \\
+        \> \highlightline{$s_{right} \gets \{0,1\}^{n}$} \\
+        \> $y := \subname{G}(s_{right})$ \\
+        \> return $x \oplus y$
+    }
+\]
+
+(d)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> \highlightline{$x := \subname{query'}()$} \\
+        \> $s_{right} \gets \{0,1\}^{n}$ \\
+        \> $y := \subname{G}(s_{right})$ \\
+        \> return $x \oplus y$
+    }
+    \link 
+    \hlcodebox{
+        \underline{$\subname{query'}()$:} \\
+        \> $k \gets \{0,1\}^n$ \\
+        \> return $G(k)$
+    }
+\]
+
+(e)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $x := \subname{query'}()$ \\
+        \> $s_{right} \gets \{0,1\}^{n}$ \\
+        \> $y := \subname{G}(s_{right})$ \\
+        \> return $x \oplus y$
+    }
+    \link 
+    \hlcodebox{
+        \underline{$\subname{query'}()$:} \\
+        \> $k \gets \{0,1\}^{3n}$ \\
+        \> return $k$
+    }
+\]
+
+(f)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> \highlightline{$x \gets \{0,1\}^{3n}$} \\
+        \> $s_{right} \gets \{0,1\}^{n}$ \\
+        \> $y := \subname{G}(s_{right})$ \\
+        \> return $x \oplus y$
+    }
+\]
+
+(g)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $x \gets \{0,1\}^{3n}$ \\
+        \> \highlightline{$ y := \subname{query'}()$} \\
+        \> return $x \oplus y$
+    }
+    \link 
+    \hlcodebox{
+        \underline{$\subname{query'}()$:} \\
+        \> $k \gets \{0,1\}^n$ \\
+        \> return $G(k)$
+    }
+\]
+
+(h)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $x \gets \{0,1\}^{3n}$ \\
+        \> $ y := \subname{query'}()$ \\
+        \> return $x \oplus y$
+    }
+    \link 
+    \hlcodebox{
+        \underline{$\subname{query'}()$:} \\
+        \> $k \gets \{0,1\}^{3n}$ \\
+        \> return $k$
+    }
+\]
+
+(i)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> $x \gets \{0,1\}^{3n}$ \\
+        \> \highlightline{$y \gets \{0,1\}^{3n}$} \\
+        \> return $x \oplus y$
+    }
+\]
+
+(j)
+\[
+    A \link 
+    \fcodebox{
+        \underline{$\subname{query}()$:} \\
+        \> \highlightline{$z \gets \{0,1\}^{3n}$} \\
+        \> \highlightline{return $z$}
+    }
+\]
 
 \end{document}
