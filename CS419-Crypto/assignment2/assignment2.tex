@@ -1,0 +1,127 @@
+\documentclass[12pt]{article}
+
+%% minimal example of some latex stuff
+
+\usepackage{xspace,graphicx,amsmath,amssymb,xcolor}
+
+\newcommand{\pct}{\mathbin{\%}}
+
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newcommand{\Enc}{\text{\sf Enc}}
+\newcommand{\Dec}{\text{\sf Dec}}
+\newcommand{\KeyGen}{\text{\sf KeyGen}}
+
+% fancy script L
+\usepackage[mathscr]{euscript}
+\renewcommand{\L}{\ensuremath{\mathscr{L}}\xspace}
+\newcommand{\lib}[1]{\ensuremath{\L_{\textsf{#1}}}\xspace}
+
+\newcommand{\myterm}[1]{\ensuremath{\text{#1}}\xspace}
+\newcommand{\bias}{\myterm{bias}}
+\newcommand{\link}{\diamond}
+\newcommand{\subname}[1]{\ensuremath{\textsc{#1}}\xspace}
+
+
+%%% code boxes
+
+\newcommand{\fcodebox}[1]{%
+    \framebox{\codebox{#1}}%
+}
+\newcommand{\hlcodebox}[1]{%
+    \fcolorbox{black}{myyellow}{\codebox{#1}}%
+}
+
+
+\usepackage{varwidth}
+
+\newcommand{\codebox}[1]{%
+        \begin{varwidth}{\linewidth}%
+        \begin{tabbing}%
+            ~~~\=\quad\=\quad\=\quad\=\kill
+            #1
+        \end{tabbing}%
+        \end{varwidth}%
+}
+
+
+\definecolor{myyellow}{HTML}{F5F589}
+
+\newcommand{\mathhighlight}[1]{\basehighlight{$#1$}}
+\newcommand{\highlightline}[1]{%\raisebox{0pt}[-\fboxsep][-\fboxsep]{
+    \hspace*{-\fboxsep}\basehighlight{#1}%
+%}
+}
+\newcommand{\basehighlight}[1]{\colorbox{myyellow}{#1}}
+
+
+\title{Cryptography: HW2}
+\author{Trevor Bramwell}
+\date{
+    Professor Mike Rosulek\\
+    January 23, 2015
+}
+%%%%
+
+\begin{document}
+\maketitle
+
+
+\paragraph{1} Negligible Functions
+\\\\
+Unless otherwise stated, all the following functions are negligible.
+
+    \[
+        \frac{1}{2^{n/2}} =  \frac{1}{2^{1/2}} * \frac{1}{2^{n}}
+    \]
+    We know $\frac{1}{2^{n}}$ is negligible. Since this takes the form
+    of $p(x)f(x)$ where $p(x)$ is a polynomial and $f(x)$ is negligible,
+    $p(x)f(x)$ is negligible as well.
+
+    \[
+        \frac{1}{2^{\log{(n^2)}}} < \frac{1}{2^{log(n)}} < \frac{1}{n^c}
+    \]
+    Becuase ($\log{n}$) grows at a quicker rate than the constant $c$,
+    $\frac{1}{2^{\log{(n)}}}$ will asymptotically approach zero faster
+    than $\frac{1}{n^c}$.
+
+    \[
+        \frac{1}{n^{\log{(n)}}} < \frac{1}{n^c}
+    \]
+
+    \[
+        \frac{1}{2^{(\log{n})^2}} < \frac{1}{2^{(\log{n})}} < \frac{1}{n^c}
+    \]
+
+
+    \[
+        \frac{1}{(\log{n})^2} > \frac{1}{\log{n}} > \frac{1}{n^c}
+        \\
+        \text{ - Not Negligible.}
+    \]
+
+    \[
+        \left(\frac{1}{n^{1/n}} = \frac{1}{n^{-n}} = n^{n}\right) >
+        \frac{1}{n^c}
+        \\
+        \text{ - Not Negligible.}
+    \]
+
+    \[
+        \left(\frac{1}{\sqrt{n}} = \frac{1}{n^{1/2}}\right) >= \frac{1}{n^c}
+        \\
+        \text{ - Not Negligible.}
+    \]
+
+    \[
+        \frac{1}{2^{\sqrt{n}}} < \frac{1}{2^n} < \frac{1}{n^c}
+    \]
+
+    \[
+        \frac{1}{n^{\sqrt{n}}} < \frac{1}{n^{\log{n}}} < \frac{1}{n^c}
+    \]
+
+\end{document}
