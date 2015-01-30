@@ -1,0 +1,229 @@
+\documentclass[12pt]{article}
+
+%% minimal example of some latex stuff
+
+\usepackage{xspace,graphicx,amsmath,amssymb,xcolor}
+
+\newcommand{\pct}{\mathbin{\%}}
+
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newcommand{\Enc}{\text{\sf Enc}}
+\newcommand{\Dec}{\text{\sf Dec}}
+\newcommand{\KeyGen}{\text{\sf KeyGen}}
+
+% fancy script L
+\usepackage[mathscr]{euscript}
+\renewcommand{\L}{\ensuremath{\mathscr{L}}\xspace}
+\newcommand{\lib}[1]{\ensuremath{\L_{\textsf{#1}}}\xspace}
+
+\newcommand{\myterm}[1]{\ensuremath{\text{#1}}\xspace}
+\newcommand{\bias}{\myterm{bias}}
+\newcommand{\link}{\diamond}
+\newcommand{\subname}[1]{\ensuremath{\textsc{#1}}\xspace}
+
+
+%%% code boxes
+
+\newcommand{\fcodebox}[1]{%
+    \framebox{\codebox{#1}}%
+}
+\newcommand{\hlcodebox}[1]{%
+    \fcolorbox{black}{myyellow}{\codebox{#1}}%
+}
+
+
+\usepackage{varwidth}
+
+\newcommand{\codebox}[1]{%
+        \begin{varwidth}{\linewidth}%
+        \begin{tabbing}%
+            ~~~\=\quad\=\quad\=\quad\=\kill
+            #1
+        \end{tabbing}%
+        \end{varwidth}%
+}
+
+
+\definecolor{myyellow}{HTML}{F5F589}
+
+\newcommand{\mathhighlight}[1]{\basehighlight{$#1$}}
+\newcommand{\highlightline}[1]{%\raisebox{0pt}[-\fboxsep][-\fboxsep]{
+    \hspace*{-\fboxsep}\basehighlight{#1}%
+%}
+}
+\newcommand{\basehighlight}[1]{\colorbox{myyellow}{#1}}
+
+
+\title{Cryptography: HW3}
+\author{Trevor Bramwell}
+\date{
+    Professor Mike Rosulek\\
+    January 23, 2015
+}
+%%%%
+
+\begin{document}
+\maketitle
+
+
+\paragraph{1} Secure PRF: F' \\
+% Need to refactor to use k, r and QUERY twice to be able to swap
+% prg-real/rand
+% Use CHALLENGE to show CPA$ ?
+
+Given $F'(k, r) = G(F(k,r))$ we will show that it is a secure PRF.\\
+
+\noindent
+First we rewrite $F'(k,r)$ as an algorithm. Then after following a
+series of steps that do not affect the output of the program, we will
+arive at a double-length PRF.\\
+
+(a)
+\[
+    \fcodebox{
+        \underline{$\subname{F'}(k, r)$:} \\
+        \> $return \; \subname{G}(\subname{F}(k, r))$
+    }
+\]
+
+(b)
+\[
+    \fcodebox{
+        \underline{$\subname{F'}(k, r)$:} \\
+        \> $s \gets \subname{F}(k, r)$ \\
+        \> $return \; \subname{G}(s)$
+    }
+\]
+
+(c)
+\[
+    \fcodebox{
+        \underline{$\subname{F'}(k, r)$:} \\
+        \> $s \gets \{0, 1\}^n$ \\
+        \> $return \; \subname{G}(s)$
+    }
+\]
+
+(d)
+\[
+    \fcodebox{
+        \underline{$\subname{F'}(k, r)$:} \\
+        \> $s \gets \{0, 1\}^{n+\ell}$ \\
+        \> $return \; s$
+    }
+\]
+
+\begin{itemize}
+    \addtolength{\leftskip}{24pt}
+    \item[(a)] This is the formation of $F'$ as a algorithm.
+    \item[(a)$\Rightarrow$(b)] $s$ is used to hold the output of
+        $F(k, r)$. No effect on program.
+    \item[(b)$\Rightarrow$(c)] Because we are given $F$ is a secure PRF,
+        meaning it is indistinguishable from randomness,
+        we can replace the call to $F(k, r)$ with a random string.
+    \item[(c)$\Rightarrow$(d)] By the same logic in (b)$\Rightarrow$(c)
+        we can replace $G$.
+    \item[(d)] $F'(k, r)$ is a secure PRF.
+\end{itemize}
+
+
+\paragraph{2} Distinguisher for insecure $F'$ \\
+
+\noindent
+Given $F'(k, r) = F(k, r) \oplus F(k, \bar{r})$, there exists the
+following distinguisher $A$ that can tell with non-negligible
+probability the use of $\lib{prg-real}^{F'}$ over $\lib{prg-rand}^{F'}$.
+
+
+\[
+    \fcodebox{
+        \underline{$\subname{A}()$:} \\
+        \> $k \gets \{0, 1\}^n$ \\
+        \> $l := \subname{F'}(k, 0^n)$ \\
+        \> $m := \subname{F'}(k, 1^n)$ \\
+        \> $return (l = m)$
+    }
+\]
+
+\noindent
+The bias for $A$ is:
+
+\begin{align*}
+    \bias(A, \lib{prg-real}^{F'}, \lib{prg-rand}^{F'}) 
+             &= | Pr[A \link \lib{prg-real}^{F'} \mbox{ outputs 1}] - Pr[A
+\link \lib{prg-rand}^{F'}\mbox{ outputs 1}] | \\
+             &= | 1 - \frac{1}{2^n} | \\
+             &= \text{Non-negligible amount}
+\end{align*}
+
+\paragraph{3} Insecurity of a 2-Round Feistel Network \\
+
+\noindent
+Given two distinct strings $L_1$ and $L_2$, the following distinguisher
+can be used in a CPA attack against a 2-Round Feistel Network.
+
+\[
+    \fcodebox{
+        \underline{$\subname{A}()$:} \\
+        \> $R \gets \{0, 1\}^n$ \\
+        \> $(a_L, a_R) := \subname{F}(L_1, R)$ \\
+        \> $(b_L, b_R) := \subname{F}(L_2, R)$ \\
+        \> return $a_L \oplus b_L = L_1 \oplus L_2$
+    }
+\]\\
+
+\noindent
+In a 2-round Feistel network, with distinct $f$ round functions, the output of $F(L, R)$ is a 2-tuple:
+\[
+    (f_1(R) \oplus L, \; f_2(f_1(R) \oplus L) \oplus R.
+\]
+
+Calling $F(L, R)$ twice, with a constant $R$, and distinct $L_i$ provides
+the unique property of:
+
+\[
+    (f_1(R) \oplus L_1) \oplus (f_1(R) \oplus L_2)
+\]
+
+which reduces to:
+
+\[
+    L_1 \oplus L_2
+\]
+
+\paragraph{4} PRP Distinguisher
+
+\[
+    \fcodebox{
+        \underline{$\subname{A}()$:} \\
+        \> $k \gets \subname{KeyGen}$ \\
+        \> $(r_1, z_1) := \subname{Enc}(k, 0^n)$ \\
+        \> $(r_2, z_2) := \subname{Enc}(k, 0^n)$ \\
+        \> return $(r_1 \oplus z_1 \oplus r_2 \oplus z_2) = 0$
+    }
+\]\\
+
+\noindent
+To show that $F$ does \textbf{not} have CPA-security, the above
+distinguisher is given. $\subname{Enc}$ returns a 2-tuple: $(r, z)$ with
+the property of $r \oplus z = F(k, m)$. Given two calls to
+$\subname{Enc}$ the distinguisher is able to check the equality of $F(k, m)$.
+$F(k, m)$ will not be equal when using $\lib{prg-rand}$.\\
+
+\noindent
+The bias for $A$ is:
+
+\begin{align*}
+    \bias(A, \lib{prg-real}^{F}, \lib{prg-rand}^{F}) 
+             &= | Pr[A \link \lib{prg-real}^{F} \mbox{ outputs 1}] - Pr[A
+\link \lib{prg-rand}^{F}\mbox{ outputs 1}] | \\
+             &= | 1 - \frac{1}{2^n} | \\
+             &= \text{Non-negligible amount}
+\end{align*}
+
+
+\end{document}
