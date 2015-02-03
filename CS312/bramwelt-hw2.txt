@@ -1,0 +1,49 @@
+###################
+# Trevor Bramwell #
+# CS312 - HW2     #
+###################
+
+1) lvcreate -i 2 -L 100G vg_cs312
+
+2) lvextend -i 2 -L +200G vg_cs312/lvol01
+
+3)
+
+install
+cdrom
+lang en_US.UTF-8
+keyboard us
+network --bootproto=dhcp
+rootpw cs312
+firewall --disabled
+selinux --permissive
+timezone America/Los_Angeles
+unsupported_hardware
+bootloader --location=mbr
+cmdline
+skipx
+zerombr
+clearpart --all --initlabel
+part /boot --fstype="ext4" --size=512
+part pv.01 --grow --size=100
+volgroup vg_cs312 pv.01
+logvol swap --vgname=vg_cs312 --name=swap --fstype="swap" --size=1024
+logvol / --vgname=vg_cs312 --name=root --fstype="ext4" --size=5120 --grow
+auth --enableshadow --passalgo=sha512 --kickstart
+user --name=cs312 --plaintext --password cs312
+firstboot --disabled
+shutdown
+url --url=http://centos.osuosl.org/6/os/x86_64/
+repo --name=epel --baseurl=http://epel.osuosl.org/6/x86_64/
+%packages
+sudo
+bash-completion
+httpd
+%end
+services --enabled httpd
+
+4) /var/log/auth.log
+
+5) tcp+ssl
+
+6) 12 */6 * sat,sun,wed * date
