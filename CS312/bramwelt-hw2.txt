@@ -146,4 +146,163 @@ Working Devices : 3
        4       0        0        4      removed
        3       7        3        3      active sync   /dev/loop3
 
-10)
+10) Process for Installing and Setting up Jenkins on an OpenStack instance.
+
+Install
+
+    1. Create Openstack Instance on studentcloud.osuosl.org
+    2. ssh to newly created instance using pre-associated key.
+       ssh centos@140.211.168.XXX -i ~/.ssh/id_rsa-studentcloud
+    3. Switch to root user
+       su -
+    4. Download and install the jenkins repo.
+       wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+    5. Add the repo's GPG key to yum.
+       rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+    6. Install jenkins and a java runtime
+       yum install -y jenkins java-1.6.0-openjdk
+    7. Start the Jenkins service
+       service jenkins start
+    8. Ensure jenkins is started on reboot
+       chkconfig --add jenkins
+    9. Validate Jenkins is running by viewing it in a web browser from an
+       external host.
+       firefox http://140.211.168.XXX:8080/
+   10. Reboot the server and ensure jenkins comes back up by repeating step 9.
+       shutdown -r now
+
+Setup
+
+    1. Open the Jenkins Security Configuration page in a web browser.
+       firefox http://140.211.168.XXX:8080/configureSecurity/
+    2. Check the 'Enable security' box. - This will expand a list of hidden
+       options.
+    3. Select the 'Jenkins' own user database' radio button under
+       'Security Realm'
+    4. Make sure the 'Allow users to sign up' checkbox is checked.
+    5. Select the 'Logged-in users can do anything' radio button under
+       'Authorization'
+    6. Click 'Save' at the bottom. - This should redirect you to the login page.
+    7. Click 'Create an account'
+    8. Fill out the Sign up form with a valid username, password, confirm
+       password, and E-mail address.
+    9. Click 'Sign up'
+   10. Click 'the top page'.
+   11. Logout and log back in to verify your account works.
+
+
+11)
+
+Started by GitHub push by bramwelt
+Building in workspace /var/lib/jenkins/workspace/cs312-build
+ > git rev-parse --is-inside-work-tree # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/bramwelt/cs312 # timeout=10
+Fetching upstream changes from https://github.com/bramwelt/cs312
+ > git --version # timeout=10
+ > git fetch --tags --progress https://github.com/bramwelt/cs312 +refs/heads/*:refs/remotes/origin/*
+Seen branch in repository origin/jordane/add-intro-readings
+Seen branch in repository origin/jordane/add-slide-links
+Seen branch in repository origin/jordane/friday-1-9-slides
+Seen branch in repository origin/jordane/hw1-solutions
+Seen branch in repository origin/jordane/intro_slides
+Seen branch in repository origin/jordane/minor-fixes
+Seen branch in repository origin/jordane/slides-1-14
+Seen branch in repository origin/master
+Seen 8 remote branches
+Checking out Revision d4c8da860a9574863e691e432d684fdb82c73b3b (origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f d4c8da860a9574863e691e432d684fdb82c73b3b
+ > git rev-list 6e26df0f9e6c707d934d2271542849a991771e00 # timeout=10
+[cs312-build] $ /bin/sh -xe /tmp/hudson1179284676237056957.sh
++ bash -ex scripts/build.sh
++ git checkout master
+Previous HEAD position was d4c8da8... HW2 - Part 11: Test Webhook
+Switched to branch 'master'
+Your branch and 'origin/master' have diverged,
+and have 1 and 1 different commit(s) each, respectively.
++ git pull -q
+Already uptodate!
++ '[' '!' -d venv ']'
++ source venv/bin/activate
+++ deactivate nondestructive
+++ unset pydoc
+++ '[' -n '' ']'
+++ '[' -n '' ']'
+++ '[' -n /bin/bash -o -n '' ']'
+++ hash -r
+++ '[' -n '' ']'
+++ unset VIRTUAL_ENV
+++ '[' '!' nondestructive = nondestructive ']'
+++ VIRTUAL_ENV=/var/lib/jenkins/workspace/cs312-build/venv
+++ export VIRTUAL_ENV
+++ _OLD_VIRTUAL_PATH=/sbin:/usr/sbin:/bin:/usr/bin
+++ PATH=/var/lib/jenkins/workspace/cs312-build/venv/bin:/sbin:/usr/sbin:/bin:/usr/bin
+++ export PATH
+++ '[' -n '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ '[' x '!=' x ']'
++++ basename /var/lib/jenkins/workspace/cs312-build/venv
+++ '[' venv = __ ']'
++++ basename /var/lib/jenkins/workspace/cs312-build/venv
+++ PS1='(venv)'
+++ export PS1
+++ alias 'pydoc=python -m pydoc'
+++ '[' -n /bin/bash -o -n '' ']'
+++ hash -r
++ pip install -r requirements.txt
+Requirement already satisfied (use --upgrade to upgrade): Jinja2==2.7.3 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 1))
+Requirement already satisfied (use --upgrade to upgrade): MarkupSafe==0.23 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 2))
+Requirement already satisfied (use --upgrade to upgrade): Pillow==2.7.0 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 3))
+Requirement already satisfied (use --upgrade to upgrade): Pygments==2.0.1 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 4))
+Requirement already satisfied (use --upgrade to upgrade): Sphinx==1.2.3 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 5))
+Requirement already satisfied (use --upgrade to upgrade): argparse==1.2.1 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 6))
+Requirement already satisfied (use --upgrade to upgrade): docutils==0.12 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 7))
+Requirement already satisfied (use --upgrade to upgrade): hieroglyph==0.6.5 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 8))
+Requirement already satisfied (use --upgrade to upgrade): pyparsing==2.0.3 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 9))
+Requirement already satisfied (use --upgrade to upgrade): six==1.8.0 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 10))
+Requirement already satisfied (use --upgrade to upgrade): sphinx-rtd-theme==0.1.6 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 11))
+Requirement already satisfied (use --upgrade to upgrade): wsgiref==0.1.2 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 12))
+Cleaning up...
++ '[' -e build/html/objects.inv -a -e build/html/slides/objects.inv ']'
++ SPHINXOPTS=-W
++ make -e slides
+sphinx-build -b slides -d build/slide-doctrees  -W -c source source/slides build/html/slides
+Running Sphinx v1.2.3
+loading pickled environment... done
+loading intersphinx inventory from http://cs312.osuosl.org/slides/objects.inv...
+loading intersphinx inventory from http://cs312.osuosl.org/objects.inv...
+building [slides]: targets for 0 source files that are out of date
+updating environment: 0 added, 0 changed, 0 removed
+looking for now-outdated files... none found
+no targets are out of date.
+Build finished. The HTML slides are in build/html/slides.
++ '[' -x /usr/bin/varnishadm ']'
++ SPHINXOPTS=-W
++ make -e html
+sphinx-build -b html -d build/doctrees  -W source build/html
+Running Sphinx v1.2.3
+loading pickled environment... done
+loading intersphinx inventory from http://cs312.osuosl.org/slides/objects.inv...
+loading intersphinx inventory from http://cs312.osuosl.org/objects.inv...
+building [html]: targets for 0 source files that are out of date
+updating environment: 0 added, 0 changed, 0 removed
+looking for now-outdated files... none found
+no targets are out of date.
+
+Build finished. The HTML pages are in build/html.
++ deactivate
++ unset pydoc
++ '[' -n /sbin:/usr/sbin:/bin:/usr/bin ']'
++ PATH=/sbin:/usr/sbin:/bin:/usr/bin
++ export PATH
++ unset _OLD_VIRTUAL_PATH
++ '[' -n '' ']'
++ '[' -n /bin/bash -o -n '' ']'
++ hash -r
++ '[' -n '' ']'
++ unset VIRTUAL_ENV
++ '[' '!' '' = nondestructive ']'
++ unset -f deactivate
+Finished: SUCCESS
