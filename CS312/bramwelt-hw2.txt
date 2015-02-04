@@ -42,8 +42,108 @@ httpd
 %end
 services --enabled httpd
 
-4) /var/log/auth.log
+4) /var/log/secure OR /var/log/auth.log
 
 5) tcp+ssl
 
-6) 12 */6 * sat,sun,wed * date
+6) 12 */6 * * sat,sun,wed date
+
+7) A total of 4 devices are needed.
+
+   dd if=/dev/zero of=disk_00 bs=100M count=1
+   dd if=/dev/zero of=disk_01 bs=100M count=1
+   dd if=/dev/zero of=disk_02 bs=100M count=1
+   dd if=/dev/zero of=disk_03 bs=100M count=1
+
+8)
+
+[root@bramwelt ~]# mdadm --create /dev/md0 --level=6 \
+--raid-devices=4 /dev/loop0 /dev/loop1 /dev/loop2 /dev/loop3
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+
+[root@bramwelt ~]# cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4]
+md0 : active raid6 loop3[3] loop2[2] loop1[1] loop0[0]
+      202752 blocks super 1.2 level 6, 512k chunk, algorithm 2 [4/4] [UUUU]
+
+unused devices: <none>
+
+
+[root@bramwelt ~]# mdadm -D /dev/md0
+/dev/md0:
+        Version : 1.2
+  Creation Time : Wed Feb  4 01:10:42 2015
+     Raid Level : raid6
+     Array Size : 202752 (198.03 MiB 207.62 MB)
+  Used Dev Size : 101376 (99.02 MiB 103.81 MB)
+   Raid Devices : 4
+  Total Devices : 4
+    Persistence : Superblock is persistent
+
+    Update Time : Wed Feb  4 01:10:44 2015
+          State : clean 
+ Active Devices : 4
+Working Devices : 4
+ Failed Devices : 0
+  Spare Devices : 0
+
+         Layout : left-symmetric
+     Chunk Size : 512K
+
+           Name : bramwelt:0  (local to host bramwelt)
+           UUID : 291cca8f:71b3819e:1483d266:19a8ffbc
+         Events : 17
+
+    Number   Major   Minor   RaidDevice State
+       0       7        0        0      active sync   /dev/loop0
+       1       7        1        1      active sync   /dev/loop1
+       2       7        2        2      active sync   /dev/loop2
+       3       7        3        3      active sync   /dev/loop3
+
+[root@bramwelt ~]# mdadm /dev/md0 -f /dev/loop2
+mdadm: set /dev/loop2 faulty in /dev/md0
+
+[root@bramwelt ~]# mdadm /dev/md0 -r /dev/loop2
+mdadm: hot removed /dev/loop2 from /dev/md0
+
+[root@bramwelt ~]# cat /proc/mdstat
+Personalities : [raid6] [raid5] [raid4] 
+md0 : active raid6 loop3[3] loop1[1] loop0[0]
+      202752 blocks super 1.2 level 6, 512k chunk, algorithm 2 [4/3] [UU_U]
+      
+unused devices: <none>
+
+[root@bramwelt ~]# mdadm -D /dev/md0
+/dev/md0:
+        Version : 1.2
+  Creation Time : Wed Feb  4 01:10:42 2015
+     Raid Level : raid6
+     Array Size : 202752 (198.03 MiB 207.62 MB)
+  Used Dev Size : 101376 (99.02 MiB 103.81 MB)
+   Raid Devices : 4
+  Total Devices : 3
+    Persistence : Superblock is persistent
+
+    Update Time : Wed Feb  4 01:13:09 2015
+          State : clean, degraded 
+ Active Devices : 3
+Working Devices : 3
+ Failed Devices : 0
+  Spare Devices : 0
+
+         Layout : left-symmetric
+     Chunk Size : 512K
+
+           Name : bramwelt:0  (local to host bramwelt)
+           UUID : 291cca8f:71b3819e:1483d266:19a8ffbc
+         Events : 20
+
+    Number   Major   Minor   RaidDevice State
+       0       7        0        0      active sync   /dev/loop0
+       1       7        1        1      active sync   /dev/loop1
+       4       0        0        4      removed
+       3       7        3        3      active sync   /dev/loop3
+
+10)
