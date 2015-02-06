@@ -258,9 +258,9 @@ adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
     \fcodebox{
         $T := empty$ \\ \\
         \underline{$\subname{QUERY}(iv)$:} \\
-        \> if $T[r]$ undefined: \\
-        \>\> $T[r] := \subname{SAMP}()$ \\
-        \> return $T[r]$
+        \> if $T[iv]$ undefined: \\
+        \>\> $T[iv] := \subname{SAMP}()$ \\
+        \> return $T[iv]$
     }
     \link
     \fcodebox{
@@ -300,7 +300,7 @@ adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
     }
 \]
 
-(e)
+(h)
 \[
     \fcodebox{
         $k_{right} \gets \{0, 1\}^{n}$ \\ \\
@@ -321,7 +321,7 @@ adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
     }
 \]
 
-(f)
+(i)
 \[
     \fcodebox{
         $k_{right} \gets \{0, 1\}^{n}$ \\ \\
@@ -340,7 +340,7 @@ adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
     }
 \]
 
-(g)
+(j)
 \[
     \fcodebox{
         $k_{right} \gets \{0, 1\}^{n}$ \\ \\
@@ -351,14 +351,48 @@ adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
         \>\> using initialization vector $iv'$ \\
         \> return $c_{1}{\cdots}c_{\ell}$ \\
     }
-\]
+\]\\
 
+\noindent
 The CPA\$ security relies on $iv'$s being pseudorandom. Since each $iv'$
 is a result from the call to the PRF, the outputs will only be
 pseudorandom if the inputs to the PRF are distinct. Because this variant
 does not allow for $iv$s to be repeated, they are guaranteed to be
-distinct.
+distinct. \\
 
+\noindent
+Justification of steps:
+\begin{itemize}
+    \addtolength{\leftskip}{24pt}
+    \item[(a)] This is the inlining of the encryption scheme to the
+        CPA\$ security variant.
+    \item[(a)$\Rightarrow$(b)] $k$ is split into it's two halves. No
+        affect on the program output distribution.
+    \item[(b)$\Rightarrow$(c)] The PRF call is factored out into it's
+        own function along with $k_{left}$. No affect on the program.
+    \item[(c)$\Rightarrow$(d)] $\lib{prf-real}^F$ replaced with
+        $\lib{prf-rand}^F$. Program output distribution changes by a
+        negligible amount.
+    \item[(d)$\Rightarrow$(e)] Factoring out the sampling of random
+        blocks. No effect on program.
+    \item[(e)$\Rightarrow$(f)] Sampling without replacement instead of
+        with replacement. Negligible effect to output distribution.
+    \item[(g)] Because $iv$ are not allowed to be reused,
+        $\subname{QUERY}$ is only called with a non-defined $T[iv]$.
+        Removing the if-statement does not affect the output
+        distribution.
+    \item[(h)] $iv$ is now never used, so it is removed from the
+        definition. $\subname{QUERY}$ merely calls $\subname{SAMP}$, so
+        this redundancy is removed.
+    \item[(h)$\Rightarrow$(i)] Sampling with replacement instead of
+        sample without replacement. Negligible effect on program's
+        output distribution.
+    \item[(i)$\Rightarrow$(j)] Call to $\subname{SAMP}$ inlined. No
+        effect on program.
+\end{itemize}
+
+Program (j) now has pseudorandom ciphertexts under chosen plaintext and
+{\it chosen-but-never-repeated-IV} attacks.
 
 \paragraph{3} A distinguisher showing $\Sigma^2$ does not have CCA
 security is as follows: \\
