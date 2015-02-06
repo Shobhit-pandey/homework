@@ -79,30 +79,28 @@ choosing a plaintext.
     \framebox{
         \codebox{
             $k \gets \Sigma.$KeyGen \\
-            $iv \gets \{0, 1\}^n$ \\
             \\
             \underline{$\subname{CHALLENGE}(m_L, m_R)$:} \\
             \> return null if $|m_L| \neq |m_R|$ \\
-            \> $c_0, c_1, \cdots, c_{\ell} := \Sigma.\subname{Enc}(k, iv, m_L)$ \\
-            \> return $c_0, c_1, \cdots, c_{\ell}$\\
+            \> $c_{0}c_{1}{\cdots}c_{\ell} := \Sigma.\subname{Enc}(k, m_L)$ \\
+            \> return $c_{0}c_{1}{\cdots}c_{\ell}$\\
             \\
             \underline{$\subname{VEC}$:} \\
-            \> return $iv$
+            \> return $iv_{next}$
         }
     }
     \qquad
     \framebox{
         \codebox{
             $k \gets \Sigma.$KeyGen \\
-            $iv \gets \{0, 1\}^n$ \\
             \\
             \underline{$\subname{CHALLENGE}(m_L, m_R)$:} \\
             \> return null if $|m_L| \neq |m_R|$ \\
-            \> $c_0, c_1, \cdots, c_{\ell} := \Sigma.\subname{Enc}(k, iv, m_R)$ \\
-            \> return $c_0, c_1, \cdots, c_{\ell}$\\
+            \> $c_{0}c_{1}{\cdots}c_{\ell} := \Sigma.\subname{Enc}(k, m_R)$ \\
+            \> return $c_{0}c_{1}{\cdots}c_{\ell}$\\
             \\
             \underline{$\subname{VEC}$:} \\
-            \> return $iv$
+            \> return $iv_{next}$
         }
     }
 \]
@@ -114,15 +112,32 @@ This can be seen by the following distinguisher $A$.
 \[
     \fcodebox{
         \underline{$\subname{A}$:} \\
-        \> $iv \gets \subname{VEC}$ \\
-        \> $m_L = iv, m_2, m_3, \cdots, m_{\ell}$ \\
-        \> $c_0, c_1, c_2, \cdots, c_{\ell} := \subname{CHALLENGE}(m_L, m_L)$ \\
-        \> return $c_1 \oplus c_2 \stackrel{?}{=} m_2$
+        \> $iv_1 \gets \subname{VEC}$ \\
+        \> $iv_{0}ca_{1}{\cdots}ca_{\ell} := \subname{CHALLENGE}(m_{1}m_{2}{\cdots}m_{\ell})$ \\
+        \> $iv_{1}cb_{1}{\cdots}cb_{\ell} :=
+        \subname{CHALLENGE}((iv_{0}{\oplus}iv_{1}{\oplus}m_{1})m_{2}{\cdots}m_{\ell})$ \\
+        \> return $ca_{1-\ell} \stackrel{?}{=} cb_{1-\ell}$
     }
 \]
 
-By replacing $m_1$ with $iv$ the first call to $F_k$ is $F(k, 0^n)$.
-This results in ...
+\noindent
+Assume $k$ does not change for each call to $\subname{CHALLENGE}$. In
+the first call to $\subname{CHALLENGE}$, $F_k$ is called with
+$(iv_{0}{\oplus}m_1)$. In
+the second call to $\subname{CHALLENGE}$, we know the $iv$ ahead of
+time. This allows us to replace it with the previously used $iv_{0}$.
+\[
+    iv_{0}{\oplus}m_{1} = iv_{1} \oplus (iv_{0}{\oplus}iv_{1}{\oplus}m_{1})
+\]
+This results in the same ciphertext being output twice. The bias for A
+is then:
+
+\begin{align*}
+    \bias(A,\lib{cpa-real}^{CBC},\lib{cpa-rand}^{CBC}) &=
+    |\Pr[A \link \lib{cpa-real}^{CBC} \mbox{ outputs 1}] - \Pr[A \link \lib{cpa-rand}^{CBC} \mbox{ outputs 1}]| \\
+    &= | 1 - \frac{1}{2^{n}} | \\
+    &= \text{Non-negligible}
+\end{align*}
 
 \paragraph{3} A distinguisher showing $\Sigma^2$ does not have CCA
 security is as follows: \\
