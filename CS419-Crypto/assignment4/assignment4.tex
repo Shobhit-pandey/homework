@@ -139,6 +139,227 @@ is then:
     &= \text{Non-negligible}
 \end{align*}
 
+\paragraph{2} Consider a variant of CPA\$ security in which the
+adversary is allowed to {\it choose} but not {\it re-use} IVs. We know
+"standard" CBC encryption (with a random IV) is CPA\$-secure.
+
+(a)
+\[
+    \fcodebox{
+        $k \gets \{0, 1\}^{2n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets F(k_{left}, iv)$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+\]
+
+(b)
+\[
+    \fcodebox{
+        \highlightline{$k_{left} \gets \{0, 1\}^{n}$} \\
+        \highlightline{$k_{right} \gets \{0, 1\}^{n}$} \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets F(k_{left}, iv)$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+\]
+
+(c)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets $\highlightline{$\subname{QUERY}(iv)$} \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \hlcodebox{
+        $k_{left} \gets \{0, 1\}^{n}$ \\ \\
+        \underline{$\subname{QUERY}(iv)$:} \\
+        \> return $F(k_{left}, iv)$
+    }
+\]
+
+(d)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets $\highlightline{$\subname{QUERY}(iv)$} \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \hlcodebox{
+        $T := empty$ \\ \\
+        \underline{$\subname{QUERY}(iv)$:} \\
+        \> if $T[iv]$ undefined: \\
+        \>\> $T[iv] \gets \{0, 1\}^n$ \\
+        \> return $T[iv]$
+    }
+\]
+
+(e)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets \subname{QUERY}(iv)$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \fcodebox{
+        $T := empty$ \\ \\
+        \underline{$\subname{QUERY}(iv)$:} \\
+        \> if $T[iv]$ undefined: \\
+        \>\> \highlightline{$T[iv] := \subname{SAMP}()$} \\
+        \> return $T[iv]$
+    }
+    \link
+    \hlcodebox{
+        \underline{$\subname{SAMP}()$:} \\
+        \> $s \gets \{0, 1\}^n$ \\
+        \> return $s$
+    }
+\]
+
+(f)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets \subname{QUERY}(iv)$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \fcodebox{
+        $T := empty$ \\ \\
+        \underline{$\subname{QUERY}(iv)$:} \\
+        \> if $T[r]$ undefined: \\
+        \>\> $T[r] := \subname{SAMP}()$ \\
+        \> return $T[r]$
+    }
+    \link
+    \fcodebox{
+        \highlightline{$S := \emptyset$} \\ \\
+        \underline{$\subname{SAMP}()$:} \\
+        \> $s \gets \{0, 1\}^n $\highlightline{$\; \backslash \; S$} \\
+        \> \highlightline{$S := S \cup \{s\}$} \\
+        \> return $s$
+    }
+\]
+
+(g)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\
+        $iv \gets $Adversary Choice \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' \gets \subname{QUERY}(iv)$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \hlcodebox{
+        \underline{$\subname{QUERY}(iv)$:} \\
+        \> $t := \subname{SAMP}()$ \\
+        \> return $t$
+    }
+    \link
+    \fcodebox{
+        $S := \emptyset$ \\ \\
+        \underline{$\subname{SAMP}()$:} \\
+        \> $s \gets \{0, 1\}^n \; \backslash \; S$ \\
+        \> $S := S \cup \{s\}$ \\
+        \> return $s$
+    }
+\]
+
+(e)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' := $\highlightline{$\subname{SAMP}()$} \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \fcodebox{
+        $S := \emptyset$ \\ \\
+        \underline{$\subname{SAMP}()$:} \\
+        \> $s \gets \{0, 1\}^n \; \backslash \; S$ \\
+        \> $S := S \cup \{s\}$ \\
+        \> return $s$
+    }
+\]
+
+(f)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> $iv' := \subname{SAMP}()$ \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+    \link
+    \hlcodebox{
+        \underline{$\subname{SAMP}()$:} \\
+        \> $s \gets \{0, 1\}^n$ \\
+        \> return $s$
+    }
+\]
+
+(g)
+\[
+    \fcodebox{
+        $k_{right} \gets \{0, 1\}^{n}$ \\ \\
+        \underline{$\subname{CHALLENGE}(m_{1}{\cdots}m_{\ell})$:} \\
+        \> \highlightline{$iv' \gets \{0, 1\}^n$} \\
+        \> $c := $ CBC encryption of $m_{1}{\cdots}m_{\ell}$ \\
+        \>\> under key $k_{right}$ \\
+        \>\> using initialization vector $iv'$ \\
+        \> return $c_{1}{\cdots}c_{\ell}$ \\
+    }
+\]
+
+The CPA\$ security relies on $iv'$s being pseudorandom. Since each $iv'$
+is a result from the call to the PRF, the outputs will only be
+pseudorandom if the inputs to the PRF are distinct. Because this variant
+does not allow for $iv$s to be repeated, they are guaranteed to be
+distinct.
+
+
 \paragraph{3} A distinguisher showing $\Sigma^2$ does not have CCA
 security is as follows: \\
 
