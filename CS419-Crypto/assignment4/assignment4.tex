@@ -1,0 +1,131 @@
+\documentclass[12pt]{article}
+
+%% minimal example of some latex stuff
+
+\usepackage{xspace,graphicx,amsmath,amssymb,xcolor}
+
+\newcommand{\pct}{\mathbin{\%}}
+
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newcommand{\Enc}{\text{\sf Enc}}
+\newcommand{\Dec}{\text{\sf Dec}}
+\newcommand{\KeyGen}{\text{\sf KeyGen}}
+
+% fancy script L
+\usepackage[mathscr]{euscript}
+\renewcommand{\L}{\ensuremath{\mathscr{L}}\xspace}
+\newcommand{\lib}[1]{\ensuremath{\L_{\textsf{#1}}}\xspace}
+
+\newcommand{\myterm}[1]{\ensuremath{\text{#1}}\xspace}
+\newcommand{\bias}{\myterm{bias}}
+\newcommand{\link}{\diamond}
+\newcommand{\subname}[1]{\ensuremath{\textsc{#1}}\xspace}
+
+
+%%% code boxes
+
+\newcommand{\fcodebox}[1]{%
+    \framebox{\codebox{#1}}%
+}
+\newcommand{\hlcodebox}[1]{%
+    \fcolorbox{black}{myyellow}{\codebox{#1}}%
+}
+
+
+\usepackage{varwidth}
+
+\newcommand{\codebox}[1]{%
+        \begin{varwidth}{\linewidth}%
+        \begin{tabbing}%
+            ~~~\=\quad\=\quad\=\quad\=\kill
+            #1
+        \end{tabbing}%
+        \end{varwidth}%
+}
+
+
+\definecolor{myyellow}{HTML}{F5F589}
+
+\newcommand{\mathhighlight}[1]{\basehighlight{$#1$}}
+\newcommand{\highlightline}[1]{%\raisebox{0pt}[-\fboxsep][-\fboxsep]{
+    \hspace*{-\fboxsep}\basehighlight{#1}%
+%}
+}
+\newcommand{\basehighlight}[1]{\colorbox{myyellow}{#1}}
+
+
+\title{Cryptography: HW4}
+\author{Trevor Bramwell}
+\date{
+    Professor Mike Rosulek\\
+    February 5, 2015
+}
+%%%%
+
+\begin{document}
+\maketitle
+
+
+\paragraph{1a} Modified CPA Security for CBC Encryption \\
+
+Consider a varient of the CPA definition for CBC encryption in which an
+adversary is able to see the next IV before choosing a plaintext.
+
+\begin{center}
+\[
+    \framebox{
+        \codebox{
+            $k \gets KeyGen$ \\
+            $iv \gets \{0, 1\}^n$ \\
+            \\
+            \underline{$\subname{CHALLENGE}(m_L, m_R)$:} \\
+            \> return $null$ if $|m_L| \neq |m_R|$ \\
+            \> $c \gets \Sigma.\subname{Enc}(k, m_L)$ \\
+            \> return $c$\\
+            \\
+            \underline{$\subname{VEC}$:} \\
+            \> return $iv$
+        }
+    }
+    \qquad
+    \framebox{
+        \codebox{
+            $k \gets KeyGen$ \\
+            $iv \gets \{0, 1\}^n$ \\
+            \\
+            \underline{$\subname{CHALLENGE}(m_L, m_R)$:} \\
+            \> return $null$ if $|m_L| \neq |m_R|$ \\
+            \> $c \gets \Sigma.\subname{Enc}(k, m_R)$ \\
+            \> return $c$ \\
+            \\
+            \underline{$\subname{VEC}$:} \\
+            \> return $iv$
+        }
+    }
+\]
+\end{center}
+
+\paragraph{1b} Distinguisher for CBC new kind of security \\
+
+This modified version of CPA security for CBC encryption no longer
+satisfies CPA security. This can be seen by the following distingusher
+$A$.
+
+\[
+    \fcodebox{
+        \underline{$\subname{A}$:} \\
+        \> $iv \gets \subname{VEC}$ \\
+        \> $m_L = iv, m_2, m_3, \cdots, m_{\ell}$ \\
+        \> $c_1, c_2, \cdots, c_{\ell} := \subname{CHALLENGE}(m_L, m_L)$ \\
+        \> return $c_1 \oplus c_2 \stackrel{?}{=} m_2$
+    }
+\]
+
+\paragraph{3} $\Sigma^2$ CCA Security \\
+
+
+\end{document}
