@@ -1,0 +1,103 @@
+###################
+# Trevor Bramwell #
+# Homework #3     #
+###################
+
+1)
+
+Configuration Management is important for being able to easily
+replication the configuration of a machine and apply the same
+configuration across multiple hosts. The first configuration management
+system widely used was CFEngine.
+
+2)
+
+ 1. Ensuring policies and standards are in place and do not change on the
+    machine.
+ 2. Provide a history of changes to a system.
+ 3. Ability to rebuild a server that has failed.
+ 4. Ensure the state of configuration on a machine.
+
+3)
+
+ 1. Puppet does not gaurantee ordering without use of the dependency
+    system.
+ 2. Puppet is a DSL while Chef is more of an extension of Ruby. In other
+    words, Chef can take full advantage of the Ruby language, while
+    Puppet is limited by it's DSL.
+
+4)
+
+ 1. The service 'ntpd' is enabled, and started.
+ 2. The package 'httpd' (though the resource is called 'ntpd') is
+ installed.
+
+ This code will fail to run without 'ntpd' installed. If this was to
+ actually manage the 'ntpd' package and service, the package resource
+ should come first.
+
+5)
+
+ - Push: In a push model, the central server logs-into clients and
+   immediately applies their configuration. Push allows for changes to
+   be applied immediately, but lacks scalability. If you push a change
+   that affects all your servers, you don't want all of them applying
+   the changes at once.
+ - Pull: In a pull model, a central server is polled by every node on a
+   set interval to download changes and apply them. Pull can scale to a
+   huge number of hosts if properly configured, but does not easily
+   allow for immediate changes to be applied.
+
+6) 
+
+ - Push: Ansible, Puppet
+ - Pull: CFEngine, Chef
+
+7)
+
+ - Resources: An item that should be managed (ex: package), the state it
+   should be in (ex: installed), and how it gets to that state (ex: from
+   repo).
+ - Providers: Steps needed to bring a resource to a specific state. For
+   example the chef package can either be installed through rubygems, or
+   by the system package manager.
+ - Nodes: A physical, or virtual client managed by Chef. Contains a run
+   list of recipes to be applied.
+ - Roles: A collection of attributes and a run list that apply to a
+   larger collection clients. Clients can have zero or more roles. A
+   common role seen is webserver because some clients act as more than a
+   webserver.
+ - Environments: A set of attributes that map to workflows. Generally
+   used to manage cookbook versions across a large set of nodes.
+
+8)
+
+ - force_default: Applied between default and normal. Set in attribute
+   files, nodes or recipes.
+ - force_override: Applied between override and automatic. Set in
+   attribute files, nodes or recipes.
+
+9)
+
+ Templates allow you to define tuning values through attributes. If
+ files were used, each time a resource wanted change just one value of a
+ configuration file, the entire file would have to be pulled into
+ configuration management.
+
+10)
+
+ Test Kitchen enables cookbook authors to easily define and run test
+ suites against their cookbooks. It abstracts the use of virtualization
+ providers and test frameworks. Solves the problem of starting a vm,
+ installing chef, copying over the tests, and running them.
+
+11) 
+
+ Food Fight Show: Apache Kafka - The food fight host, and Jay Kreps talk
+ about the creation of Kafka, open source business models, related
+ problems Kafka solves, and Confluent (the new company Jay, June, and
+ Neha founded). Kafka is a replicated message queue backed by a
+ transaction commit log. It was created by engineers at Linkedin to
+ solve the problem of moving data around between different data stores,
+ such as Hadoop. Jay hopes it can be used like unix pipes, to solve
+ large real-time data processing problems.
