@@ -1,0 +1,261 @@
+###################
+# Trevor Bramwell #
+# Homework #4     #
+###################
+
+1.1)
+
+Load - High load is 100% usage on all CPUs. A server with a load of
+1 does not necessarily have 100% CPU usage. The critical threshold
+should be set to # of CPUs, and warning to 2/3 load. It might be
+best to have these higher, as it's fine for processing loads to
+occasionally spike for a short period of time.
+
+1.2)
+
+Disk - Disks should never be maxed out, as the server will not be able
+to create new files (especially logs, if done locally).  Thresholds
+should be set conservatively (50% warning, 75% critical) so that
+moving/managing data can be easily facilitated. These percentages may be
+too small for servers with large amounts of data (>5TB) as 10% would be
+5G which is generally enough wiggle-room.
+
+1.3)
+
+Network - A server can become unreachable if it runs out of network
+connections to allocate. There are even attacks (slowloris) designed to
+slowly eat up a server's network connections. As the default cap for
+maximum connections is 65,535, a critical threshold would be half of
+this (32,768) with a warning at 1/4 (16,384). This is dependent upon the
+server type though, as some (such as vpn, firewalls, load balancers) may
+manage many connections and may benefit from a higher threshold.
+
+2.1) 
+
+Plugins: Scripts that gather information about servers. Can be written
+in any language that accepts command line arguments.
+
+2.2)
+
+NRPE/NSCA: Daemons that run active and passive plugins respectively.
+
+2.3)
+
+Core Server process: The master nagios daemon that collects data from
+NRPE/NSCA checks.
+
+2.4)
+
+CGI Web Interface: Web interface that talks to the core server daemon
+over a socket. Useful for viewing and looking at the history of checks.
+
+3.1)
+
+Passive checks run on the remote server, collect data, and send it back
+to Nagios, whereas active checks are initiated by Nagios, connect to the
+server, and run the command. (Push vs. Pull)
+
+3.2)
+
+Active checks require running of the NRPE daemon, whereas passive checks
+only require the plugin and the send_nsca application.
+
+3.3)
+
+Passive checks can scale to thousands of hosts, while active checks may
+cause disruptions and increase load. (Nagios as a DoS)
+
+4a)
+
+yum install epel-release
+yum install nagios nrpe nagios-plugins*
+
+4b)
+
+chkconfig nrpe on
+chkconfig nagios on
+chkconfig httpd on
+service nagios start
+service httpd start
+service nrpe start
+
+4c)
+
+localhost
+
+Current Load OK  02-23-2015 23:44:46     0d 0h 13m 0s    1/4     
+ OK - load average: 0.00, 0.00, 0.00 
+    
+Current Users OK  02-23-2015 23:45:24     0d 0h 12m 22s   1/4     
+ USERS OK - 1 users currently logged in 
+    
+HTTP WARNING     02-23-2015 23:44:01     0d 0h 11m 45s   4/4     
+ HTTP WARNING: HTTP/1.1 403 Forbidden - 5152 bytes in 0.001 second
+ response time 
+    
+PING OK  02-23-2015 23:46:39     0d 0h 11m 7s    1/4     
+ PING OK - Packet loss = 0%, RTA = 0.04 ms 
+    
+Root Partition OK  02-23-2015 23:47:16     0d 0h 10m 30s   1/4     
+ DISK OK - free space: / 8563 MB (89% inode=94%): 
+    
+SSH OK  02-23-2015 23:42:54     0d 0h 9m 52s    1/4     
+ SSH OK - OpenSSH_5.3 (protocol 2.0) 
+    
+Swap Usage OK  02-23-2015 23:43:31     0d 0h 9m 15s    1/4     
+ SWAP OK - 100% free (511 MB out of 511 MB) 
+    
+Total Processes OK  02-23-2015 23:44:09     0d 0h 8m 37s    1/4
+ PROCS OK: 88 processes with STATE = RSZDT 
+
+4d)
+
+localhost
+
+HTTP OK  02-24-2015 00:44:01     0d 0h 15m 23s   1/4     
+ HTTP OK: HTTP/1.1 200 OK - 1067 bytes in 2.072 second response time 
+
+define service{
+ use                  local-service
+ host_name            localhost
+ service_description  HTTP
+ check_command        check_http!-u /nagios -ffollow -a nagiosadmin:nagiosadmin
+}
+
+4e)
+
+cs312-server
+    
+HTTP OK  02-24-2015 22:38:05     0d 0h 5m 17s    1/4     
+ HTTP OK: HTTP/1.1 200 OK - 9460 bytes in 0.002 second response time 
+    
+PING OK  02-24-2015 22:34:00     0d 0h 4m 22s    1/4     
+ PING OK - Packet loss = 0%, RTA = 0.50 ms 
+    
+SSH OK  02-24-2015 22:34:54     0d 0h 3m 28s    1/4     
+ SSH OK - OpenSSH_5.3 (protocol 2.0) 
+
+define host{
+  use                     linux-server
+  host_name               cs312-server
+  alias                   cs312-server
+  address                 140.211.15.183
+}
+
+define service{
+        use                             local-service
+        host_name                       localhost, cs312-server
+        service_description             PING
+        check_command                   check_ping!100.0,20%!500.0,60%
+        }
+
+define service{
+        use                             local-service
+        host_name                       localhost, cs312-server
+        service_description             SSH
+        check_command                   check_ssh
+        notifications_enabled           0
+        }
+
+define service{
+        use                             local-service
+        host_name                       cs312-server
+        service_description             HTTP
+        check_command                   check_http!-H cs312.osuosl.org
+        notifications_enabled           0
+        }
+
+4f)
+
+command[check_all_disks]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -r '^/'
+
+4g)
+
+[root@bramwelt ~]# /usr/lib64/nagios/plugins/check_nrpe -H 127.0.0.1
+NRPE v2.15
+
+5) 
+
+A recursive DNS server will perform recursive lookups for clients, by
+first asking the TLD server, and continuing on until it gets an A
+record.
+
+An authoritative DNS server responds to requests as the authority of a
+domain. It contains a SOA record for the domain.
+
+An recursive server (generally your ISP's) is used when asking for the
+address of osuosl.org, and an (osuosl's) authoritative server responds
+with the address for osuosl.org. You would use the authoritative server
+if you wanted to know what records (or subdomains) it manages. 
+
+6)
+
+A - Address Record. Maps a domain to an IPv4 address.
+AAAA - Quad A. Maps a domain to an IPv6 Address.
+CNAME - Canonical Name. Mapping of domain name to another domain name.
+MX - Mail. Specifies where mail is to be sent. Includes an extra field
+           for priority.
+NS - Name Server. Specify the dns servers of a domain.
+NXDOMAIN - Non-Existent Domain. A record the represents the absence of a
+           host.
+7)
+
+Because name servers are designated by NS records, and name servers are
+themselves subdomains of the domains they manage, there is the
+possibility of getting into circular dependencies. To solve this,  glue
+records are given in the additional information of a dns query, so that
+additional lookup aren't required.
+
+8)
+
+Sensitivity: The likelihood an event has occurred given the criteria for
+the event is met. If your house burglar alarm goes off, without there
+being a burglar, it has a high sensitivity. 
+Specificity: The likelihood an event has not occurred given the criteria
+is met. If a burglar breaks in and the alarm doesn't go off, the alarm
+has a low specificity.
+
+Good alarms should have low sensitivity, and high specificity. They
+don't go off when they shouldn't, and they do go off when they should.
+
+9)
+
+Airport scanners have low specificity and high sensitivity. They alert
+even on small metallic objects, and rarely alert on
+non-metallic items.
+
+10)
+
+Time series data is a set of data measured over time. Some good examples
+are the price of gas over the last year, or your cost of groceries over
+the last 10 trips to the store. It consists of the data being measured
+(gas, groceries, etc) and a time period (years, days, events, etc).
+
+It is important for finding patterns and trends in data. In monitoring
+it is helpful to answering questions such as:
+
+* Is this a recurring event?
+* How often does this event happen?
+* Does this event happen at a specific time of day, week, month?
+* Is there a specific point when this event started happening?
+
+11)
+
+DHCP uses the broadcast scheme because clients on a network don't know 
+who the DHCP server is ahead of time. If a client knew what the server
+address was ahead of time, it could directly query it using unicast.
+DHCP servers hand out addresses and must use broadcast because they
+don't know who asked for the address to begin with. If they client
+already had address, it wouldn't need to ask for one.
+
+12)
+
+Automatic - The DHCP server hands out an address to any client that
+            asks, and will never ask for it back.
+
+Static - DHCP controls the addresses, but they are only given out to
+         explicit hosts identified by their MAC addresses.
+
+Dynamic - Normal DHCP operation. Addresses are 'leased' out to clients
+          and clients are expected to renew their address after a set
+          timeout.
