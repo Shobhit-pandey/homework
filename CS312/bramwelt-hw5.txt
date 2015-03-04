@@ -1,0 +1,121 @@
+###################
+# Trevor Bramwell #
+# Homework #5     #
+###################
+
+1)
+
+Horizontal: Adding more machines to increase throughput. For example, to
+horizontally scale email you might add more SMTP servers so that emails
+are not bottlenecked by a single machine.
+
+Vertical: Adding more resources to a machine to increase throughput (ie.
+CPUs, Memory, Faster/More Disks, Extra network cards, USB Entropy
+Generators)
+
+Horizontal scaling can be more expensive (without virtualization), but
+adds the cost of complexit of managing a larger number of machines. More
+machines means more disks, which means more possible failures and needs
+for replacement. Vertical scaling can be cheaper, but is bounded by the
+limits of the hardware. Vertical scaling can't be used to solve a
+problem like network latency from Australia, which could be solved by
+horizontally scaling and adding a replicate close by.
+
+2)
+
+CoreOS works by maintaining two partitions on the machine, and is
+modeled after embedded system firmware upgrades. One partition holds the
+current version and another holds the new version. After an update is
+written to the new partition, upon restarting the machine is running in
+the new upgraded state. The other partition is now available to recieve
+a new version and the process repeated.
+
+3)
+
+CoreOS uses Raft for etcd's consensus algorithm. To understand raft it
+is important to note that it is influenced by a fictitious voting
+system. So many of the terms ('term' being one of them) relate to voting
+and election. In Raft there are three position a node can have:
+follower, leader, candidate. A cluster starts without a leader, and
+during the first term of office, a node elects to be a candidate for
+leader. It lets all the other nodes know it expects to run for office,
+and they respond they have seen the request. If the majority of nodes in
+the cluster respond, the candidate becomes the leader. The leader is the
+only node external resources can talk to, and it distributes the changes
+to it's followers. The algorithm provides further means of determining
+leadership if nodes are missing, or there is a network partition, but I
+will not go into details of those.
+
+4)
+
+Two features that make containers possible for linux are 
+cgroups and namespaces. Cgroups allow for the management and doling out
+of resources, while namespaces (network, pid, user, etc) allow for the
+isolation of processes.
+
+5)
+
+A virtual machine runs it's own kernel (OS) while a container does not.
+Virtualization is focused on hardware, while containers are focused on
+processes and software. Currently containers do not support Windows, and
+they are restricted to *nix operating systems. Containers are
+beneficial though in that they greatly reduced the amount of resources
+consumed vs virtualization.
+
+6)
+
+1. Databases
+2. Load Balancers
+3. File Servers
+
+7)
+
+1. The number of systems.
+2. Replication of data.
+3. Routing of traffic.
+
+This complexity is necessary because you are essentially replicating a
+system. In vertical scaling there is only one system so you don't have
+to worry about it getting out of sync, but with horizontal scaling you
+always want the same data read and written.
+
+8)
+
+# Dockerfile
+FROM nginx
+MAINTAINER bramwelt@onid.oregonstate.edu
+
+RUN apt-get update
+
+RUN apt-get install -y build-essential python-virtualenv git python-dev
+
+RUN git clone https://github.com/osuosl/cs312
+
+WORKDIR cs312
+RUN bash scripts/build.sh
+WORKDIR ..
+
+RUN cp -r cs312/build/html /usr/share/nginx/
+
+
+9)
+
+# Systemd Service (Note: it is important NOT to have '-d' in ExecStart)
+[Unit]
+Description=CS312 Repo
+BindsTo=cs312.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill cs312_site
+ExecStartPre=-/usr/bin/docker rm cs312_site
+ExecStart=/usr/bin/docker run --name cs312_site -p 80:80 cs312-repo
+ExecStop=/usr/bin/docker stop cs312_site
+
+10)
+
+The single point of failure is the single load balancer. It can be
+remove by adding a secondary load balancer. Other points of failure that
+might exist are: all systems running on the same machine, non-redundant
+power, disks (if the servers aren't using RAID), a single switch
+handling all traffic for the systems, a single datacenter hosting all
+the systems.
