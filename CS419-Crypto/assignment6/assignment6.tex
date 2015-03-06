@@ -1,0 +1,144 @@
+\documentclass[12pt]{article}
+
+%% minimal example of some latex stuff
+
+\usepackage{xspace,graphicx,amsmath,amssymb,xcolor}
+\usepackage{numprint}
+
+\newcommand{\pct}{\mathbin{\%}}
+
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newcommand{\Enc}{\text{\sf Enc}}
+\newcommand{\Dec}{\text{\sf Dec}}
+\newcommand{\KeyGen}{\text{\sf KeyGen}}
+
+% fancy script L
+\usepackage[mathscr]{euscript}
+\renewcommand{\L}{\ensuremath{\mathscr{L}}\xspace}
+\newcommand{\lib}[1]{\ensuremath{\L_{\textsf{#1}}}\xspace}
+
+\newcommand{\myterm}[1]{\ensuremath{\text{#1}}\xspace}
+\newcommand{\bias}{\myterm{bias}}
+\newcommand{\link}{\diamond}
+\newcommand{\subname}[1]{\ensuremath{\textsc{#1}}\xspace}
+
+
+%%% code boxes
+
+\newcommand{\fcodebox}[1]{%
+    \framebox{\codebox{#1}}%
+}
+\newcommand{\hlcodebox}[1]{%
+    \fcolorbox{black}{myyellow}{\codebox{#1}}%
+}
+
+
+\usepackage{varwidth}
+
+\newcommand{\codebox}[1]{%
+        \begin{varwidth}{\linewidth}%
+        \begin{tabbing}%
+            ~~~\=\quad\=\quad\=\quad\=\kill
+            #1
+        \end{tabbing}%
+        \end{varwidth}%
+}
+
+
+\definecolor{myyellow}{HTML}{F5F589}
+
+\newcommand{\mathhighlight}[1]{\basehighlight{$#1$}}
+\newcommand{\highlightline}[1]{%\raisebox{0pt}[-\fboxsep][-\fboxsep]{
+    \hspace*{-\fboxsep}\basehighlight{#1}%
+%}
+}
+\newcommand{\basehighlight}[1]{\colorbox{myyellow}{#1}}
+
+
+\title{Cryptography: HW6}
+\author{Trevor Bramwell}
+\date{
+    Professor Mike Rosulek\\
+    March 5, 2015
+}
+%%%%
+
+\begin{document}
+\maketitle
+
+
+\paragraph{1} 
+
+\paragraph{2}
+
+\paragraph{3a}
+
+Given an RSA modulus $N$ and $\phi{(N)}$, it is possible to factor $N$
+easily without computing $d$ or finding a non-trivial square root of
+unity.
+\\\\
+To start with, we know:
+
+\begin{align*}
+    N &= pq \\
+    \phi{(N)} &= (p - 1)(q - 1)
+\end{align*}
+
+Factoring $(p - 1)(q - 1)$ and doing some algebra, we arrive at:
+
+\[
+    N - \phi{(N)} + 1 = q + p
+\]
+
+This allows us to now use the quadratic equation:
+
+\[
+    (x - q)(x - p) = 0
+\]
+
+and find roots equal to $q$ and $p$. Factoring we have:
+
+\begin{align*}
+    (x - q)(x - p) &= x^2 - qx - px + pq \\
+    &= x^2 + (-q - p)x + pq
+\end{align*}
+
+This provides us with the quadractic equations constants:
+
+\begin{align*}
+    a &= 1 \\
+    b &= (-q - p) \\
+   -b &= (q + p) \\
+    c &= pq = N
+\end{align*}
+
+Which when plugged into the quadratic equation, give us:
+
+\[
+    p,q = \frac{(q + p) \pm \sqrt{(-q-p)^2-4N}}{2}
+\]
+
+
+\paragraph{3b}
+
+The prime factors ($p$, $q$) of $N$ are:
+
+\begin{verbatim}
+p = 
+1050633452306161046573480136342977017860065421289419090831011858888328139819275
+4157844910388599060640609121542398864123229041436886066123523490551620883141000
+2395649542617648887800946357680235133745987328106517234870888931439344639465469
+355722657253870347038180634028206997149618094761699250765049161158010333
+
+q =
+9352419571367596976939279289180413447699593351180217187280653361389412531812702
+8917922827635059951366086790265075822909039161954650657371451399404924083352681
+6235957699648688337327410429196529474184107065919242793511757586398184746028719
+1342833560356018485176253542816589237713501814110266911435430483265167
+\end{verbatim}
+
+\end{document}
