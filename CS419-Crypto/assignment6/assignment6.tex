@@ -75,6 +75,21 @@
 
 \paragraph{2}
 
+Given an RSA modulus $N$, finding an element of $\mathbb{Z}_N \setminus
+\mathbb{Z}_{N}^*$ is just as hard as factoring $N$.
+
+Knowing that $\mathbb{Z}_N$ is the set of integers (mod $N$), and
+$\mathbb{Z}_{N}^*$ is the set of integers (mod $N$) relativly prime to
+$N$, by the definition of set subtraction: $\mathbb{Z}_N \setminus
+\mathbb{Z}_{N}^*$ can be seen as the set of integers (mod $N$) {\it not}
+relatively prime to $N$.
+
+The set of integers (mod $N$) not relatively prime to $N$, is the set of
+factors ($p$, $q$) of $N$ and their multiples (mod $N$): ($2p$, $2q$, ... ).
+
+As this set obviously contains the integers $p$, and $q$, finding an
+element of this set is the same as factoring $N$.
+
 \paragraph{3a}
 
 Given an RSA modulus $N$ and $\phi{(N)}$, it is possible to factor $N$
@@ -122,6 +137,9 @@ Which when plugged into the quadratic equation, give us:
     p,q = \frac{(q + p) \pm \sqrt{(-q-p)^2-4N}}{2}
 \]
 
+Again, we can compute the solutions for this equation because it only
+relies on knowing the term $(p + q)$ and it's negation $(-q - p)$, which
+we can compute given $N$, and $\phi{(N)}$.
 
 \paragraph{3b}
 
