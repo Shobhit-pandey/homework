@@ -1,0 +1,181 @@
+###################
+# Trevor Bramwell #
+# Homework #6     #
+###################
+
+1)
+
+A load balancer solves the problems of high load on a single server. It
+does this by watching the traffic coming in, and directing it to a
+specific server based on a set of load balancing rules.
+
+Here are two examples of where using a load balancer might be useful:
+
+  1. Web Traffic - HTTP requests can be routed to the least used web
+  host available to serve a site, assuming the site is replicated
+  across all hosts.
+  2. SMTP Traffic - Outgoing email is routed to a different SMTP server
+  depending upon the queue size of the server. This allows more mail to
+  go out quicker than being stuck in the back of a queue on a single
+  SMTP server.
+
+2)
+
+Round Robin DNS:
+ - Con: Relies on DNS, which may be a single point of failure.
+ - Con: Doesn't allow for automatic failover. Taking a server out of
+   rotation requires updating DNS.
+ - Pro: Simple, and easy to implement. Good for fault tolerant servers,
+   or use of protocols that don't drop traffic if a server goes offline.
+
+Software TCP/UDP Load Balancing:
+ - Pro: Simple to implement and maintain.
+ - Pro: Great flexibility in how traffic is managed/distributed
+ - Pro: Can proxy both forwards and backwards.
+ - Con: Some overhead gained in each request.
+
+Hardware TCP/UDP Load Balancing
+ - Con: Propriety and expensive. May cost a lot to continue
+   using/maintain.
+ - Pro: Very fast as hardware is specifically designed for the task.
+ - Pro: Greater throughput because they are hardware backed.
+ - Pro: SSL Offloading.
+
+
+3)
+
+Round-Robin DNS is the simplest and cheapest form of load balancing. One
+DNS address is given multiple mappings to servers. DNS requests return a
+list of servers, and the client generally picks the first one it's given
+with the list being rotated on each request. It is useful when servers
+going out of rotation is not a major issue.
+
+4)
+
+The best scheduling algorithms for this case are:
+  - balance source
+  - balance url_param
+
+source will (assuming no servers go up or down) associate the source IP
+address with a specific host, and always return that host to the client.
+This is useful for database-backed client sessions which don't rely on a
+session cookie.
+
+url_param hashes the URL parameters and associate the requests with a
+specific server. This is useful for sites that keep the client ID in the
+uri of the request.
+
+Knowing how the web application handles cookies and sessions might
+provide better insight into which to use.
+
+5)
+
+Persistence, in the context of load-balancer, is ensuring users are
+always provided with their login session. As sessions are generally
+cached on a per-server basis, a user moved between servers would have to
+re-authenticate in order to keep using the site. This introducing a
+wealth of cache-invalidation problems involved in ensuring a user is
+logged-out, along with ensuring re-auth happens when required.
+
+7)
+
+A hypervisor is the software, or hardware, used to run virtual machines.
+It is a layer on top of (or within) the operating system kernel that
+allows a single physical machine to host multiple emulated machines on
+top of it.
+
+There are two types of hypervisors: native (type 1) and hosted (type 2).
+Native hypervisors integrate with or run as the operating system kernel,
+whereas hosted hypervisors run as processes on the operating system.
+
+KVM is closer to a hosted hypervisor in my opinion, because it does not
+require any special kernel or hardware to run (kvm is built into modern
+linux kernels), and virtual machines in KVM are closer to system
+processes.
+
+8)
+
+KVM can be used to run CPU architectures different than the host. By
+utilizing QEMU which does most the heavy lifting, KVM can run any CPU
+architecture that it has support for. 
+
+9)
+
+KVM does not perform any emulation, but instead uses QEMU. KVM manages
+filesystem and physical devices, while QEMU is used to translate IO
+operations between virtual machines and a host.
+
+10)
+
+  1. Xen requires a separate kernel, while KVM is built into Linux.
+  2. In Xen, only dom0 has direct hardware access, while in KVM all
+     VMs have the potential to directly access hardware.
+  3. KVM requires a separate kernel module for each supported CPU arch,
+     while Xen doesn't require CPU support at all (as dom0 controls the
+     CPU).
+11)
+
+If I were creating a virtualization server, I would choose KVM over Xen.
+Not only is KVM on par (if not better) in performance with Xen[2], it is
+easier to manage and setup as it doesn't require a separate kernel. Xen
+by design contains an extra image (dom0) on top of the kernel, that
+consumes resources. Because KVM is built into the kernel, it is
+supported under the RHEL license, so there is no need (when running RHEL
+server) for an extra support license for Xen.[1] VMWare might be
+considered if I wasn't at a company with technically competent system
+administrators, and the department had plenty of money to burn.[3].
+
+[1] (KVM or Xen) https://www.linux.com/news/enterprise/systems-management/
+                 327628-kvm-or-xen-choosing-a-virtualization-platform
+[2] (KVM/Xen Performance) http://major.io/2014/06/22/
+                          performance-benchmarks-kvm-vs-xen/
+[2] (KVM or VMWare) http://thevarguy.com/ubuntu/kvm-vs-vmware-case-study
+
+12)
+
+Libvirt sits between KVM and OpenStack as an abstraction of virtual
+machine management. It is trying to solve the problem of highly coupled
+virtual machine management and hypervisor management. It allows you to
+switch out the hypervisor (ex. switch from KVM to Xen) without having to
+worry about the management interface (OpenStack).
+
+13)
+
+  cinder: (Block Storage) manages creating, mounting, and moving of
+          block storage devices. Allows OpenStack users the ability to
+          backup and manage the block storage accessed by their VMs.
+
+  glance: (Image Service) manages creation, searching, and fetching of
+          disk (operating system) images. Allows for users to create new
+          VMs from existing Operating Systems, or save their VMs to be
+          reloaded later.
+
+  keystone: (Identity) managed authentication and authorization for
+            OpenStack clusters. Removes the need for all the other
+            services to reimplement auth. Single point of identity
+            that can be backed by multiple auth providers.
+
+  neutron: (Networking) manages IP address, and subnet allocation for
+           VMs. Allows for internal creation of networks between VMs and
+           organizations without bothering network administrators or
+           managing physical switches.
+
+  nova: (Compute) virtual machine management, creation, and monitoring.
+        Relies on libvirt so that machines can be ran and managed across
+        hypervisors.
+
+  swift: (Object Storage) distributed, and scalable random data storage.
+         Similar to AmazonS3. Allows for the storage, distribution, and
+         retrieval of blobs of data. Glance is different in that it deals
+         directly with disk images, not files ranging in size and usage.
+
+  horizon: (Dashboard) web interface for managing other resources.
+           Allows for the creation and management of VMs, storage,
+           networking, and authentication/authorization from a web
+           interface.
+
+  heat: (Orchestration) virtual machine creation, and deletion
+        orchestration. Allows users to specify requirements for when and
+        how VMs are created or deleted. Provides users the ability to
+        horizontally scale vms automatically based on resource usage.
+
